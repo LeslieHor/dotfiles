@@ -42,6 +42,16 @@ init()
 
     echo "Setting git username"
     git config --global user.name "leslie"
+
+    echo "Setting fish as default shell"
+    chsh -s `which fish`
+
+    echo "Installing oh-my-fish"
+    curl -L https://get.oh-my.fish | fish
+
+    echo "To use beloglasov theme in fish, run the following commands:"
+    echo "$ omf install beloglazov"
+    echo "$ omf theme beloglazov"
 }
 
 case $1 in
