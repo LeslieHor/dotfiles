@@ -35,7 +35,7 @@ init()
 
     echo "Installing programs"
     sudo apt update
-    sudo apt install -y tmux firefox keepassx mpv vim fish virtualbox xbindkeys git
+    sudo apt install -y tmux firefox keepassx mpv vim fish virtualbox xbindkeys git rofi
 
     echo "Setting git email"
     git config --global user.email "leslie.hor@gmail.com"
