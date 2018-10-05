@@ -1,0 +1,60 @@
+#!/bin/bash
+
+save()
+{
+    echo "Saving files"
+    mkdir -pv config
+    mkdir -pv bin
+
+    # Copy config files into config dir
+    cp -v ~/.tmux.conf config/tmux.conf
+    cp -v ~/.vimrc config/vimrc
+    cp -v ~/.xbindkeysrc config/xbindkeysrc
+
+    # Copy bin files into bin dir
+    cp -rv ~/bin/ ./
+}
+
+load()
+{
+    echo "Loading files"
+    mkdir -pv ~/bin
+
+    # Copy config files from config dir
+    cp -v config/tmux.conf ~/.tmux.conf
+    cp -v config/vimrc ~/.vimrc
+    cp -v config/xbindkeysrc ~/.xbindkeysrc
+
+    # Copy bin files from bin dir
+    cp -rv bin/ ~/
+}
+
+init()
+{
+    echo "Initialising..."
+
+    echo "Installing programs"
+    sudo apt update
+    sudo apt install -y tmux firefox keepassx mpv vim fish virtualbox xbindkeys git
+
+    echo "Setting git email"
+    git config --global user.email "leslie.hor@gmail.com"
+
+    echo "Setting git username"
+    git config --global user.name "leslie"
+}
+
+case $1 in
+save)
+    save
+    ;;
+load)
+    load
+    ;;
+init)
+    init
+    ;;
+*)
+    echo "What?"
+    ;;
+esac

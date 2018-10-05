@@ -1,0 +1,11 @@
+"rofi -show run"
+    m:0x4d + c:39
+    Control+Shift+Alt+Mod4 + s
+
+"rofi -show window"
+    m:0x4d + c:38
+    Control+Shift+Alt+Mod4 + a
+
+"konsole"
+    m:0xd + c:65
+    Control+Shift+Alt + space

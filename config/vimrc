@@ -1,0 +1,8 @@
+set hls ic is "highlight, ignore case, incremental search
+set autoindent
+set tabstop=4
+set softtabstop=0 expandtab
+set shiftwidth=4
+set smarttab
+set relativenumber
+set number

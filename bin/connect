@@ -1,0 +1,32 @@
+#!/bin/bash
+
+tmux new-window
+
+case $1 in
+active)
+    FIRST="adama"
+    HOSTS="baltar capricasix roslin valerii zarek"
+    ;;
+inactive)
+    FIRST="gaeta"
+    HOSTS="tigh tyrol"
+    ;;
+*)
+    FIRST=${1}
+    HOSTS="${@:2}"
+    ;;
+esac
+
+tmux new-window "env HOST=${FIRST} ${SHELL}"
+tmux send-keys "ssh ${FIRST}" C-m
+
+for HOST in ${HOSTS}
+do
+	tmux split-window -h "env HOST=${HOST} ${SHELL}"
+	tmux send-keys "ssh ${HOST}" C-m
+	tmux select-layout tiled
+done
+
+tmux setw synchronize-panes on
+tmux select-pane -t 0
+
