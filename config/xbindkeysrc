@@ -7,5 +7,37 @@
     Control+Shift+Alt+Mod4 + a
 
 "konsole"
-    m:0xd + c:65
-    Control+Shift+Alt + space
+    m:0x4d + c:65
+    Control+Shift+Alt+Mod4 + space
+
+"wmctrl -s 0"
+    m:0x4d + c:10
+    Control+Shift+Alt+Mod4 + 1
+
+"wmctrl -s 1"
+    m:0x4d + c:11
+    Control+Shift+Alt+Mod4 + 2
+
+"wmctrl -s 2"
+    m:0x4d + c:12
+    Control+Shift+Alt+Mod4 + 3i
+
+"wmctrl -s 3"
+    m:0x4d + c:13
+    Control+Shift+Alt+Mod4 + 4
+
+"wmctrl -r :ACTIVE: -t 0"
+    m:0x4d + c:67
+    Control+Shift+Alt+Mod4 + F1
+
+"wmctrl -r :ACTIVE: -t 1"
+    m:0x4d + c:68
+    Control+Shift+Alt+Mod4 + F2
+    
+"wmctrl -r :ACTIVE: -t 2"
+    m:0x4d + c:69
+    Control+Shift+Alt+Mod4 + F3
+
+"wmctrl -r :ACTIVE: -t 3"
+    m:0x4d + c:70
+    Control+Shift+Alt+Mod4 + F4
