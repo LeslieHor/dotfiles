@@ -52,6 +52,10 @@ init()
     echo "Installing anf setting beloglasov theme in fish"
     echo "omf install beloglazov | fish"
     echo "omf theme beloglazov | fish"
+
+    echo "Loading config and bin files"
+
+    load
 }
 
 case $1 in
