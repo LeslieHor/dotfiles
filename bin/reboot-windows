@@ -1,0 +1,15 @@
+#!/bin/bash
+
+sudo grub-reboot 2
+qdbus org.kde.ksmserver /KSMServer logout 1 1 0
+# First parameter:
+# 0 = Do not wait for confirmation
+# 1 = Wait for confirmation
+
+# Second parameter:
+# -1 = Prompt for action (default to shutdown) (only makes sense when waiting for confirmation)
+# 0 = Logout
+# 1 = Restart
+# 2 = Shutdown
+
+# Third parameter is "when"
