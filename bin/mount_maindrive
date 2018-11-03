@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sudo mkdir -p /media/leslie/maindrive/
+sudo mount -t cifs -o username=Administrator //tertiaseptima/maindrive /media/leslie/maindrive/

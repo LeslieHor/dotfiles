@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sudo mkdir -p /media/leslie/bay/
+sudo mount -t cifs -o username=Administrator //tertiaseptima/bay /media/leslie/bay/
