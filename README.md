@@ -1,7 +1,7 @@
 # dotfiles
 
-`save` - Copy current config/bin into project
+`save-config` - Copy current config/bin into project
 
-`load` - Load config/bin from project into system
+`install-config` - Load config/bin from project into system
 
-`init` - Initalise a new system
+`init-config` - Initalise a new system
