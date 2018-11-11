@@ -1,6 +1,6 @@
 #!/bin/bash
 
-save()
+save_config()
 {
     echo "Saving files"
     mkdir -pv config
@@ -15,7 +15,7 @@ save()
     cp -rv ~/bin/ ./
 }
 
-load()
+install_config()
 {
     echo "Loading files"
     mkdir -pv ~/bin
@@ -29,7 +29,7 @@ load()
     cp -rv bin/ ~/
 }
 
-init()
+init_config()
 {
     echo "Initialising..."
 
@@ -59,16 +59,19 @@ init()
 }
 
 case $1 in
-save)
-    save
+save-config)
+    save_config
     ;;
-load)
-    load
+install-config)
+    install_config
     ;;
-init)
-    init
+init-config)
+    init_config
     ;;
 *)
-    echo "What?"
+    echo "dotfiles"
+    echo "    save-config - Copy the currently installed dot files into this project"
+    echo "    install-config - Copy the project dot files into the system locations"
+    echo "    init-config - Install and initialise a new system"
     ;;
 esac
