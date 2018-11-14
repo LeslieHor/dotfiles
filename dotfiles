@@ -62,7 +62,7 @@ github_mirror()
 {
     echo "Sending to Github"
 
-    cp ./* ~/Git/github-dotfiles/
+    cp ./* ~/Git/github-dotfiles/ -r
     cd ~/Git/github-dotfiles/
     git add .
     git commit -m "Update Github repo"
