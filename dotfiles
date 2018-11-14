@@ -58,6 +58,17 @@ init_config()
     load
 }
 
+github_mirror()
+{
+    echo "Sending to Github"
+
+    cp ./* ~/Git/github-dotfiles/
+    cd ~/Git/github-dotfiles/
+    git add .
+    git commit -m "Update Github repo"
+    git push
+}
+
 case $1 in
 save-config)
     save_config
@@ -68,10 +79,14 @@ install-config)
 init-config)
     init_config
     ;;
+github-mirror)
+    github_mirror
+    ;;
 *)
     echo "dotfiles"
     echo "    save-config - Copy the currently installed dot files into this project"
     echo "    install-config - Copy the project dot files into the system locations"
     echo "    init-config - Install and initialise a new system"
+    echo "    github-mirror - Copy this repo to Github"
     ;;
 esac
