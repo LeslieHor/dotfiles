@@ -62,7 +62,9 @@ github_mirror()
     cp ./config/bash_prompt ~/Git/github-dotfiles/config/bash_prompt
     cp ./config/bash_aliases ~/Git/github-dotfiles-config/bash_prompt
 
+    cp ./bin/connect ~/Git/github-dotfiles/bin/connect
     cp ./bin/rpn ~/Git/github-dotfiles/bin/rpn
+    cp ./bin/colours255 ~/Git/github-dotfiles/bin/colours255
 
 
     cd ~/Git/github-dotfiles/
