@@ -10,6 +10,8 @@ save_config()
     cp -v ~/.tmux.conf config/tmux.conf
     cp -v ~/.vimrc config/vimrc
     cp -v ~/.xbindkeysrc config/xbindkeysrc
+    cp -v ~/.bash_prompt config/bash_prompt
+    cp -v ~/.bash_aliases config/bash_aliases
 
     # Copy bin files into bin dir
     cp -rv ~/bin/ ./
@@ -24,6 +26,8 @@ install_config()
     cp -v config/tmux.conf ~/.tmux.conf
     cp -v config/vimrc ~/.vimrc
     cp -v config/xbindkeysrc ~/.xbindkeysrc
+    cp -v config/bash_prompt ~/.bash_prompt
+    cp -v config/bash_aliases config/bash_aliases
 
     # Copy bin files from bin dir
     cp -rv bin/ ~/
@@ -35,7 +39,7 @@ init_config()
 
     echo "Installing programs"
     sudo apt update
-    sudo apt install -y tmux firefox keepassx mpv vim fish virtualbox xbindkeys git rofi wmctrl
+    sudo apt install -y tmux firefox keepassx mpv vim virtualbox xbindkeys git rofi wmctrl
 
     echo "Setting git email"
     git config --global user.email "leslie.hor@gmail.com"
@@ -43,19 +47,8 @@ init_config()
     echo "Setting git username"
     git config --global user.name "leslie"
 
-    echo "Setting fish as default shell"
-    chsh -s `which fish`
-
-    echo "Installing oh-my-fish"
-    curl -L https://get.oh-my.fish | fish
-
-    echo "Installing anf setting beloglasov theme in fish"
-    echo "omf install beloglazov | fish"
-    echo "omf theme beloglazov | fish"
-
     echo "Loading config and bin files"
-
-    load
+    install_config
 }
 
 github_mirror()
@@ -66,6 +59,8 @@ github_mirror()
     cp ./config/tmux.conf ~/Git/github-dotfiles/config/tmux.conf
     cp ./config/vimrc ~/Git/github-dotfiles/config/vimrc
     cp ./config/xbindkeysrc ~/Git/github-dotfiles/config/xbindkeysrc
+    cp ./config/bash_prompt ~/Git/github-dotfiles/config/bash_prompt
+    cp ./config/bash_aliases ~/Git/github-dotfiles-config/bash_prompt
 
     cp ./bin/rpn ~/Git/github-dotfiles/bin/rpn
 
