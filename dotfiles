@@ -64,8 +64,6 @@ github_mirror()
 
     cp ./bin/connect ~/Git/github-dotfiles/bin/connect
     cp ./bin/rpn ~/Git/github-dotfiles/bin/rpn
-    cp ./bin/colours256 ~/Git/github-dotfiles/bin/colours256
-
 
     cd ~/Git/github-dotfiles/
     git add .
