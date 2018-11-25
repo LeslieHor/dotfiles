@@ -64,6 +64,7 @@ github_mirror()
 
     cp ./bin/connect ~/Git/github-dotfiles/bin/connect
     cp ./bin/rpn ~/Git/github-dotfiles/bin/rpn
+    cp ./bin/set_mouse_map ~/Git/github-dotfiles/bin/set_mouse_map
 
     cd ~/Git/github-dotfiles/
     git add .
