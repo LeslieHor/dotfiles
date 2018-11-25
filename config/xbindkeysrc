@@ -41,3 +41,6 @@
 "wmctrl -r :ACTIVE: -t 3"
     m:0x4d + c:70
     Control+Shift+Alt+Mod4 + F4
+
+#"COMMAND"
+#    b:12
