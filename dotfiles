@@ -27,7 +27,7 @@ install_config()
     cp -v config/vimrc ~/.vimrc
     cp -v config/xbindkeysrc ~/.xbindkeysrc
     cp -v config/bash_prompt ~/.bash_prompt
-    cp -v config/bash_aliases config/bash_aliases
+    cp -v config/bash_aliases ~/.bash_aliases
 
     # Copy bin files from bin dir
     cp -rv bin/ ~/
