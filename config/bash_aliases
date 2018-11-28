@@ -1,3 +1,4 @@
 alias copy="xclip -i -selection clipboard"
 alias paste="xclip -o -selection clipboard"
 alias hg="history | grep"
+alias img="sxiv"
