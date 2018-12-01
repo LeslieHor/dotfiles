@@ -1,0 +1,17 @@
+#!/bin/bash
+
+GREEN="\033[0;32m"
+RED="\033[0;31m"
+NC="\033[0m"
+
+HOSTS="adama baltar capricasix gaeta roslin tigh tyrol valerii zarek"
+
+for HOST in ${HOSTS}
+do
+    if ping ${HOST} -c 1 -W 1 2>&1 >/dev/null; then
+        echo -e "${GREEN}${HOST}${NC}"
+    else
+        echo -e "${RED}${HOST}${NC}"
+    fi
+done
+

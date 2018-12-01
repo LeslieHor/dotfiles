@@ -39,7 +39,7 @@ init_config()
 
     echo "Installing programs"
     sudo apt update
-    sudo apt install -y tmux firefox keepassx mpv vim virtualbox xbindkeys git rofi wmctrl
+    sudo apt install -y tmux firefox keepassx mpv vim xbindkeys git rofi wmctrl
 
     echo "Setting git email"
     git config --global user.email "leslie.hor@gmail.com"
@@ -65,6 +65,7 @@ github_mirror()
     cp ./bin/connect ~/Git/github-dotfiles/bin/connect
     cp ./bin/rpn ~/Git/github-dotfiles/bin/rpn
     cp ./bin/set_mouse_map ~/Git/github-dotfiles/bin/set_mouse_map
+    cp ./bin/pinghs ~/Git/github-dotfiles/bin/pinghs
 
     cd ~/Git/github-dotfiles/
     git add .
