@@ -5,7 +5,8 @@ if [ -z ${1} ] ; then
     exit 1
 fi
 
-dir=$(echo "data/${1}")
+name=$(echo "$1" | sed 's/config\///')
+dir=$(echo "data/${name}")
 
 echo "Directory: ${dir}"
 
