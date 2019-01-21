@@ -1,0 +1,10 @@
+#!/bin/bash
+
+dir=$(echo ${1} | sed 's/\.config//')
+
+while read line; do
+    loc=$(echo ${line} | sed 's/ .*//')
+    rem=$(echo ${line} | sed 's/.* //')
+    
+    cp ${dir}/${rem} ${loc}
+done <${1}
