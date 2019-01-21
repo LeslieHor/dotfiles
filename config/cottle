@@ -1,2 +1,5 @@
-~/bin/connect connect
+~/bin/connect bin_connect
+~/bin/pinghs bin_pinghs
+~/.tmux.conf tmux.conf
+~/.vimrc vimrc
 
