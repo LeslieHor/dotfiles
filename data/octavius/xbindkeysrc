@@ -44,3 +44,55 @@
 
 #"COMMAND"
 #    b:12
+
+"woof nav-left"
+    m:0x48 + c:43
+    Alt+Mod4 + h
+
+"woof nav-down"
+    m:0x48 + c:44
+    Alt+Mod4 + j
+
+"woof nav-up"
+    m:0x48 + c:45
+    Alt+Mod4 + k
+
+"woof nav-right"
+    m:0x48 + c:46
+    Alt+Mod4 + l
+
+"rofi -show wf -modi wf:woof"
+    m:0x48 + c:47
+    Alt+Mod4 + semicolon
+    
+"woof rh"
+    m:0x45 + c:43
+    Control+Shift+Mod4 + h
+    
+"woof ev"
+    m:0x45 + c:44
+    Control+Shift+Mod4 + j
+    
+"woof rv"
+    m:0x45 + c:45
+    Control+Shift+Mod4 + k
+    
+"woof eh"
+    m:0x45 + c:46
+    Control+Shift+Mod4 + l
+
+"woof activate-next-window"
+    m:0x48 + c:60
+    Alt+Mod4 + period
+
+"woof activate-prev-window"
+    m:0x48 + c:59
+    Alt+Mod4 + comma
+
+"woof kill"
+    m:0x48 + c:53
+    Alt+Mod4 + x
+    
+"woof maximize"
+    m:0x48 + c:52
+    Alt+Mod4 + z

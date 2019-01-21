@@ -1,13 +1,19 @@
 #!/bin/bash
 
-dir=$(echo ${1} | sed 's/\.config//')
+if [ -z ${1} ] ; then
+    echo "Need a config file, idiot"
+    exit 1
+fi
+
+name=$(echo "$1" | sed 's/config\///')
+dir=$(echo "data/${name}")
 mkdir -p ${dir}
 
 echo "Directory: ${dir}"
 
 while read line; do
-    loc=$(echo ${line} | sed 's/ .*//')
-    rem=$(echo ${line} | sed 's/.* //')
+    loc=$(eval echo ${line} | sed 's/ .*//')
+    rem=$(eval echo ${line} | sed 's/.* //')
     if [ -z ${loc} ] ; then
         exit 1 
     fi

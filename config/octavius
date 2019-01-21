@@ -1,0 +1,18 @@
+~/bin/colours256 bin_colours256
+~/bin/connect bin_connect
+~/bin/feed bin_feed
+~/bin/flush-cache bin_flush-cache
+~/bin/mount_bay bin_mount_bay
+~/bin/mount_maindrive bin_mount_maindrive
+~/bin/netflix bin_netflix
+~/bin/pinghs bin_pinghs
+~/bin/plex bin_plex
+~/bin/reboot-windows bin_reboot-windows
+~/bin/rpn bin_rpn
+~/bin/set_mouse_map bin_set_mouse_map
+~/.bash_aliases bash_aliases
+~/.bash_prompt bash_prompt
+~/.tmux.conf tmux.conf
+~/.vimrc vimrc
+~/.xbindkeysrc xbindkeysrc
+
