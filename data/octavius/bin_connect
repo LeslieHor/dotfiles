@@ -3,7 +3,7 @@
 case $1 in
 active)
     FIRST="adama"
-    HOSTS="baltar capricasix roslin valerii zarek"
+    HOSTS="baltar capricasix cottle roslin valerii zarek"
     ;;
 inactive)
     FIRST="gaeta"

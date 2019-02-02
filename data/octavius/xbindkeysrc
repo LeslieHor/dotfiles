@@ -96,3 +96,8 @@
 "woof maximize"
     m:0x48 + c:52
     Alt+Mod4 + z
+
+
+"xdotool getactivewindow windowminimize"
+    m:0x48 + c:54
+    Alt+Mod4 + c
