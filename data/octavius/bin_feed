@@ -8,6 +8,7 @@ parser = argparse.ArgumentParser(description='Convert Reddit and Youtube links i
 parser.add_argument('url', type=str, help='The regular reddit / youtube url')
 parser.add_argument('-c', '--copy', dest='copy', action='store_true')
 parser.add_argument('-w', '--weekly', dest='weekly', action='store_true')
+parser.add_argument('-m', '--monthly', dest='monthly', action='store_true')
 parser.add_argument('-s', '--subscribe', dest='subscribe', action='store_true')
 args = parser.parse_args()
 
@@ -19,6 +20,8 @@ def reddit(subreddit):
     bare_url = "https://www.reddit.com/r/" + subreddit + "/"
     if args.weekly:
         bare_url += "top/.rss?t=week"
+    elif args.monthly:
+        bare_url += "top/.rss?t=month"
     else:
         bare_url += ".rss"
 

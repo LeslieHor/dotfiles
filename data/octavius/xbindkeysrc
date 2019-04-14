@@ -2,7 +2,7 @@
     m:0x4d + c:39
     Control+Shift+Alt+Mod4 + s
 
-"rofi -show window"
+"rofi -show window -window-format {c:20}{t}"
     m:0x4d + c:38
     Control+Shift+Alt+Mod4 + a
 
@@ -45,23 +45,23 @@
 #"COMMAND"
 #    b:12
 
-"woof nav-left"
+"woof gl"
     m:0x48 + c:43
     Alt+Mod4 + h
 
-"woof nav-down"
+"woof gd"
     m:0x48 + c:44
     Alt+Mod4 + j
 
-"woof nav-up"
+"woof gu"
     m:0x48 + c:45
     Alt+Mod4 + k
 
-"woof nav-right"
+"woof gr"
     m:0x48 + c:46
     Alt+Mod4 + l
 
-"rofi -show wf -modi wf:woof"
+"rofi -show wf -modi wf:woof -location 2 -no-fixed-num-lines"
     m:0x48 + c:47
     Alt+Mod4 + semicolon
     
@@ -81,19 +81,19 @@
     m:0x45 + c:46
     Control+Shift+Mod4 + l
 
-"woof activate-next-window"
+"woof nw"
     m:0x48 + c:60
     Alt+Mod4 + period
 
-"woof activate-prev-window"
+"woof pw"
     m:0x48 + c:59
     Alt+Mod4 + comma
 
-"woof kill"
+"woof kl"
     m:0x48 + c:53
     Alt+Mod4 + x
     
-"woof maximize"
+"woof mx"
     m:0x48 + c:52
     Alt+Mod4 + z
 
@@ -101,3 +101,84 @@
 "xdotool getactivewindow windowminimize"
     m:0x48 + c:54
     Alt+Mod4 + c
+
+"woof ss1"
+    m:0x48 + c:10
+    Alt+Mod4 + 1
+
+"woof ss2"
+    m:0x48 + c:11
+    Alt+Mod4 + 2
+
+"woof ss3"
+    m:0x48 + c:12
+    Alt+Mod4 + 3
+
+"woof ss4"
+    m:0x48 + c:13
+    Alt+Mod4 + 4
+
+"woof ss5"
+    m:0x48 + c:14
+    Alt+Mod4 + 5
+
+"woof ss6"
+    m:0x48 + c:15
+    Alt+Mod4 + 6
+
+"woof ss7"
+    m:0x48 + c:16
+    Alt+Mod4 + 7
+
+"woof ss8"
+    m:0x48 + c:17
+    Alt+Mod4 + 8
+
+"woof ss9"
+    m:0x48 + c:18
+    Alt+Mod4 + 9
+
+"woof ss0"
+    m:0x48 + c:19
+    Alt+Mod4 + 0
+
+"woof sl"
+    m:0x4c + c:59
+    Control+Alt+Mod4 + comma
+
+"woof sr"
+    m:0x4c + c:60
+    Control+Alt+Mod4 + period
+
+"woof pl"
+    m:0x4c + c:43
+    Control+Alt+Mod4 + h
+
+"woof pd"
+    m:0x4c + c:44
+    Control+Alt+Mod4 + j
+
+"woof pu"
+    m:0x4c + c:45
+    Control+Alt+Mod4 + k
+
+"woof pr"
+    m:0x4c + c:46
+    Control+Alt+Mod4 + l
+
+"woof mm"
+    m:0x48 + c:58
+    Alt+Mod4 + m
+
+"woof ahl"
+    m:0x48 + c:28
+    Alt+Mod4 + t
+
+"woof avl"
+    m:0x48 + c:42
+    Alt+Mod4 + g
+
+"xdotool mousemove 2880 0"
+    m:0x4d + c:27
+    Control+Shift+Alt+Mod4 + r
+

@@ -15,4 +15,5 @@
 ~/.tmux.conf tmux.conf
 ~/.vimrc vimrc
 ~/.xbindkeysrc xbindkeysrc
+~/.emacs.d/init.el emacs_init.el
 
