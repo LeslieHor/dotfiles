@@ -5,6 +5,8 @@ Symlink all =i3= files to =~/.config/i3/= except for =i3/i3status_config=.
 
 =i3/i3status_config= should be symlinked in =~/.config/i3status/=
 
+The scripts are used to make i3 behave more like woof-tile.
+
 Use the =i3/kde_i3.sh= script and go to
 
 System Settings > Startup and Shutdown > Autostart > Add Script...
