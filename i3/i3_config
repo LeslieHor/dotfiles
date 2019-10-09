@@ -65,33 +65,33 @@ bindsym $s3+k move up
 bindsym $s3+l move right
 
 mode "window" {
-    bindsym h split h         ; mode "default"
-    bindsym v split v         ; mode "default"
-    bindsym f floating toggle ; mode "default"
+    bindsym h split h         ; exec ~/.config/i3/i3_mode_keys.sh "default" ; mode "default"
+    bindsym v split v         ; exec ~/.config/i3/i3_mode_keys.sh "default" ; mode "default"
+    bindsym f floating toggle ; exec ~/.config/i3/i3_mode_keys.sh "default" ; mode "default"
 
-    bindsym l mode "window-layout"
+    bindsym l exec ~/.config/i3/i3_mode_keys.sh "window-layout" ; mode "window-layout"
 
-    bindsym Escape mode "default"
+    bindsym Escape exec ~/.config/i3/i3_mode_keys.sh "default" ; mode "default"
 }
 
 mode "window-layout" {
-    bindsym g layout tabbed ; mode "default"
-    bindsym h layout splith ; mode "default"
-    bindsym v layout splitv ; mode "default"
+    bindsym g layout tabbed ; exec ~/.config/i3/i3_mode_keys.sh "default" ; mode "default"
+    bindsym h layout splith ; exec ~/.config/i3/i3_mode_keys.sh "default" ; mode "default"
+    bindsym v layout splitv ; exec ~/.config/i3/i3_mode_keys.sh "default" ; mode "default"
 
-    bindsym Escape mode "default"
+    bindsym Escape exec ~/.config/i3/i3_mode_keys.sh "default" ; mode "default"
 }
 
-bindsym $s1+w mode "window"
+bindsym $s1+w exec ~/.config/i3/i3_mode_keys.sh "window" ; mode "window"
 
 mode "frame" {
-    bindsym r exec i3-input -F 'rename workspace to "%s"' -P 'New name: ' ; exec ~/.config/i3/i3_status.py ; mode "default"
-    bindsym c exec ~/.config/i3/i3_new_workspace.py ; exec ~/.config/i3/i3_status.py ; mode "default"
+    bindsym r exec i3-input -F 'rename workspace to "%s"' -P 'New name: ' ; exec ~/.config/i3/i3_mode_keys.sh "default" ; exec ~/.config/i3/i3_status.py ; mode "default"
+    bindsym c exec ~/.config/i3/i3_new_workspace.py ; exec ~/.config/i3/i3_status.py ; exec ~/.config/i3/i3_mode_keys.sh "default" ; mode "default"
 
-    bindsym Escape mode "default"
+    bindsym Escape ; exec ~/.config/i3/i3_mode_keys.sh "default" ; mode "default"
 }
 
-bindsym $s3+f mode "frame"
+bindsym $s3+f mode "frame" ; exec ~/.config/i3/i3_mode_keys.sh "frame"
 
 # enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle

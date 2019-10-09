@@ -4,5 +4,5 @@
 i3status | while :
 do
         read line
-        echo "$(cat ~/.config/i3/i3_status_${1}.txt) --- $line" || exit 1
+        echo "$(cat ~/.config/i3/i3_mode.txt)          $(cat ~/.config/i3/i3_status_${1}.txt)          $line" || exit 1
 done
