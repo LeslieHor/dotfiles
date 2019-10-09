@@ -75,7 +75,8 @@ mode "window" {
 }
 
 mode "window-layout" {
-    bindsym g layout tabbed ; exec ~/.config/i3/i3_mode_keys.sh "default" ; mode "default"
+    bindsym t layout tabbed ; exec ~/.config/i3/i3_mode_keys.sh "default" ; mode "default"
+    bindsym s layout stacking ; exec ~/.config/i3/i3_mode_keys.sh "default" ; mode "default"
     bindsym h layout splith ; exec ~/.config/i3/i3_mode_keys.sh "default" ; mode "default"
     bindsym v layout splitv ; exec ~/.config/i3/i3_mode_keys.sh "default" ; mode "default"
 

@@ -13,7 +13,8 @@ case ${MODE} in
         ;;
     "window-layout")
         STRING=${STRING}"[window-layout] :: "
-        STRING=${STRING}"g: tabbed  "
+        STRING=${STRING}"t: tabbed  "
+        STRING=${STRING}"| s: stacking  "
         STRING=${STRING}"| h: split h "
         STRING=${STRING}"| v: split v "
         ;;
