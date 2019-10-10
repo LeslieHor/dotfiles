@@ -36,4 +36,5 @@ for i in range(1, len(workspaces_data) + 1):
     if len(result) == 0:
         call(["i3-msg workspace number", i])
 
+call(["i3-msg move container to workspace number", len(workspaces_data) + 1])
 call(["i3-msg workspace number", len(workspaces_data) + 1])
