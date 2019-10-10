@@ -9,6 +9,7 @@ case ${MODE} in
         STRING=${STRING}"h: set split h "
         STRING=${STRING}"| v: set split v "
         STRING=${STRING}"| f: toggle floating"
+        STRING=${STRING}"| z: toggle fullscreen"
         STRING=${STRING}"| l: ->layout"
         ;;
     "window-layout")
