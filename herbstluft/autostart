@@ -110,10 +110,12 @@ fi
 run_only_one(){
     APP=${1}
     pidof ${APP} && kill $(pidof ${APP})
-    ${APP} &
+    ${@}
 
 }
 
-run_only_one "dunst"
-run_only_one "stalonetray"
-run_only_one "udiskie -t"
+run_only_one dunst
+run_only_one stalonetray
+
+killall udiskie || true
+run_only_one udiskie -t
