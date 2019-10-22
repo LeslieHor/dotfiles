@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+hc() {
+    herbstclient "$@"
+}
+
+window_id=$(wmctrl -l | dmenu -i -p "Switch to" -l 10 | sed 's/^\(.*\) .*/\1/')
+
+hc jumpto ${window_id}

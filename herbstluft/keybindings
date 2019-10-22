@@ -1,0 +1,196 @@
+#!/usr/bin/env bash
+
+# Specificially for keytables
+
+set_keys="spawn ${HOME}/.config/herbstluftwm/keybindings"
+scripts="spawn ${HOME}/.config/herbstluftwm/scripts"
+
+hc() {
+    herbstclient "$@"
+}
+
+once(){
+    return "chain , $@ , $set_keys"
+}
+
+# SYS1 - M-H
+# SYS2 - C-S-H
+# SYS3 - C-M-H
+# SYS4 - S-M-H
+# ULTI - C-M-S-H
+Mod=Mod4
+SYS1=Mod1-Mod4
+SYS2=Control-Shift-Mod4
+SYS3=Control-Mod1-Mod4
+SYS4=Shift-Mod1-Mod4
+ULTI=Control-Shift-Mod1-Mod4
+
+# dunst
+# defined in dunstrc
+# SYS4-z = history
+# SYS4-x = clear
+# SYS4-c = context
+
+default() {
+    hc keyunbind --all
+
+    hc keybind $SYS1-semicolon spawn "herbstclient \$\(herbstclient list_commands | dmenu -p 'herbstluft'\)"
+    hc keybind $SYS1-r reload
+    hc keybind $SYS1-q close # Close the application window
+    hc keybind $SYS1-c remove # Close the frame
+    hc keybind $ULTI-space spawn ${TERMINAL:-xterm} # use your $TERMINAL with xterm as fallback
+
+    hc keybind $SYS1-o spawn dmenu_run
+
+    # focusing clients
+    hc keybind $SYS1-h     focus left
+    hc keybind $SYS1-j     focus down
+    hc keybind $SYS1-k     focus up
+    hc keybind $SYS1-l     focus right
+
+    hc keybind $SYS1-z $scripts/maximize
+
+    # cycle through workspaces
+    hc keybind $SYS1-n cycle +1
+    hc keybind $SYS1-p cycle -1
+
+    # moving clients
+    # to shift across monitors...
+    hc keybind $SYS3-h or / shift left / \
+        chain , lock , shift_to_monitor -l , focus_monitor -l , unlock
+    hc keybind $SYS3-j or / shift down / \
+        chain , lock , shift_to_monitor -d , focus_monitor -d , unlock
+    hc keybind $SYS3-k or / shift up / \
+        chain , lock , shift_to_monitor -u , focus_monitor -u , unlock
+    hc keybind $SYS3-l or / shift right / \
+        chain , lock , shift_to_monitor -r , focus_monitor -r , unlock
+
+    # cycle through tags
+    hc keybind $SYS1-period use_index +1 --skip-visible
+    hc keybind $SYS1-comma use_index -1 --skip-visible
+
+    hc keybind $SYS1-1 use_index 0
+    hc keybind $SYS1-2 use_index 1
+    hc keybind $SYS1-3 use_index 2
+    hc keybind $SYS1-4 use_index 3
+    hc keybind $SYS1-5 use_index 4
+    hc keybind $SYS1-6 use_index 5
+    hc keybind $SYS1-7 use_index 6
+    hc keybind $SYS1-8 use_index 7
+    hc keybind $SYS1-9 use_index 8
+
+    hc keybind $SYS2-1 move_index 0
+    hc keybind $SYS2-2 move_index 1
+    hc keybind $SYS2-3 move_index 2
+    hc keybind $SYS2-4 move_index 3
+    hc keybind $SYS2-5 move_index 4
+    hc keybind $SYS2-6 move_index 5
+    hc keybind $SYS2-7 move_index 6
+    hc keybind $SYS2-8 move_index 7
+    hc keybind $SYS2-9 move_index 8
+
+    # resizing frames
+    resizestep=0.05
+    hc keybind $SYS2-h resize right -$resizestep
+    hc keybind $SYS2-j resize down -$resizestep
+    hc keybind $SYS2-k resize down +$resizestep
+    hc keybind $SYS2-l resize right +$resizestep
+
+    hc keybind $SYS2-r rotate
+
+    hc keybind $SYS3-comma $scripts/swap_screens left
+    hc keybind $SYS3-period $scripts/swap_screens right
+
+    # Leaders
+    hc keybind $SYS1-w $set_keys window
+    hc keybind $SYS1-b $set_keys buffer
+    hc keybind $SYS3-f $set_keys frame
+
+    notify-send "default"
+}
+
+window() {
+    hc keyunbind --all
+    hc keybind Escape $set_keys
+
+    hc keybind h chain , split right 0.5 , $set_keys
+    hc keybind v chain , split bottom 0.5 , $set_keys
+    hc keybind f chain , floating toggle , $set_keys
+    hc keybind m chain , fullscreen toggle , $set_keys
+    hc keybind p chain , pseudotile toggle , $set_keys
+    hc keybind z chain , $scripts/maximize , $set_keys
+
+    hc keybind l $set_keys layout
+
+    notify-send "window
+h : split horizontal
+v : split vertical
+f : toggle floating
+m : toggle fullscreen
+p : toggle pseudotile
+z : toggle maximize
+l : -> layout"
+}
+
+layout() {
+    hc keyunbind --all
+    hc keybind Escape $set_keys
+
+    hc keybind v chain , set_layout vertical , $set_keys # Vertical
+    hc keybind h chain , set_layout horizontal , $set_keys # Horizontal
+    hc keybind s chain , set_layout max , $set_keys # Max / stack
+    hc keybind g chain , set_layout grid , $set_keys # Grid
+
+    notify-send "layout
+h : horizontal
+v : vertical
+s : stacking
+g : grid"
+}
+
+buffer() {
+    hc keyunbind --all
+    hc keybind Escape $set_keys
+
+    hc keybind b chain , $scripts/window_bring , $set_keys
+    hc keybind j chain , $scripts/window_find , $set_keys
+
+    notify-send "buffer
+b : buffer bring
+j : buffer jump to"
+}
+
+frame() {
+    hc keyunbind --all
+    hc keybind Escape $set_keys
+
+    hc keybind r chain , $scripts/rename_tag , $set_keys
+
+    notify-send "frame
+r : rename"
+}
+
+always_bind(){
+    hc mouseunbind --all
+    hc mousebind $Mod-Button1 move
+    hc mousebind $Mod-Button2 zoom
+    hc mousebind $Mod-Button3 resize
+
+    hc keybind $Mod-i jumpto urgent
+    hc keybind $Mod-l spawn i3lock -fc 222222
+}
+
+case ${1} in
+    window)
+        window ;;
+    layout)
+        layout ;;
+    buffer)
+        buffer ;;
+    frame)
+        frame ;;
+    *)
+        default ;;
+esac
+
+always_bind

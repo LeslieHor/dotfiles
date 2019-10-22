@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+hc() {
+    herbstclient "$@"
+}
+
+window_id=$(wmctrl -l | dmenu -i -p "Bring" -l 10 | sed 's/^\(.*\) .*/\1/')
+
+hc bring ${window_id}

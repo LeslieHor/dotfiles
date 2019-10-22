@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+
+clock() {
+    date '+%Y-%m-%d %H:%M'
+}
+
+cpu() {
+    ps -eo pcpu | awk 'BEGIN {sum=0.0f} {sum+=$1} END {print sum}'
+}
+
+ram() {
+    read -d "\n" MEM_TOTAL MEM_FREE MEM_BUFFERS MEM_CACHED <<< $(grep -oP '^(Mem(Total|Free)|Buffers|Cached): * \K[0-9]*' /proc/meminfo)
+    bc <<< "100*($MEM_TOTAL - $MEM_FREE - $MEM_BUFFERS - $MEM_CACHED) / $MEM_TOTAL"
+}
+
+groups() {
+    G=$(herbstclient tag_status ${1})
+
+    R=""
+    INDEX=1
+    for W in ${G}; do
+        case ${W:0:1} in
+            !) # Contains an urgent window
+                W="%{F#000000}%{B#FF5555} ${INDEX} : ${W:1} %{F-}%{B-}" ;;
+            \#|+) # Currently active
+                W="%{F#000000}%{B#338833} ${INDEX} : ${W:1} %{F-}%{B-}" ;;
+            %|-) # Viewed on a monitor, but not this one
+                W="%{F#000000}%{B#5555FF} ${INDEX} : ${W:1} %{F-}%{B-}" ;;
+            .) # Is empty
+                W="%{F#000000}%{B#555555} ${INDEX} : ${W:1} %{F-}%{B-}" ;;
+            *)
+                W="%{F#000000}%{B#555555} ${INDEX} : ${W:1} %{F-}%{B-}" ;;
+        esac
+
+        R="${R}${W}"
+
+        let INDEX=${INDEX}+1
+    done
+
+    echo -n "${R}"
+}
+
+while :; do
+    MON_0_GROUPS=$(groups 1)
+    MON_1_GROUPS=$(groups 0)
+    MON_2_GROUPS=$(groups 2)
+
+    CLOCK=$(clock)
+    CPU=$(cpu)
+    RAM=$(ram)
+
+    LINE=""
+    for MON_GROUPS in 0,"${MON_0_GROUPS}" 1,"${MON_1_GROUPS}" 2,"${MON_2_GROUPS}"; do
+        IFS=',' read MON GROUP <<< "${MON_GROUPS}"
+
+        LINE="${LINE}"
+
+        # Left
+        LINE="${LINE}%{l}"
+
+        LINE="${LINE}%{S${MON}}"
+        LINE="${LINE}${GROUP}"
+
+        # Center
+        LINE="${LINE}%{c}"
+
+        LINE="${LINE}${CLOCK}"
+
+        # Right
+        # Monitor 2 has system tray, so keep it clear
+        if [ "${MON}" != 2 ]; then
+            LINE="${LINE}%{r}"
+
+            LINE="${LINE}CPU: ${CPU}% | "
+            LINE="${LINE}RAM: ${RAM}% "
+        fi
+    done
+
+    echo "${LINE}"
+    sleep 1
+done

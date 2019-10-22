@@ -1,16 +1,18 @@
 * dotfiles
 
-** i3 + kde
-Symlink all =i3= files to =~/.config/i3/= except for =i3/i3status_config=.
+** Install
+Sym link the files into the appropriate places
+#+BEGIN_SRC sh
+mkdir -p ~/.config/dunst
+ln -s $(pwd)/dunst/dunstrc ~/.config/dunst/dunstrc
 
-=i3/i3status_config= should be symlinked in =~/.config/i3status/=
+mkdir -p ~/.config/herbstluftwm
+ln -s $(pwd)/herbsluft/autostart ~/.config/herbstluftwm/autostart
+ln -s $(pwd)/herbsluft/keybindings ~/.config/herbstluftwm/keybindings
+ln -s $(pwd)/herbsluft/panel.sh ~/.config/herbstluftwm/panel.sh
+ln -s $(pwd)/herbsluft/scripts ~/.config/herbstluftwm/
+# Yes, it does in the herbstluftwm directory
+ln -s $(pwd)/lemonbar/bar_output ~/.config/herbstluftwm/bar_output
 
-The scripts are used to make i3 behave more like woof-tile.
-
-Use the =i3/kde_i3.sh= script and go to
-
-System Settings > Startup and Shutdown > Autostart > Add Script...
-
-Add the script and set "Run On" to "Before session start-up"
-
-That should be it.
+ln -s $(pwd)/stalonetray/stalonetrayrc ~/.stalonetrayrc
+#+END_SRC
