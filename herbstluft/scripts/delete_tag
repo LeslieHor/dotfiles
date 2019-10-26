@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+hc() {
+    herbstclient "$@"
+}
+
+NUM_OF_TAGS=$(hc tag_status | awk '{print NF}')
+
+if [ ${NUM_OF_TAGS} -gt $(hc list_monitors | wc -l) ]; then
+    TAG=$(hc tag_status | grep -oP "#\K[A-Za-z0-9_-]*")
+    hc use_index -1 --skip-visible
+    hc merge_tag ${TAG}
+else
+    notify-send "Not enough free tags"
+fi

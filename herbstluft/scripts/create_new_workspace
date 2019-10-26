@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+hc() {
+    herbstclient "$@"
+}
+
+~/.config/herbstluftwm/scripts/reindex_tags
+
+NEW_INDEX=$(hc tag_status | awk '{print NF+1}')
+hc add ${NEW_INDEX}
+hc use ${NEW_INDEX}

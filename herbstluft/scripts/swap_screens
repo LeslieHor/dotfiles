@@ -22,11 +22,11 @@ FOCUSED_TAG=$(hc tag_status | grep -oP '\#\K([A-Za-z0-9_-]*)') || exit 1
 TARGET_TAG=$(hc tag_status ${DIR} | grep -oP '\+\K([A-Za-z0-9_-]*)') || exit 1
 
 hc lock
-hc add TEMPORARYTAG       || hc unlock
-hc use TEMPORARYTAG       || hc unlock
+SWAP_SETTING=$(hc get swap_monitors_to_get_tag)
+hc set swap_monitors_to_get_tag 1
 hc focus_monitor ${DIR}   || hc unlock
 hc use ${FOCUSED_TAG}     || hc unlock
 hc focus_monitor ${ODIR}  || hc unlock
 hc use ${TARGET_TAG}      || hc unlock
-hc merge_tag TEMPORARYTAG || hc unlock
+hc set swap_monitors_to_get_tag ${SWAP_SETTING}
 hc unlock

@@ -3,6 +3,7 @@
 # Specificially for keytables
 
 set_keys="spawn ${HOME}/.config/herbstluftwm/keybindings"
+which_key="${HOME}/.config/herbstluftwm/which_key"
 scripts="spawn ${HOME}/.config/herbstluftwm/scripts"
 
 hc() {
@@ -33,26 +34,26 @@ ULTI=Control-Shift-Mod1-Mod4
 
 default() {
     hc keyunbind --all
+    ${which_key} default &
 
-    hc keybind $SYS1-semicolon spawn "herbstclient \$\(herbstclient list_commands | dmenu -p 'herbstluft'\)"
-    hc keybind $SYS1-r reload
+    hc keybind $SYS3-r reload
     hc keybind $SYS1-q close # Close the application window
     hc keybind $SYS1-c remove # Close the frame
-    hc keybind $ULTI-space spawn ${TERMINAL:-xterm} # use your $TERMINAL with xterm as fallback
+    hc keybind $ULTI-space spawn konsole
 
     hc keybind $SYS1-o spawn dmenu_run
 
     # focusing clients
-    hc keybind $SYS1-h     focus left
-    hc keybind $SYS1-j     focus down
-    hc keybind $SYS1-k     focus up
-    hc keybind $SYS1-l     focus right
+    hc keybind $SYS1-h focus left
+    hc keybind $SYS1-j focus down
+    hc keybind $SYS1-k focus up
+    hc keybind $SYS1-l focus right
 
     hc keybind $SYS1-z $scripts/maximize
 
-    # cycle through workspaces
-    hc keybind $SYS1-n cycle +1
-    hc keybind $SYS1-p cycle -1
+    # cycle through windows
+    hc keybind $SYS1-comma cycle -1
+    hc keybind $SYS1-period cycle +1
 
     # moving clients
     # to shift across monitors...
@@ -66,8 +67,8 @@ default() {
         chain , lock , shift_to_monitor -r , focus_monitor -r , unlock
 
     # cycle through tags
-    hc keybind $SYS1-period use_index +1 --skip-visible
-    hc keybind $SYS1-comma use_index -1 --skip-visible
+    hc keybind $SYS3-p use_index -1 --skip-visible
+    hc keybind $SYS3-n use_index +1 --skip-visible
 
     hc keybind $SYS1-1 use_index 0
     hc keybind $SYS1-2 use_index 1
@@ -100,74 +101,58 @@ default() {
 
     hc keybind $SYS3-comma $scripts/swap_screens left
     hc keybind $SYS3-period $scripts/swap_screens right
+    hc keybind $SYS3-w use_previous
 
     # Leaders
     hc keybind $SYS1-w $set_keys window
     hc keybind $SYS1-b $set_keys buffer
     hc keybind $SYS3-f $set_keys frame
-
-    notify-send "default"
 }
 
 window() {
     hc keyunbind --all
+    ${which_key} window &
     hc keybind Escape $set_keys
 
-    hc keybind h chain , split right 0.5 , $set_keys
-    hc keybind v chain , split bottom 0.5 , $set_keys
-    hc keybind f chain , floating toggle , $set_keys
-    hc keybind m chain , fullscreen toggle , $set_keys
-    hc keybind p chain , pseudotile toggle , $set_keys
-    hc keybind z chain , $scripts/maximize , $set_keys
+    hc keybind h chain , split right 0.5 , $set_keys # split horizontal
+    hc keybind v chain , split bottom 0.5 , $set_keys # split vertical
+    hc keybind f chain , floating toggle , $set_keys # toggle floating
+    hc keybind m chain , fullscreen toggle , $set_keys # toggle fullscreen
+    hc keybind p chain , pseudotile toggle , $set_keys # toggle pseudotile
+    hc keybind z chain , $scripts/maximize , $set_keys # toggle maximize
 
     hc keybind l $set_keys layout
-
-    notify-send "window
-h : split horizontal
-v : split vertical
-f : toggle floating
-m : toggle fullscreen
-p : toggle pseudotile
-z : toggle maximize
-l : -> layout"
 }
 
 layout() {
     hc keyunbind --all
+    ${which_key} layout &
     hc keybind Escape $set_keys
 
-    hc keybind v chain , set_layout vertical , $set_keys # Vertical
-    hc keybind h chain , set_layout horizontal , $set_keys # Horizontal
-    hc keybind s chain , set_layout max , $set_keys # Max / stack
-    hc keybind g chain , set_layout grid , $set_keys # Grid
-
-    notify-send "layout
-h : horizontal
-v : vertical
-s : stacking
-g : grid"
+    hc keybind v chain , set_layout vertical , $set_keys # vertical
+    hc keybind h chain , set_layout horizontal , $set_keys # horizontal
+    hc keybind s chain , set_layout max , $set_keys # max / stack
+    hc keybind g chain , set_layout grid , $set_keys # grid
 }
 
 buffer() {
     hc keyunbind --all
+    ${which_key} buffer &
     hc keybind Escape $set_keys
 
-    hc keybind b chain , $scripts/window_bring , $set_keys
-    hc keybind j chain , $scripts/window_find , $set_keys
-
-    notify-send "buffer
-b : buffer bring
-j : buffer jump to"
+    hc keybind b chain , $scripts/window_bring , $set_keys # bring
+    hc keybind j chain , $scripts/window_find , $set_keys # jump to
 }
 
 frame() {
     hc keyunbind --all
+    ${which_key} frame &
     hc keybind Escape $set_keys
 
-    hc keybind r chain , $scripts/rename_tag , $set_keys
-
-    notify-send "frame
-r : rename"
+    hc keybind r chain , $scripts/rename_tag , $set_keys # rename
+    hc keybind c chain , $scripts/create_new_workspace , $set_keys # new workspace
+    hc keybind q chain , $scripts/delete_tag , $set_keys # delete tag
+    hc keybind b chain , $scripts/switch_tag , $set_keys # switch tag
 }
 
 always_bind(){

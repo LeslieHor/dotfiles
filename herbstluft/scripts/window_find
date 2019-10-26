@@ -4,6 +4,10 @@ hc() {
     herbstclient "$@"
 }
 
-window_id=$(wmctrl -l | dmenu -i -p "Switch to" -l 10 | sed 's/^\(.*\) .*/\1/')
+window_id_title_list() {
+    wmctrl -l | awk '{printf $1" : "; for(i=4;i<=NF;i++)printf $i" "; print""}'
+}
+
+window_id=$(window_id_title_list | dmenu -i -p "Switch to" -l 10 | sed 's/^\(.*\) .*/\1/')
 
 hc jumpto ${window_id}

@@ -10,9 +10,12 @@ mkdir -p ~/.config/herbstluftwm
 ln -s $(pwd)/herbsluft/autostart ~/.config/herbstluftwm/autostart
 ln -s $(pwd)/herbsluft/keybindings ~/.config/herbstluftwm/keybindings
 ln -s $(pwd)/herbsluft/panel.sh ~/.config/herbstluftwm/panel.sh
+ln -s $(pwd)/herbsluft/which_key ~/.config/herbstluftwm/which_key
 ln -s $(pwd)/herbsluft/scripts ~/.config/herbstluftwm/
 # Yes, it does in the herbstluftwm directory
 ln -s $(pwd)/lemonbar/bar_output ~/.config/herbstluftwm/bar_output
 
 ln -s $(pwd)/stalonetray/stalonetrayrc ~/.stalonetrayrc
 #+END_SRC
+
+** Herbstluftwm with KDE
