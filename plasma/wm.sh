@@ -1,2 +1,2 @@
-export KDEWM=/usr/bin/herbstluftwm
+#export KDEWM=/usr/bin/herbstluftwm
 

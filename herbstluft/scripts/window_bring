@@ -5,7 +5,7 @@ hc() {
 }
 
 window_id_title_list() {
-    wmctrl -l | awk '{printf $1" : "; for(i=4;i<=NF;i++)printf $i" "; print""}'
+    wmctrl -l | awk '{printf $1" : "$2+1" : "; for(i=4;i<=NF;i++)printf $i" "; print""}' | sort -t":" -k2
 }
 
 window_id=$(window_id_title_list | dmenu -i -p "Bring" -l 10 | sed 's/^\(.*\) .*/\1/')
