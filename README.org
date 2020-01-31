@@ -1,21 +1,45 @@
 * dotfiles
 
 ** Install
-Sym link the files into the appropriate places
-#+BEGIN_SRC sh
-mkdir -p ~/.config/dunst
-ln -s $(pwd)/dunst/dunstrc ~/.config/dunst/dunstrc
+*** i3
+Sym link the following:
 
-mkdir -p ~/.config/herbstluftwm
-ln -s $(pwd)/herbsluft/autostart ~/.config/herbstluftwm/autostart
-ln -s $(pwd)/herbsluft/keybindings ~/.config/herbstluftwm/keybindings
-ln -s $(pwd)/herbsluft/panel.sh ~/.config/herbstluftwm/panel.sh
-ln -s $(pwd)/herbsluft/which_key ~/.config/herbstluftwm/which_key
-ln -s $(pwd)/herbsluft/scripts ~/.config/herbstluftwm/
-# Yes, it does in the herbstluftwm directory
-ln -s $(pwd)/lemonbar/bar_output ~/.config/herbstluftwm/bar_output
+#+BEGIN_SRC
+i3/config --> ~/.config/i3/config
+i3/i3c --> ~/.config/i3/i3c
 
-ln -s $(pwd)/stalonetray/stalonetrayrc ~/.stalonetrayrc
+dzen2/dzen2_bar --> ~/.config/i3status/dzen2_bar
+dzen2/run_dzen2_bar --> ~/.config/i3status/run_dzen2_bar
 #+END_SRC
 
-** Herbstluftwm with KDE
+The =i3c= python script offers some functionality that is missing from =i3=.
+
+Compatible with =i3wm= versions:
+- 4.12 [[https://github.com/i3/i3/blob/c9f0bc174d0746c925443d49bcc07727b631e335/docs/userguide][User guide]]
+- 4.14.1 [[https://github.com/i3/i3/blob/83a62267dce22d5d898d861bc957a6266268d030/docs/userguide][User guide]]
+
+=i3= v4.12 lacks the =swap= command, so marks are used to facilitate.
+
+The =dzen2= bar depends on =i3c= to detect displays and add a dock to each display.
+
+*** TODO Firefox
+Sym link the following:
+
+#+BEGIN_SRC
+USERCHROME.CSS --> ~/.mozilla/firefox/<ID>.default/chrome/userChrome.css
+#+END_SRC
+
+You may need to create parent directories.
+
+Note the css that hides the tab bar. I do not use tabs in firefox. Instead, I use =i3='s tab layout to achieve the same thing but with better integration with the wm. This has the advantage of being able to use the same commands to move tabs around my desktop as moving normal windows.
+
+To facilitate this:
+
+Go to =about:config= and set =browser.tabs.opentabfor.middleclick= to =false=.
+
+If you use =tridactyl=, rebind the =t= and =T= keys to open new windows instead of new tabs, and rebind =F= to open links in new windows.
+#+BEGIN_SRC
+:bind t fillcmdline winopen
+:bind T current_url winopen
+:bind F hint -w
+#+END_SRC

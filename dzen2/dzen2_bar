@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+i3c="${HOME}/.config/i3/i3c"
+
+#data_from i3c
+BAR_X=$(${i3c} dzen2-bar-x ${1})
+BAR_WIDTH=$(${i3c} dzen2-bar-width ${1})
+
+BAR_FONT="-*-fixed-medium-*-*-*-12-*-*-*-*-*-*-*"
+BAR_FG="#ffffff"
+BAR_BG="#222222"
+BAR_MARGIN=10
+
+cpu() {
+    ps -eo pcpu | awk 'BEGIN {sum=0.0f} {sum+=$1} END {print sum}'
+}
+
+ram() {
+    read -r t f <<< $(grep -E 'Mem(Total|Free)' /proc/meminfo |awk '{print $2}' | tr '\n' ' ')
+    read -r b c <<< $(grep -E '^(Buffers|Cached)' /proc/meminfo |awk '{print $2}' | tr '\n' ' ')
+
+    echo "100 * ($t - $f - $c - $b) / $t" | bc
+}
+
+diskusage() {
+    df ${1} | tail -n 1 | awk '{print $5}'
+}
+
+while sleep 1; do
+    # Left block
+    left=""
+    left="${left}$(${i3c} dzen2-bar-workspaces ${1})"
+
+    ## add margin for left side
+    printf "^pa(${BAR_MARGIN})"
+    printf "${left}"
+
+    # Centre block
+    centre=""
+    centre="${centre}"
+
+    ## find the offset for the centre block
+    width=$(dzen2-textwidth "${BAR_FONT}" "${centre}")
+    offset=$(( ( ${BAR_WIDTH} - ${width} ) / 2 ))
+    printf "^pa(${offset})"
+    printf "${centre}"
+
+    # Right block
+    right=""
+    right="${right}"
+    #right="${right}CPU: $(cpu)% | "
+    right="${right}D/: $(diskusage /) | "
+    right="${right}D/S: $(diskusage /media/leslie/slave/) | "
+    right="${right}RAM: $(ram)% | "
+    right="${right}$(date '+%Y-%m-%d %H:%M:%S')"
+
+    ## find the offset for the right block
+    width=$(dzen2-textwidth "${BAR_FONT}" "${right}")
+    offset=$((${BAR_WIDTH} - ${width} - ${BAR_MARGIN}))
+
+    # Correct percentage signs
+    right=$(echo ${right} | sed 's/%/%%/g')
+
+    printf "^pa(${offset})"
+    printf "${right}"
+
+    printf "\n"
+done | dzen2 -dock \
+             -ta l \
+             -x ${BAR_X} \
+             -w ${BAR_WIDTH} \
+             -fg ${BAR_FG} \
+             -bg ${BAR_BG} \
+             -fn ${BAR_FONT}

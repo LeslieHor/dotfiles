@@ -1,0 +1,174 @@
+# i3 Config File
+# Created: 2020-01-21
+# As much as possible, make it act like emacs manual tiling
+
+# Settings
+
+# Font
+font pango:monospace 8
+#font pango:DejaVu Sans Mono 8
+
+## All workspaces start in tabbed layout
+workspace_layout tabbed
+
+## Modifier for floating window manipulation
+floating_modifier Mod4
+
+## Colours
+# class                 border  bground text    indicator child_border
+client.focused          #006600 #004400 #FFFFFF #004400   #006600
+client.focused_inactive #333333 #222222 #FFFFFF #FF0000   #333333
+client.unfocused        #333333 #555555 #FFFFFF #FF0000   #333333
+client.urgent           #FF0000 #FF0000 #FFFFFF #FF0000   #FF0000
+client.placeholder      #FF0000 #FF0000 #FFFFFF #FF0000   #FF0000
+
+client.background       #FFFFFF
+
+## Keybind shortcuts
+
+set $i3c ~/.config/i3/i3c
+set $exit mode "default"
+
+### default
+set $mod Mod4
+
+### Meta + Hyper
+set $s1 Mod1+Mod4
+
+### Control + Shift + Hyper
+set $s2 Control+Shift+Mod4
+
+### Control + Meta + Hyper
+set $s3 Control+Mod1+Mod4
+
+### Shift + Meta + Hyper
+set $s4 Shift+Mod1+Mod4
+
+# Key tables
+
+## Windows
+mode "window" {
+    bindsym h exec $i3c split-right ; $exit
+    bindsym v exec $i3c split-down ; $exit
+    bindsym u focus parent ; $exit
+    bindsym d focus child ; $exit
+
+    bindsym Escape $exit
+}
+
+mode "frame" {
+    bindsym r exec $i3c rename-workspace $(echo -n | dmenu -p "Rename workspace:") ; $exit
+    bindsym c exec $i3c create-new-workspace ; $exit
+
+    bindsym Escape $exit
+}
+
+mode "buffer" {
+    bindsym y exec $i3c buffer-yank ; $exit
+    bindsym p exec $i3c buffer-paste ; $exit
+    bindsym j exec $i3c jump-to-window ; $exit
+    bindsym b exec $i3c bring-window ; $exit
+
+    bindsym Escape $exit
+}
+
+# Mouse bindings
+
+## The middle button over a titlebar kills the window
+bindsym --release button2 kill
+
+# Keybindings
+
+bindsym Mod4+l exec i3lock -fc 222222
+bindsym Control+Shift+Mod1+Mod4+space exec i3-sensible-terminal
+
+## SYS-1
+
+bindsym $s1+1 exec $i3c focus-workspace 1
+bindsym $s1+2 exec $i3c focus-workspace 2
+bindsym $s1+3 exec $i3c focus-workspace 3
+bindsym $s1+4 exec $i3c focus-workspace 4
+bindsym $s1+5 exec $i3c focus-workspace 5
+bindsym $s1+6 exec $i3c focus-workspace 6
+bindsym $s1+7 exec $i3c focus-workspace 7
+bindsym $s1+8 exec $i3c focus-workspace 8
+bindsym $s1+9 exec $i3c focus-workspace 9
+bindsym $s1+0 exec $i3c focus-workspace 10
+
+bindsym $s1+h exec $i3c focus-left
+bindsym $s1+j exec $i3c focus-down
+bindsym $s1+k exec $i3c focus-up
+bindsym $s1+l exec $i3c focus-right
+
+# bindsym $s1+h focus left
+# bindsym $s1+j focus down
+# bindsym $s1+k focus up
+# bindsym $s1+l focus right
+
+bindsym $s1+q kill
+bindsym $s1+b mode "buffer"
+bindsym $s1+o exec dmenu_run
+bindsym $s1+w mode "window"
+bindsym $s1+comma exec $i3c prev-tab
+bindsym $s1+period exec $i3c next-tab
+
+## SYS-2
+
+bindsym $s2+h resize shrink width 2 px or 2 ppt
+bindsym $s2+j resize grow height 2 px or 2 ppt
+bindsym $s2+k resize shrink height 2 px or 2 ppt
+bindsym $s2+l resize grow width 2 px or 2 ppt
+
+## SYS-3
+
+bindsym $s3+1 move container to workspace 1
+bindsym $s3+2 move container to workspace 2
+bindsym $s3+3 move container to workspace 3
+bindsym $s3+4 move container to workspace 4
+bindsym $s3+5 move container to workspace 5
+bindsym $s3+6 move container to workspace 6
+bindsym $s3+7 move container to workspace 7
+bindsym $s3+8 move container to workspace 8
+bindsym $s3+9 move container to workspace 9
+bindsym $s3+0 move container to workspace 10
+
+bindsym $s3+f mode "frame"
+
+bindsym $s3+h move left
+bindsym $s3+j move down
+bindsym $s3+k move up
+bindsym $s3+l move right
+
+bindsym $s3+p exec $i3c prev-workspace
+bindsym $s3+n exec $i3c next-workspace
+bindsym $s3+comma exec $i3c swap-workspace-left
+bindsym $s3+period exec $i3c swap-workspace-right
+
+# split in horizontal orientation
+bindsym $mod+h split h
+
+# split in vertical orientation
+bindsym $mod+v split v
+
+# enter fullscreen mode for the focused container
+bindsym $mod+f fullscreen toggle
+
+# change container layout (stacked, tabbed, toggle split)
+bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
+
+# toggle tiling / floating
+bindsym $mod+Shift+space floating toggle
+
+# change focus between tiling / floating windows
+bindsym $mod+space focus mode_toggle
+
+# reload the configuration file
+bindsym $mod+Shift+c reload
+# restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
+bindsym $mod+Shift+r restart
+# exit i3 (logs you out of your X session)
+bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
+
+exec_always --no-startup-id ~/.config/i3status/run_dzen2_bar
