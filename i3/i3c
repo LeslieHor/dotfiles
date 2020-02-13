@@ -199,6 +199,7 @@ class I3C:
             fallback = non_visible_workspaces_nums[-1]
             rest = filter(lambda n: n < focused_num,
                           non_visible_workspaces_nums)
+            rest.reverse()
 
         if len(rest) > 0:
             self.focus_workspace(rest[0])
@@ -412,6 +413,12 @@ class I3C:
         ws_string = ' '.join(ws_strings)
         print(ws_string)
 
+    def dzen2_active_display(self):
+        workspace = filter(lambda w: w['focused'], self.get_workspaces())[0]
+        active_display = workspace['output']
+        displays = self.get_displays()
+        print displays.index(active_display) + 1
+
     def rename_workspace(self, name):
         workspace = filter(lambda w: w['focused'], self.get_workspaces())[0]
         workspace_num = workspace['num']
@@ -504,6 +511,8 @@ elif command == 'dzen2-bar-width':
     i3c.dzen2_bar_width(int(sys.argv[2]))
 elif command == 'dzen2-bar-workspaces':
     i3c.dzen2_bar_workspaces(int(sys.argv[2]))
+elif command == 'dzen2-active-display':
+    i3c.dzen2_active_display()
 elif command == 'debug':
     i3c.get_displays()
     print i3c.displays

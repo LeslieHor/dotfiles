@@ -1,0 +1,13 @@
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+
+#pageActionButton, .share-more-button { display: none!important; }
+
+:root{
+  scrollbar-face-color: #595959;
+  scrollbar-track-color: #232323;
+  scrollbar-width: auto;
+}
+
+
+#TabsToolbar { visibility: collapse !important; }
+#tabbrowser-tabs { visibility: collapse !important; }

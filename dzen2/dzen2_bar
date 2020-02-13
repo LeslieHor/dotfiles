@@ -9,6 +9,7 @@ BAR_WIDTH=$(${i3c} dzen2-bar-width ${1})
 BAR_FONT="-*-fixed-medium-*-*-*-12-*-*-*-*-*-*-*"
 BAR_FG="#ffffff"
 BAR_BG="#222222"
+BAR_BG_ACTIVE="#228822"
 BAR_MARGIN=10
 
 cpu() {
@@ -27,6 +28,12 @@ diskusage() {
 }
 
 while sleep 1; do
+    # TODO: Finish this
+    active_display=$(${i3c} dzen2-active-display)
+    if [ ${active_display} == ${1} ]; then
+        BACKGROUND=${BAR_BG_ACTIVE}
+    fi
+
     # Left block
     left=""
     left="${left}$(${i3c} dzen2-bar-workspaces ${1})"

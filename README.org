@@ -31,7 +31,7 @@ USERCHROME.CSS --> ~/.mozilla/firefox/<ID>.default/chrome/userChrome.css
 
 You may need to create parent directories.
 
-Note the css that hides the tab bar. I do not use tabs in firefox. Instead, I use =i3='s tab layout to achieve the same thing but with better integration with the wm. This has the advantage of being able to use the same commands to move tabs around my desktop as moving normal windows.
+Note the css that hides the tab bar. I do not use tabs in firefox. Instead, I use =i3='s tab layout to achieve the same thing but with better integration with the wm. This has the advantage of being able to use the same commands to move tabs around my desktop as moving normal windows. E.g. I can yank a tab and paste it to a different workspace whilst leaving all other tabs alone.
 
 To facilitate this:
 

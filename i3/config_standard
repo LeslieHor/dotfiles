@@ -81,82 +81,77 @@ bindsym --release button2 kill
 
 # Keybindings
 
-bindsym Mod4+l exec i3lock -fc 222222
-bindsym Control+Shift+Mod1+Mod4+space exec i3-sensible-terminal
+bindsym Mod4+Shift+l exec i3lock -fc 222222
+bindsym Mod4+space exec i3-sensible-terminal
 
 ## SYS-1
 
-bindsym $s1+1 exec $i3c focus-workspace 1
-bindsym $s1+2 exec $i3c focus-workspace 2
-bindsym $s1+3 exec $i3c focus-workspace 3
-bindsym $s1+4 exec $i3c focus-workspace 4
-bindsym $s1+5 exec $i3c focus-workspace 5
-bindsym $s1+6 exec $i3c focus-workspace 6
-bindsym $s1+7 exec $i3c focus-workspace 7
-bindsym $s1+8 exec $i3c focus-workspace 8
-bindsym $s1+9 exec $i3c focus-workspace 9
-bindsym $s1+0 exec $i3c focus-workspace 10
+bindsym $Mod4+1 exec $i3c focus-workspace 1
+bindsym $Mod4+2 exec $i3c focus-workspace 2
+bindsym $Mod4+3 exec $i3c focus-workspace 3
+bindsym $Mod4+4 exec $i3c focus-workspace 4
+bindsym $Mod4+5 exec $i3c focus-workspace 5
+bindsym $Mod4+6 exec $i3c focus-workspace 6
+bindsym $Mod4+7 exec $i3c focus-workspace 7
+bindsym $Mod4+8 exec $i3c focus-workspace 8
+bindsym $Mod4+9 exec $i3c focus-workspace 9
+bindsym $Mod4+0 exec $i3c focus-workspace 10
 
-bindsym $s1+h exec $i3c focus-left
-bindsym $s1+j exec $i3c focus-down
-bindsym $s1+k exec $i3c focus-up
-bindsym $s1+l exec $i3c focus-right
+bindsym $Mod4+h exec $i3c focus-left
+bindsym $Mod4+j exec $i3c focus-down
+bindsym $Mod4+k exec $i3c focus-up
+bindsym $Mod4+l exec $i3c focus-right
 
-# bindsym $s1+h focus left
-# bindsym $s1+j focus down
-# bindsym $s1+k focus up
-# bindsym $s1+l focus right
-
-bindsym $s1+q kill
-bindsym $s1+b mode "buffer"
-bindsym $s1+o exec dmenu_run
-bindsym $s1+w mode "window"
-bindsym $s1+comma exec $i3c prev-tab
-bindsym $s1+period exec $i3c next-tab
+bindsym $Mod4+q kill
+bindsym $Mod4+b mode "buffer"
+bindsym $Mod4+o exec dmenu_run
+bindsym $Mod4+w mode "window"
+bindsym $Mod4+comma exec $i3c prev-tab
+bindsym $Mod4+period exec $i3c next-tab
 
 ## SYS-2
 
-bindsym $s2+h resize shrink width 2 px or 2 ppt
-bindsym $s2+j resize grow height 2 px or 2 ppt
-bindsym $s2+k resize shrink height 2 px or 2 ppt
-bindsym $s2+l resize grow width 2 px or 2 ppt
+bindsym $Mod4+Mod1+h resize shrink width 2 px or 2 ppt
+bindsym $Mod4+Mod1+j resize grow height 2 px or 2 ppt
+bindsym $Mod4+Mod1+k resize shrink height 2 px or 2 ppt
+bindsym $Mod4+Mod1+l resize grow width 2 px or 2 ppt
 
 ## SYS-3
 
-bindsym $s3+1 move container to workspace 1
-bindsym $s3+2 move container to workspace 2
-bindsym $s3+3 move container to workspace 3
-bindsym $s3+4 move container to workspace 4
-bindsym $s3+5 move container to workspace 5
-bindsym $s3+6 move container to workspace 6
-bindsym $s3+7 move container to workspace 7
-bindsym $s3+8 move container to workspace 8
-bindsym $s3+9 move container to workspace 9
-bindsym $s3+0 move container to workspace 10
+bindsym $Mod4+Shift+1 move container to workspace 1
+bindsym $Mod4+Shift+2 move container to workspace 2
+bindsym $Mod4+Shift+3 move container to workspace 3
+bindsym $Mod4+Shift+4 move container to workspace 4
+bindsym $Mod4+Shift+5 move container to workspace 5
+bindsym $Mod4+Shift+6 move container to workspace 6
+bindsym $Mod4+Shift+7 move container to workspace 7
+bindsym $Mod4+Shift+8 move container to workspace 8
+bindsym $Mod4+Shift+9 move container to workspace 9
+bindsym $Mod4+Shift+0 move container to workspace 10
 
-bindsym $s3+f mode "frame"
+bindsym $Mod4+Shift+f mode "frame"
 
-bindsym $s3+h move left
-bindsym $s3+j move down
-bindsym $s3+k move up
-bindsym $s3+l move right
+bindsym $Mod4+Shift+h move left
+bindsym $Mod4+Shift+j move down
+bindsym $Mod4+Shift+k move up
+bindsym $Mod4+Shift+l move right
 
-bindsym $s3+p exec $i3c prev-workspace
-bindsym $s3+n exec $i3c next-workspace
-bindsym $s3+comma exec $i3c swap-workspace-left
-bindsym $s3+period exec $i3c swap-workspace-right
+bindsym $Mod4+Shift+p exec $i3c prev-workspace
+bindsym $Mod4+Shift+n exec $i3c next-workspace
+bindsym $Mod4+Shift+comma exec $i3c swap-workspace-left
+bindsym $Mod4+Shift+period exec $i3c swap-workspace-right
 
 ## SYS-4
 
-bindsym $s4+n scratchpad show
-bindsym $s4+m move scratchpad
-bindsym $s4+c floating toggle
+bindsym $Mod4+Control+n scratchpad show
+bindsym $Mod4+Control+m move scratchpad
+bindsym $Mod4+Control+c floating toggle
 
 # toggle tiling / floating
-bindsym $mod+Shift+space floating toggle
+# bindsym $mod+Shift+space floating toggle
 
 # change focus between tiling / floating windows
-bindsym $mod+space focus mode_toggle
+# bindsym $mod+space focus mode_toggle
 
 # reload the configuration file
 bindsym $mod+Shift+c reload
