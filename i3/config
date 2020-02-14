@@ -27,7 +27,8 @@ client.background       #FFFFFF
 ## Keybind shortcuts
 
 set $i3c ~/.config/i3/i3c
-set $exit mode "default"
+set $popup ~/.config/i3/keybind_popup
+set $exit exec ~/.config/i3/keybind_popup ; mode "default"
 
 ### default
 set $mod Mod4
@@ -108,9 +109,9 @@ bindsym $s1+l exec $i3c focus-right
 # bindsym $s1+l focus right
 
 bindsym $s1+q kill
-bindsym $s1+b mode "buffer"
+bindsym $s1+b exec $popup buffer & ; mode "buffer"
 bindsym $s1+o exec dmenu_run
-bindsym $s1+w mode "window"
+bindsym $s1+w exec $popup window ; mode "window"
 bindsym $s1+comma exec $i3c prev-tab
 bindsym $s1+period exec $i3c next-tab
 
@@ -134,7 +135,7 @@ bindsym $s3+8 move container to workspace 8
 bindsym $s3+9 move container to workspace 9
 bindsym $s3+0 move container to workspace 10
 
-bindsym $s3+f mode "frame"
+bindsym $s3+f exec $popup frame ; mode "frame"
 
 bindsym $s3+h move left
 bindsym $s3+j move down

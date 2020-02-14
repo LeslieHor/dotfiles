@@ -28,7 +28,6 @@ if [ -z ${1} ]; then
     exit 0
 fi
 
-touch ~/.config/i3/mini_popup.pid
 echo $$ > ${PID_FILE}
 
 sleep ${DELAY}
