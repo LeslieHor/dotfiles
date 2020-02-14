@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+PID_FILE="${HOME}/.config/i3/mini_popup.pid"
+
+if [ -f ${PID_FILE} ]; then
+    PARENT_PID=$(cat ${PID_FILE}) || true
+    CHILD_PID=$(pgrep -P ${PARENT_PID}) || true
+    kill ${PARENT_PID} || true
+    kill ${CHILD_PID} || true
+    rm ${PID_FILE}
+fi
+
+WIDTH=1000
+X=2380
+FONT='-*-fixed-medium-*-*-*-12-*-*-*-*-*-*-*'
+FG='#FFFFFF'
+BG='#222222'
+DELAY=0.5
+
+if [ -z ${1} ]; then
+    echo "default" | dzen2 -p 1\
+                           -e 'onstart=uncollapse' \
+                           -w ${WIDTH} \
+                           -x ${X} \
+                           -fn ${FONT} \
+                           -fg ${FG} \
+                           -bg ${BG}
+    exit 0
+fi
+
+touch ~/.config/i3/mini_popup.pid
+echo $$ > ${PID_FILE}
+
+sleep ${DELAY}
+
+TITLE="${1}"
+TEXT=$(echo "${2}" | column -c ${WIDTH} -x | expand | sed 's/^/ /')
+
+INPUT="${TITLE}\n${TEXT}\n"
+
+LINES=$(( $(printf "${INPUT}" | wc -l) - 1 ))
+
+printf "${INPUT}" | dzen2 -p \
+                          -e 'onstart=uncollapse' \
+                          -l ${LINES} \
+                          -w ${WIDTH} \
+                          -x ${X} \
+                          -fn ${FONT} \
+                          -fg ${FG} \
+                          -bg ${BG}
