@@ -10,9 +10,10 @@ if [ -f ${PID_FILE} ]; then
     rm ${PID_FILE}
 fi
 
-WIDTH=1000
-X=2380
-FONT='-*-fixed-medium-*-*-*-12-*-*-*-*-*-*-*'
+WIDTH=2560
+FONT_WIDTH=212
+X=0
+FONT="-*-terminus-*-*-*-*-24-*-*-*-*-*-*-*"
 FG='#FFFFFF'
 BG='#222222'
 DELAY=0.5
@@ -33,7 +34,7 @@ echo $$ > ${PID_FILE}
 sleep ${DELAY}
 
 TITLE="${1}"
-TEXT=$(echo "${2}" | column -c ${WIDTH} -x | expand | sed 's/^/ /')
+TEXT=$(echo "${2}" | column -c ${FONT_WIDTH} -x | expand | sed 's/^/ /')
 
 INPUT="${TITLE}\n${TEXT}\n"
 
