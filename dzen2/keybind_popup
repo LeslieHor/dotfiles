@@ -30,6 +30,15 @@ f - firefox
 e - emacs
 t - thunderbird"
 
+elif [ "${1}" == "pass" ]; then
+    TITLE="pass"
+    TEXT="u - type user
+p - type pass
+b - type user and pass
+U - copy user
+P - copy pass"
+
+
 fi
 
 ${MINI_POPUP} "${TITLE}" "${TEXT}"

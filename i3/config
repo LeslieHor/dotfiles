@@ -60,7 +60,7 @@ mode "window" {
 }
 
 mode "frame" {
-    bindsym r exec $i3c rename-workspace $(echo -n | dmenu -p "Rename workspace:") ; $exit
+    bindsym r exec $i3c rename-workspace $(echo -n | dmenu -fn "terminus-8" -p "Rename workspace:") ; $exit
     bindsym c exec $i3c create-new-workspace ; $exit
 
     bindsym Escape $exit
@@ -76,10 +76,20 @@ mode "buffer" {
 }
 
 mode "applications" {
-    bindsym o exec dmenu_run ; $exit
+    bindsym o exec dmenu_run -fn "terminus-8" ; $exit
     bindsym f exec firefox ; $exit
     bindsym e exec emacsclient -c -n ; $exit
     bindsym t exec thunderbird ; $exit
+
+    bindsym Escape $exit
+}
+
+mode "pass" {
+    bindsym u exec passmenu type user ; $exit
+    bindsym p exec passmenu type pass ; $exit
+    bindsym b exec passmenu type both ; $exit
+    bindsym U exec passmenu copy user ; $exit
+    bindsym P exec passmenu copy pass ; $exit
 
     bindsym Escape $exit
 }
@@ -158,6 +168,7 @@ bindsym $s3+period exec $i3c swap-workspace-right
 
 ## SYS-4
 
+bindsym $s4+p $popup pass ; mode "pass"
 bindsym $s4+n scratchpad show
 bindsym $s4+m move scratchpad
 bindsym $s4+c floating toggle

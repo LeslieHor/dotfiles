@@ -6,7 +6,7 @@ i3c="${HOME}/.config/i3/i3c"
 BAR_X=$(${i3c} dzen2-bar-x ${1})
 BAR_WIDTH=$(${i3c} dzen2-bar-width ${1})
 
-BAR_FONT="-*-fixed-medium-*-*-*-12-*-*-*-*-*-*-*"
+BAR_FONT="-*-terminus-*-*-*-*-12-*-*-*-*-*-*-*"
 BAR_FG="#ffffff"
 BAR_BG="#222222"
 BAR_BG_ACTIVE="#228822"

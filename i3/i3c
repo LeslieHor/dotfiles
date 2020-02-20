@@ -442,7 +442,7 @@ class I3C:
         return call(['wmctrl -l |',
                      'awk \'{printf $1" : "$2+1" : "; for(i=4;i<=NF;i++) printf $i" "; print""}\' |',
                      'sort -t":" -k2 |',
-                     'dmenu -i -l 10 -p "%s" | ' % prompt,
+                     'dmenu -i -fn "terminus-8" -l 10 -p "%s" | ' % prompt,
                      'awk \'{print $1}\'']).rstrip()
 
     def jump_to_window(self):

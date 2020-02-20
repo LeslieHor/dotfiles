@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+[ -z "${1}" ] && exit 1
+[ -z "${2}" ] && exit 1
+
+PASSWORD_DIR=${HOME}/.password-store/
+PASSWORD_FILES=$(find ${PASSWORD_DIR} -name "*.gpg" | sed "s%^${PASSWORD_DIR}\(.*\)\.gpg$%\1%")
+
+PASSWORD_FILE=$(printf "${PASSWORD_FILES}" | dmenu -i -fn "terminus-8" -p "Pass")
+[ -z "${PASSWORD_FILE}" ] && exit 0
+
+PASSWORD_CONTENT=$(pass show ${PASSWORD_FILE})
+PASSWORD=$(printf "${PASSWORD_CONTENT}" | awk 'NR==1')
+USERNAME=$(printf "${PASSWORD_CONTENT}" | grep -oP 'user: \K.*$')
+
+if [[ ${1} == "type" ]]; then
+    # Workaround for xdotool bug
+    # https://github.com/jordansissel/xdotool/issues/49
+    setxkbmap us
+    setxkbmap gb
+
+    if [[ ${2} == "pass" ]]; then
+        xdotool type --clearmodifiers "${PASSWORD}"
+    elif [[ ${2} == "user" ]]; then
+        xdotool type --clearmodifiers "${USERNAME}"
+    elif [[ ${2} == "both" ]]; then
+        xdotool type --clearmodifiers "${USERNAME}"
+        xdotool key Tab
+        xdotool type --clearmodifiers "${PASSWORD}"
+    fi
+
+elif [[ ${1} == "copy" ]]; then
+    if [[ ${2} == "pass" ]]; then
+        pass show -c ${PASSWORD_FILE}
+    elif [[ ${2} == "user" ]]; then
+        printf "${USERNAME}" | xclip -i -selection clipboard
+    fi
+
+fi
