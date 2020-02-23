@@ -12,6 +12,15 @@ BAR_BG="#222222"
 BAR_BG_ACTIVE="#228822"
 BAR_MARGIN=10
 
+FG_END="^fg()"
+FG_ON="^fg(#00FF00)"
+FG_OFF="^fg(#FF0000)"
+FG_ACTIVE="^fg(#00FF00)"
+FG_INACTIVE="^fg(#999999)"
+FG_HEADER="^fg(#999999)"
+
+SEP="^fg(#555555) | ^fg()"
+
 cpu() {
     ps -eo pcpu | awk 'BEGIN {sum=0.0f} {sum+=$1} END {print sum}'
 }
@@ -21,22 +30,31 @@ ram() {
     read -r b c <<< $(grep -E '^(Buffers|Cached)' /proc/meminfo |awk '{print $2}' | tr '\n' ' ')
 
     PERCENT=$(echo "100 * ($t - $f - $c - $b) / $t" | bc)
-    echo "${PERCENT}%"
+    echo "${FG_HEADER}RAM:${FG_END} ${PERCENT}%"
 }
 
 diskusage() {
-    df -h ${1} | tail -n 1 | awk '{print $4}'
+    DISK_USAGE=$(df -h ${1} | tail -n 1 | awk '{print $4}')
+    echo "${FG_HEADER}D${2}:${FG_END} ${DISK_USAGE}"
 }
 
 battery() {
     BATT_INFO=$(upower -i /org/freedesktop/UPower/devices/battery_BAT0)
     PERCENT=$(echo -e "${BATT_INFO}" | grep -oP 'percentage: *\K[0-9]*%')
     STATE=$(echo -e "${BATT_INFO}" | grep -oP 'state: *\K.*')
-    TIME_TO_FULL=$(echo -e "${BATT_INFO}" | grep -oP 'time to full: *\K.*')
-    TIME_TO_EMPTY=$(echo -e "${BATT_INFO}" | grep -oP 'time to empty: *\K.*')
+    TIME_TO_FULL=$(echo -e "${BATT_INFO}" | grep -oP 'time to full: *\K.*' | sed 's/ hours/h/')
+    TIME_TO_EMPTY=$(echo -e "${BATT_INFO}" | grep -oP 'time to empty: *\K.*' | sed 's/ hours/h/')
     ENERGY_RATE=$(echo -e "${BATT_INFO}" | grep -oP 'energy-rate: *\K.*')
 
-    echo "${PERCENT} ${STATE} (${ENERGY_RATE} ${TIME_TO_FULL}${TIME_TO_EMPTY})"
+    if [ "${STATE}" == "charging" ]; then
+        INFO="${FG_ON}${PERCENT} (${ENERGY_RATE} ${TIME_TO_FULL})${FG_END}"
+    elif [ "${STATE}" == "discharging" ]; then
+        INFO="${PERCENT} (${ENERGY_RATE} ${TIME_TO_EMPTY})"
+    else
+        INFO="${PERCENT} ${STATE} (${ENERGY_RATE} ${TIME_TO_FULL}${TIME_TO_EMPTY})"
+    fi
+
+    echo "${FG_HEADER}BAT:${FG_END} ${INFO}"
 }
 
 brightness() {
@@ -48,34 +66,52 @@ volume() {
     VOLUME=$(amixer get Master)
     PERCENTAGE=$(echo -e "${VOLUME}" | grep -oP '[0-9]*%')
     if echo -e "${VOLUME}" | grep -q '\[off\]'; then
-        echo "${PERCENTAGE} (mute)"
+        INFO="${FG_INACTIVE}${PERCENTAGE}${FG_END}"
     else
-        echo "${PERCENTAGE}"
+        INFO="${PERCENTAGE}"
     fi
+
+    echo "${FG_HEADER}VOL:${FG_END} ${INFO}"
 }
 
 sticky_keys() {
-    xkbset q | grep -oP 'Sticky-Keys = \K.*'
+    STATE=$(xkbset q | grep -oP 'Sticky-Keys = \K.*')
+    if [ "${STATE}" == "On" ]; then
+        echo "${FG_ACTIVE}STK${FG_END}"
+    elif [ "${STATE}" == "Off" ]; then
+        echo "${FG_INACTIVE}STK${FG_END}"
+    else
+        echo "STK: ${STATE}"
+    fi
 }
 
 cpu_speed() {
     read -r a b c d <<< $(grep -oP 'cpu MHz[ \t]*:[ \t]*\K[0-9]*' /proc/cpuinfo | tr '\n' ' ')
-    # a=$(awk "BEGIN {printf ${a} / 100}")
-    # b=$(awk "BEGIN {printf ${b} / 100}")
-    # c=$(awk "BEGIN {printf ${c} / 100}")
-    # d=$(awk "BEGIN {printf ${d} / 100}")
     a=$((${a} / 100))
     b=$((${b} / 100))
     c=$((${c} / 100))
     d=$((${d} / 100))
+    e=$(( ( ${a} + ${b} + ${c} + ${d} ) / 4))
 
-    echo "${a} ${b} ${c} ${d}"
+    echo "${FG_HEADER}CPU:${FG_END} ${e}"
 }
 
 cpu_temps() {
-    # First one has decimal point temps
-    # sensors | grep -oP ': *\+\K[0-9.]*' | tr '\n' ' '
-    sensors | grep -oP ': *\+\K[0-9]*' | tr '\n' ' '
+    TEMPS=$(sensors | grep -oP 'Package id 0: *\+\K[0-9]*')
+    echo "${FG_HEADER}CTP:${FG_END} ${TEMPS}"
+}
+
+wifi() {
+    NET_DATA=$(nmcli -t device show wlp2s0)
+    NETWORK=$(printf "${NET_DATA}" | grep -oP 'GENERAL\.CONNECTION:\K.*' | sed 's/ [0-9]*$//')
+    CONNECTED=$(printf "${NET_DATA}" | grep -oP 'GENERAL\.STATE: *[0-9]* \(\K.*' | sed 's/)$//')
+    if [ "${CONNECTED}" == "connected" ]; then
+        INFO="${FG_ON}${NETWORK}${FG_END}"
+    else
+        INFO="${FG_OFF}${NETWORK}${FG_END}"
+    fi
+
+    echo "${FG_HEADER}NET:${FG_END} ${INFO}"
 }
 
 while sleep 1; do
@@ -105,20 +141,19 @@ while sleep 1; do
 
     # Right block
     right=""
-    right="${right}"
-    #right="${right}CPU: $(cpu)% | "
-    right="${right}CPU: $(cpu_speed) | "
-    right="${right}CTP: $(cpu_temps) | "
-    right="${right}DF/: $(diskusage /) | "
-    right="${right}RAM: $(ram) | "
-    right="${right}VOL: $(volume) | "
-    right="${right}BAT: $(battery) | "
-    right="${right}STK: $(sticky_keys) | "
-    # right="${right}BGT: $(brightness)% | "
-    right="${right}$(date '+%Y-%m-%d %H:%M:%S')"
+    right="${right}$(wifi)"
+    right="${right}${SEP}$(cpu_speed)"
+    right="${right}${SEP}$(cpu_temps)"
+    right="${right}${SEP}$(diskusage / 'F/')"
+    right="${right}${SEP}$(ram)"
+    right="${right}${SEP}$(volume)"
+    right="${right}${SEP}$(battery)"
+    right="${right}${SEP}$(sticky_keys)"
+    right="${right}${SEP}$(date '+%Y-%m-%d %H:%M:%S')"
 
     ## find the offset for the right block
-    width=$(dzen2-textwidth "${BAR_FONT}" "${right}")
+    bare_text=$(echo "${right}" | sed "s/\^[a-z][a-z]([A-Za-z0-9#]*)//g")
+    width=$(dzen2-textwidth "${BAR_FONT}" "${bare_text}")
     offset=$((${BAR_WIDTH} - ${width} - ${BAR_MARGIN}))
     #offset=$((${BAR_WIDTH} - ${width} + ${BAR_MARGIN}))
 
