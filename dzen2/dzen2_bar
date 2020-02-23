@@ -2,7 +2,7 @@
 
 i3c="${HOME}/.config/i3/i3c"
 
-#data_from i3c
+# Data from i3c
 BAR_X=$(${i3c} dzen2-bar-x ${1})
 BAR_WIDTH=$(${i3c} dzen2-bar-width ${1})
 
