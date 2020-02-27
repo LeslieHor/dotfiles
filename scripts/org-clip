@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo "* REVIEW $@ :clipped:" >> ~/projects/notes/todo.org
+echo "Clipped $@"
