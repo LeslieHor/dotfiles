@@ -16,8 +16,9 @@ USERNAME=$(printf "${PASSWORD_CONTENT}" | grep -oP 'user: \K.*$')
 if [[ ${1} == "type" ]]; then
     # Workaround for xdotool bug
     # https://github.com/jordansissel/xdotool/issues/49
+    KEYMAP=$(setxkbmap -query | grep -oP 'layout: *\K.*')
     setxkbmap us
-    setxkbmap gb
+    setxkbmap ${KEYMAP}
 
     if [[ ${2} == "pass" ]]; then
         xdotool type --clearmodifiers "${PASSWORD}"

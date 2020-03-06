@@ -155,16 +155,16 @@ bindsym $s2+l resize grow width 2 px or 2 ppt
 
 ## SYS-3
 
-bindsym $s3+1 move container to workspace 1
-bindsym $s3+2 move container to workspace 2
-bindsym $s3+3 move container to workspace 3
-bindsym $s3+4 move container to workspace 4
-bindsym $s3+5 move container to workspace 5
-bindsym $s3+6 move container to workspace 6
-bindsym $s3+7 move container to workspace 7
-bindsym $s3+8 move container to workspace 8
-bindsym $s3+9 move container to workspace 9
-bindsym $s3+0 move container to workspace 10
+bindsym $s3+1 move container to workspace number 1
+bindsym $s3+2 move container to workspace number 2
+bindsym $s3+3 move container to workspace number 3
+bindsym $s3+4 move container to workspace number 4
+bindsym $s3+5 move container to workspace number 5
+bindsym $s3+6 move container to workspace number 6
+bindsym $s3+7 move container to workspace number 7
+bindsym $s3+8 move container to workspace number 8
+bindsym $s3+9 move container to workspace number 9
+bindsym $s3+0 move container to workspace number 10
 bindsym $s3+f $popup frame ; mode "frame"
 bindsym $s3+h move left
 bindsym $s3+j move down
@@ -196,10 +196,3 @@ bindsym $mod+Shift+r restart
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
 
 exec_always --no-startup-id ~/.config/i3status/run_dzen2_bar
-
-# One Mix 3s
-exec --no-startup-id keynav
-
-exec xrandr -o left
-exec xinput set-prop "GXTP7386:00 27C6:0113" --type=float "Coordinate Transformation Matrix" 0 -1 1 1 0 0 0 0 1
-exec xinput set-prop "GXTP7386:00 27C6:0113 UNKNOWN" --type=float "Coordinate Transformation Matrix" 0 -1 1 1 0 0 0 0 1
