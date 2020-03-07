@@ -2,7 +2,7 @@
 
 i3c="${HOME}/.config/i3/i3c"
 
-#data_from i3c
+# Data from i3c
 BAR_X=$(${i3c} dzen2-bar-x ${1})
 BAR_WIDTH=$(${i3c} dzen2-bar-width ${1})
 
@@ -155,7 +155,6 @@ while sleep 1; do
     bare_text=$(echo "${right}" | sed "s/\^[a-z][a-z]([A-Za-z0-9#]*)//g")
     width=$(dzen2-textwidth "${BAR_FONT}" "${bare_text}")
     offset=$((${BAR_WIDTH} - ${width} - ${BAR_MARGIN}))
-    #offset=$((${BAR_WIDTH} - ${width} + ${BAR_MARGIN}))
 
     # Correct percentage signs
     right=$(echo ${right} | sed 's/%/%%/g')
