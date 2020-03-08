@@ -178,9 +178,7 @@ bindsym $s3+period exec $i3c swap-workspace-right
 ## SYS-4
 
 bindsym $s4+p $popup pass ; mode "pass"
-bindsym $s4+n scratchpad show
-bindsym $s4+m move scratchpad
-bindsym $s4+c floating toggle
+bindsym $s4+n exec org-clip --dmenu
 
 # toggle tiling / floating
 # bindsym $mod+Shift+space floating toggle

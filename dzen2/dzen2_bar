@@ -124,6 +124,7 @@ workspaces() {
     for WS in $(${i3c} bar-workspaces ${1}); do
         INDICATOR=${WS:0:1}
         NAME=${WS:1}
+        WS_NUM=${NAME:0:1}
         if [[ "${INDICATOR}" == "A" ]]; then
             BG=${BG_WS_ACTIVE}
         elif [[ "${INDICATOR}" == "V" ]]; then
@@ -132,7 +133,8 @@ workspaces() {
             BG=${BG_WS_HIDDEN}
         fi
 
-        WORKSPACES="${WORKSPACES} ${BG} ${NAME} ${BG_END}"
+        CLICK_TARGET="^ca(1, ${i3c} focus-workspace ${WS_NUM})"
+        WORKSPACES="${WORKSPACES} ${BG}${CLICK_TARGET} ${NAME} ^ca()${BG_END}"
     done
 
     echo "${WORKSPACES}"
