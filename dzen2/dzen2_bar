@@ -124,7 +124,7 @@ workspaces() {
     for WS in $(${i3c} bar-workspaces ${1}); do
         INDICATOR=${WS:0:1}
         NAME=${WS:1}
-        WS_NUM=${NAME:0:1}
+        WS_NUM=$(echo ${NAME} | grep -oP '^[0-9]*')
         if [[ "${INDICATOR}" == "A" ]]; then
             BG=${BG_WS_ACTIVE}
         elif [[ "${INDICATOR}" == "V" ]]; then
