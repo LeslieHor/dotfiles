@@ -42,17 +42,10 @@ set $exit exec ~/.config/i3/keybind_popup ; mode "default"
 ### default
 set $mod Mod4
 
-### Ergo
-set $s1 Mod1+Mod4
-set $s2 Control+Shift+Mod4
-set $s3 Control+Mod1+Mod4
-set $s4 Shift+Mod1+Mod4
-
-### Standard
-# set $s1 Mod4
-# set $s2 Mod1+Mod4
-# set $s3 Shift+Mod4
-# set $s4 Control+Mod4
+set $s1 Mod4
+set $s2 Mod1+Mod4
+set $s3 Shift+Mod4
+set $s4 Control+Mod4
 
 # Key tables
 
@@ -110,8 +103,8 @@ bindsym --release button2 kill
 
 # Keybindings
 
-bindsym Mod4+l exec i3lock -fc 222222
-bindsym Control+Shift+Mod1+Mod4+space exec i3-sensible-terminal
+bindsym Mod4+BackSpace exec i3lock -fc 222222
+bindsym Mod4+space exec i3-sensible-terminal
 
 bindsym XF86MonBrightnessUp exec ~/.config/i3/brightness-up
 bindsym XF86MonBrightnessDown exec ~/.config/i3/brightness-down
@@ -181,14 +174,6 @@ bindsym $s3+period exec $i3c swap-workspace-right
 bindsym $s4+p $popup pass ; mode "pass"
 bindsym $s4+n exec org-clip --dmenu
 
-# toggle tiling / floating
-# bindsym $mod+Shift+space floating toggle
-
-# change focus between tiling / floating windows
-# bindsym $mod+space focus mode_toggle
-
-# reload the configuration file
-bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
 # exit i3 (logs you out of your X session)
