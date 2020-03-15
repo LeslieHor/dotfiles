@@ -377,15 +377,7 @@ class I3C:
         output = outputs[i]
         print(output['rect']['width'])
 
-    def dzen2_format_fg(self, colour, string):
-        colour = '^fg(#%s)' % colour
-        return '%s%s%s' % (colour, string, '^fg()')
-
-    def dzen2_format_bg(self, colour, string):
-        colour = '^bg(#%s)' % colour
-        return '%s%s%s' % (colour, string, '^bg()')
-
-    def dzen2_bar_workspaces(self, i):
+    def bar_workspaces(self, i):
         outputs = self.get_outputs()
         outputs = filter(lambda o: o['active'], outputs)
         outputs = sorted(outputs, key=lambda d: d['rect']['x'])
@@ -400,24 +392,24 @@ class I3C:
         for ws in workspaces:
             ws_string = ''
 
-            ws_name = ' %s ' % ws['name']
+            ws_name = '%s' % ws['name']
             if ws['name'] == current_workspace:
-                ws_string += self.dzen2_format_bg("006600", ws_name)
+                ws_string += 'A%s' % ws_name
             elif ws['visible']:
-                ws_string += self.dzen2_format_bg("114400", ws_name)
+                ws_string += 'V%s' % ws_name
             else:
-                ws_string += self.dzen2_format_bg("444444", ws_name)
+                ws_string += 'H%s' % ws_name
 
             ws_strings.append(ws_string)
 
-        ws_string = ' '.join(ws_strings)
+        ws_string = '\t'.join(ws_strings)
         print(ws_string)
 
-    def dzen2_active_display(self):
+    def active_display(self):
         workspace = filter(lambda w: w['focused'], self.get_workspaces())[0]
         active_display = workspace['output']
         displays = self.get_displays()
-        print displays.index(active_display) + 1
+        print displays.index(active_display)
 
     def rename_workspace(self, name):
         workspace = filter(lambda w: w['focused'], self.get_workspaces())[0]
@@ -509,10 +501,10 @@ elif command == 'dzen2-bar-x':
     i3c.dzen2_bar_x(int(sys.argv[2]))
 elif command == 'dzen2-bar-width':
     i3c.dzen2_bar_width(int(sys.argv[2]))
-elif command == 'dzen2-bar-workspaces':
-    i3c.dzen2_bar_workspaces(int(sys.argv[2]))
-elif command == 'dzen2-active-display':
-    i3c.dzen2_active_display()
+elif command == 'bar-workspaces':
+    i3c.bar_workspaces(int(sys.argv[2]))
+elif command == 'active-display':
+    i3c.active_display()
 elif command == 'debug':
     i3c.get_displays()
     print i3c.displays

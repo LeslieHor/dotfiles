@@ -2,7 +2,7 @@
 
 i3c="${HOME}/.config/i3/i3c"
 
-#data_from i3c
+# Data from i3c
 BAR_X=$(${i3c} dzen2-bar-x ${1})
 BAR_WIDTH=$(${i3c} dzen2-bar-width ${1})
 
@@ -11,6 +11,19 @@ BAR_FG="#ffffff"
 BAR_BG="#222222"
 BAR_BG_ACTIVE="#228822"
 BAR_MARGIN=10
+BG_WS_ACTIVE="^bg(#006600)"
+BG_WS_VISIBLE="^bg(#114400)"
+BG_WS_HIDDEN="^bg(#444444)"
+BG_END="^bg()"
+
+FG_END="^fg()"
+FG_ON="^fg(#00FF00)"
+FG_OFF="^fg(#FF0000)"
+FG_ACTIVE="^fg(#00FF00)"
+FG_INACTIVE="^fg(#999999)"
+FG_HEADER="^fg(#999999)"
+
+SEP="^fg(#555555) | ^fg()"
 
 cpu() {
     ps -eo pcpu | awk 'BEGIN {sum=0.0f} {sum+=$1} END {print sum}'
@@ -20,23 +33,124 @@ ram() {
     read -r t f <<< $(grep -E 'Mem(Total|Free)' /proc/meminfo |awk '{print $2}' | tr '\n' ' ')
     read -r b c <<< $(grep -E '^(Buffers|Cached)' /proc/meminfo |awk '{print $2}' | tr '\n' ' ')
 
-    echo "100 * ($t - $f - $c - $b) / $t" | bc
+    PERCENT=$(echo "100 * ($t - $f - $c - $b) / $t" | bc)
+    echo "${FG_HEADER}RAM:${FG_END} ${PERCENT}%"
 }
 
 diskusage() {
-    df ${1} | tail -n 1 | awk '{print $5}'
+    DISK_USAGE=$(df -h ${1} | tail -n 1 | awk '{print $4}')
+    echo "${FG_HEADER}D${2}:${FG_END} ${DISK_USAGE}"
+}
+
+battery() {
+    BATT_INFO=$(upower -i /org/freedesktop/UPower/devices/battery_BAT0)
+    PERCENT=$(echo -e "${BATT_INFO}" | grep -oP 'percentage: *\K[0-9]*%')
+    STATE=$(echo -e "${BATT_INFO}" | grep -oP 'state: *\K.*')
+    TIME_TO_FULL=$(echo -e "${BATT_INFO}" | grep -oP 'time to full: *\K.*' | sed 's/ hours/h/')
+    TIME_TO_EMPTY=$(echo -e "${BATT_INFO}" | grep -oP 'time to empty: *\K.*' | sed 's/ hours/h/')
+    ENERGY_RATE=$(echo -e "${BATT_INFO}" | grep -oP 'energy-rate: *\K.*')
+
+    if [ "${STATE}" == "charging" ]; then
+        INFO="${FG_ON}${PERCENT} (${ENERGY_RATE} ${TIME_TO_FULL})${FG_END}"
+    elif [ "${STATE}" == "discharging" ]; then
+        INFO="${PERCENT} (${ENERGY_RATE} ${TIME_TO_EMPTY})"
+    else
+        INFO="${PERCENT} ${STATE} (${ENERGY_RATE} ${TIME_TO_FULL}${TIME_TO_EMPTY})"
+    fi
+
+    echo "${FG_HEADER}BAT:${FG_END} ${INFO}"
+}
+
+brightness() {
+    BRIGHTNESS=$(xrandr --verbose | grep eDP-1 -A 10 | grep -oP 'Brightness: \K[0-9]*\.[0-9]*')
+    echo "${BRIGHTNESS} * 100" | bc | grep -oP "^[0-9]*"
+}
+
+volume() {
+    VOLUME=$(amixer get Master)
+    PERCENTAGE=$(echo -e "${VOLUME}" | grep -oP '[0-9]*%')
+    if echo -e "${VOLUME}" | grep -q '\[off\]'; then
+        INFO="${FG_INACTIVE}${PERCENTAGE}${FG_END}"
+    else
+        INFO="${PERCENTAGE}"
+    fi
+
+    echo "${FG_HEADER}VOL:${FG_END} ${INFO}"
+}
+
+sticky_keys() {
+    STATE=$(xkbset q | grep -oP 'Sticky-Keys = \K.*')
+    if [ "${STATE}" == "On" ]; then
+        echo "${FG_ACTIVE}STK${FG_END}"
+    elif [ "${STATE}" == "Off" ]; then
+        echo "${FG_INACTIVE}STK${FG_END}"
+    else
+        echo "STK: ${STATE}"
+    fi
+}
+
+cpu_speed() {
+    read -r a b c d <<< $(grep -oP 'cpu MHz[ \t]*:[ \t]*\K[0-9]*' /proc/cpuinfo | tr '\n' ' ')
+    a=$((${a} / 100))
+    b=$((${b} / 100))
+    c=$((${c} / 100))
+    d=$((${d} / 100))
+    e=$(( ( ${a} + ${b} + ${c} + ${d} ) / 4))
+
+    echo "${FG_HEADER}CPU:${FG_END} ${e}"
+}
+
+cpu_temps() {
+    TEMPS=$(sensors | grep -oP 'Package id 0: *\+\K[0-9]*')
+    echo "${FG_HEADER}CTP:${FG_END} ${TEMPS}"
+}
+
+wifi() {
+    NET_DATA=$(nmcli -t device show wlp2s0)
+    NETWORK=$(printf "${NET_DATA}" | grep -oP 'GENERAL\.CONNECTION:\K.*' | sed 's/ [0-9]*$//')
+    CONNECTED=$(printf "${NET_DATA}" | grep -oP 'GENERAL\.STATE: *[0-9]* \(\K.*' | sed 's/)$//')
+    if [ "${CONNECTED}" == "connected" ]; then
+        INFO="${FG_ON}${NETWORK}${FG_END}"
+    else
+        INFO="${FG_OFF}${NETWORK}${FG_END}"
+    fi
+
+    echo "${FG_HEADER}NET:${FG_END} ${INFO}"
+}
+
+workspaces() {
+    WORKSPACES=""
+    IFS=$'\t'
+    for WS in $(${i3c} bar-workspaces ${1}); do
+        INDICATOR=${WS:0:1}
+        NAME=${WS:1}
+        WS_NUM=$(echo ${NAME} | grep -oP '^[0-9]*')
+        if [[ "${INDICATOR}" == "A" ]]; then
+            BG=${BG_WS_ACTIVE}
+        elif [[ "${INDICATOR}" == "V" ]]; then
+            BG=${BG_WS_VISIBLE}
+        elif [[ "${INDICATOR}" == "H" ]]; then
+            BG=${BG_WS_HIDDEN}
+        fi
+
+        CLICK_TARGET="^ca(1, ${i3c} focus-workspace ${WS_NUM})"
+        WORKSPACES="${WORKSPACES} ${BG}${CLICK_TARGET} ${NAME} ^ca()${BG_END}"
+    done
+
+    echo "${WORKSPACES}"
+}
+
+active_display() {
+    active_display=$(${i3c} active-display)
+    if [ ${active_display} == ${1} ]; then
+        echo "ACTIVE"
+    fi
 }
 
 while sleep 1; do
-    # TODO: Finish this
-    active_display=$(${i3c} dzen2-active-display)
-    if [ ${active_display} == ${1} ]; then
-        BACKGROUND=${BAR_BG_ACTIVE}
-    fi
-
     # Left block
     left=""
-    left="${left}$(${i3c} dzen2-bar-workspaces ${1})"
+    left="${left}$(workspaces ${1})"
 
     ## add margin for left side
     printf "^pa(${BAR_MARGIN})"
@@ -44,7 +158,7 @@ while sleep 1; do
 
     # Centre block
     centre=""
-    centre="${centre}"
+    centre="${centre}$(active_display ${1})"
 
     ## find the offset for the centre block
     width=$(dzen2-textwidth "${BAR_FONT}" "${centre}")
@@ -54,15 +168,19 @@ while sleep 1; do
 
     # Right block
     right=""
-    right="${right}"
-    #right="${right}CPU: $(cpu)% | "
-    right="${right}D/: $(diskusage /) | "
-    right="${right}D/S: $(diskusage /media/leslie/slave/) | "
-    right="${right}RAM: $(ram)% | "
-    right="${right}$(date '+%Y-%m-%d %H:%M:%S')"
+    if [ "${1}" == 0 ]; then
+        right="${right}${SEP}$(cpu_speed)"
+        right="${right}${SEP}$(cpu_temps)"
+        right="${right}${SEP}$(diskusage / 'F/')"
+        right="${right}${SEP}$(diskusage /media/leslie/slave/ 'S/')"
+        right="${right}${SEP}$(ram)"
+        right="${right}${SEP}$(sticky_keys)"
+    fi
+    right="${right}${SEP}$(date '+%Y-%m-%d %H:%M:%S')"
 
     ## find the offset for the right block
-    width=$(dzen2-textwidth "${BAR_FONT}" "${right}")
+    bare_text=$(echo "${right}" | sed "s/\^[a-z][a-z]([A-Za-z0-9#]*)//g")
+    width=$(dzen2-textwidth "${BAR_FONT}" "${bare_text}")
     offset=$((${BAR_WIDTH} - ${width} - ${BAR_MARGIN}))
 
     # Correct percentage signs

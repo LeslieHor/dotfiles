@@ -5,8 +5,8 @@
 # Settings
 
 # Font
-font pango:monospace 8
-#font pango:DejaVu Sans Mono 8
+#font pango:monospace 8
+font pango:Liberation Mono 7
 
 ## All workspaces start in tabbed layout
 workspace_layout tabbed
@@ -30,20 +30,22 @@ set $i3c ~/.config/i3/i3c
 set $popup exec ~/.config/i3/keybind_popup
 set $exit exec ~/.config/i3/keybind_popup ; mode "default"
 
+### Key aliases
+#
+# |    | Ergo                    | Standard        |
+# |----+-------------------------+-----------------|
+# | S1 | Meta + Hyper            | Hyper           |
+# | S2 | Control + Shift + Hyper | Meta + Hyper    |
+# | S3 | Control + Meta + Hyper  | Shift + Hyper   |
+# | S4 | Shift + Meta + Hyper    | Control + Hyper |
+
 ### default
 set $mod Mod4
 
-### Meta + Hyper
 set $s1 Mod4
-
-### Control + Shift + Hyper
-set $s2 Mod4+Mod1
-
-### Control + Meta + Hyper
-set $s3 Mod4+Shift
-
-### Shift + Meta + Hyper
-set $s4 Mod4+Control
+set $s2 Mod1+Mod4
+set $s3 Shift+Mod4
+set $s4 Control+Mod4
 
 # Key tables
 
@@ -88,8 +90,8 @@ mode "pass" {
     bindsym u exec passmenu type user ; $exit
     bindsym p exec passmenu type pass ; $exit
     bindsym b exec passmenu type both ; $exit
-    bindsym U exec passmenu copy user ; $exit
-    bindsym P exec passmenu copy pass ; $exit
+    bindsym Shift+u exec passmenu copy user ; $exit
+    bindsym Shift+p exec passmenu copy pass ; $exit
 
     bindsym Escape $exit
 }
@@ -101,7 +103,7 @@ bindsym --release button2 kill
 
 # Keybindings
 
-bindsym Mod4+Mod1+Shift+l exec i3lock -fc 222222
+bindsym Mod4+BackSpace exec i3lock -fc 222222
 bindsym Mod4+space exec i3-sensible-terminal
 
 bindsym XF86MonBrightnessUp exec ~/.config/i3/brightness-up
@@ -129,6 +131,7 @@ bindsym $s1+k exec $i3c focus-up
 bindsym $s1+l exec $i3c focus-right
 
 bindsym $s1+q kill
+bindsym $s1+c move container to workspace hidden
 bindsym $s1+b $popup buffer ; mode "buffer"
 bindsym $s1+o $popup applications ; mode "applications"
 bindsym $s1+w $popup window ; mode "window"
@@ -146,16 +149,16 @@ bindsym $s2+l resize grow width 2 px or 2 ppt
 
 ## SYS-3
 
-bindsym $s3+1 move container to workspace 1
-bindsym $s3+2 move container to workspace 2
-bindsym $s3+3 move container to workspace 3
-bindsym $s3+4 move container to workspace 4
-bindsym $s3+5 move container to workspace 5
-bindsym $s3+6 move container to workspace 6
-bindsym $s3+7 move container to workspace 7
-bindsym $s3+8 move container to workspace 8
-bindsym $s3+9 move container to workspace 9
-bindsym $s3+0 move container to workspace 10
+bindsym $s3+1 move container to workspace number 1
+bindsym $s3+2 move container to workspace number 2
+bindsym $s3+3 move container to workspace number 3
+bindsym $s3+4 move container to workspace number 4
+bindsym $s3+5 move container to workspace number 5
+bindsym $s3+6 move container to workspace number 6
+bindsym $s3+7 move container to workspace number 7
+bindsym $s3+8 move container to workspace number 8
+bindsym $s3+9 move container to workspace number 9
+bindsym $s3+0 move container to workspace number 10
 bindsym $s3+f $popup frame ; mode "frame"
 bindsym $s3+h move left
 bindsym $s3+j move down
@@ -169,18 +172,8 @@ bindsym $s3+period exec $i3c swap-workspace-right
 ## SYS-4
 
 bindsym $s4+p $popup pass ; mode "pass"
-bindsym $s4+n scratchpad show
-bindsym $s4+m move scratchpad
-bindsym $s4+c floating toggle
+bindsym $s4+n exec org-clip --dmenu
 
-# toggle tiling / floating
-# bindsym $mod+Shift+space floating toggle
-
-# change focus between tiling / floating windows
-# bindsym $mod+space focus mode_toggle
-
-# reload the configuration file
-bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
 # exit i3 (logs you out of your X session)

@@ -7,6 +7,7 @@
 bind q tabclose
 bind d scrollpage 0.5
 bind u scrollpage -0.5
+bind I mode ignore
 
 " Allow youtube keys
 unbindurl youtube.com/watch/* a

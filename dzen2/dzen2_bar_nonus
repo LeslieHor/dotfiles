@@ -2,7 +2,7 @@
 
 i3c="${HOME}/.config/i3/i3c"
 
-#data_from i3c
+# Data from i3c
 BAR_X=$(${i3c} dzen2-bar-x ${1})
 BAR_WIDTH=$(${i3c} dzen2-bar-width ${1})
 
@@ -138,16 +138,39 @@ wifi() {
     echo "${FG_HEADER}NET:${FG_END} ${INFO}"
 }
 
-while sleep 1; do
-    # TODO: Finish this
-    active_display=$(${i3c} dzen2-active-display)
-    if [ ${active_display} == ${1} ]; then
-        BACKGROUND=${BAR_BG_ACTIVE}
-    fi
+workspaces() {
+    WORKSPACES=""
+    IFS=$'\t'
+    for WS in $(${i3c} bar-workspaces ${1}); do
+        INDICATOR=${WS:0:1}
+        NAME=${WS:1}
+        WS_NUM=$(echo ${NAME} | grep -oP '^[0-9]*')
+        if [[ "${INDICATOR}" == "A" ]]; then
+            BG=${BG_WS_ACTIVE}
+        elif [[ "${INDICATOR}" == "V" ]]; then
+            BG=${BG_WS_VISIBLE}
+        elif [[ "${INDICATOR}" == "H" ]]; then
+            BG=${BG_WS_HIDDEN}
+        fi
 
+        CLICK_TARGET="^ca(1, ${i3c} focus-workspace ${WS_NUM})"
+        WORKSPACES="${WORKSPACES} ${BG}${CLICK_TARGET} ${NAME} ^ca()${BG_END}"
+    done
+
+    echo "${WORKSPACES}"
+}
+
+active_display() {
+    active_display=$(${i3c} active-display)
+    if [ ${active_display} == ${1} ]; then
+        echo "ACTIVE"
+    fi
+}
+
+while sleep 1; do
     # Left block
     left=""
-    left="${left}$(${i3c} dzen2-bar-workspaces ${1})"
+    left="${left}$(workspaces ${1})"
 
     ## add margin for left side
     printf "^pa(${BAR_MARGIN})"
@@ -155,7 +178,7 @@ while sleep 1; do
 
     # Centre block
     centre=""
-    centre="${centre}"
+    centre="${centre}$(active_display ${1})"
 
     ## find the offset for the centre block
     width=$(dzen2-textwidth "${BAR_FONT}" "${centre}")
