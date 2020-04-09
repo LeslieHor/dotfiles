@@ -5,7 +5,6 @@
 # Settings
 
 # Font
-#font pango:monospace 8
 font pango:Liberation Mono 7
 
 ## All workspaces start in tabbed layout
@@ -173,6 +172,9 @@ bindsym $s3+period exec $i3c swap-workspace-right
 
 bindsym $s4+p $popup pass ; mode "pass"
 bindsym $s4+n exec org-clip --dmenu
+bindsym $s4+t scratchpad show
+bindsym $s4+r move scratchpad
+bindsym $s4+a [class="Emacs"] scratchpad show
 
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
