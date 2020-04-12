@@ -13,5 +13,5 @@ if [[ -z "${ITEM}" ]]; then
     exit 1
 fi
 
-echo "* ${ITEM}" >> ~/projects/notes/inbox.org
+echo "* ${ITEM}" >> ~/pims/inbox.org
 echo "Clipped ${ITEM}"

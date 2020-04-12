@@ -9,9 +9,8 @@ PASSWORD_FILES=$(find ${PASSWORD_DIR} -name "*.gpg" | sed "s%^${PASSWORD_DIR}\(.
 PASSWORD_FILE=$(printf "${PASSWORD_FILES}" | dmenu -i -fn "terminus-8" -p "Pass")
 [ -z "${PASSWORD_FILE}" ] && exit 0
 
-PASSWORD_CONTENT=$(pass show ${PASSWORD_FILE})
-PASSWORD=$(printf "${PASSWORD_CONTENT}" | awk 'NR==1')
-USERNAME=$(printf "${PASSWORD_CONTENT}" | grep -oP 'user: \K.*$')
+PASSWORD=$(pass show ${PASSWORD_FILE} | awk 'NR==1')
+USERNAME=$(pass show ${PASSWORD_FILE} | grep -oP 'user: \K.*$')
 
 if [[ ${1} == "type" ]]; then
     # Workaround for xdotool bug
