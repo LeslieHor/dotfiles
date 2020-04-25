@@ -44,6 +44,18 @@ unbind --mode=ex <C-a>
 unbind --mode=ex <C-c>
 
 " ------------------------------------------------------------------------------
+" Custom Commands
+" ------------------------------------------------------------------------------
+
+" Evaluates to: $ ril <CURRENT_URL>
+" Adds to read it later rss feed
+command ril composite get_current_url | exclaim ril
+
+" Evaluates to: $ clip <CURRENT_URL>
+" Adds to org inbox
+command clip composite get_current_url | exclaim clip
+
+" ------------------------------------------------------------------------------
 " Misc settings
 " ------------------------------------------------------------------------------
 

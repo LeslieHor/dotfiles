@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+i3c="${HOME}/.config/i3/i3c"
+
 PID_FILE="${HOME}/.config/i3/mini_popup.pid"
 
 if [ -f ${PID_FILE} ]; then
@@ -10,13 +12,15 @@ if [ -f ${PID_FILE} ]; then
     rm ${PID_FILE}
 fi
 
-WIDTH=1920
-FONT_WIDTH=319
-X=1920
 FONT="-*-terminus-*-*-*-*-12-*-*-*-*-*-*-*"
 FG='#FFFFFF'
 BG='#222222'
 DELAY=0.5
+
+ACTIVE_DISPLAY=$(${i3c} active-display)
+X=$(${i3c} dzen2-bar-x ${ACTIVE_DISPLAY})
+WIDTH=$(${i3c} dzen2-bar-width ${ACTIVE_DISPLAY})
+FONT_WIDTH=$(( ${WIDTH} / $(dzen2-textwidth ${FONT} ".") - 1 ))
 
 if [ -z ${1} ]; then
     echo "default" | dzen2 -p 1\
