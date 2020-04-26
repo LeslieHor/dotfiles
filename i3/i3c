@@ -352,7 +352,6 @@ class I3C:
         call('i3-msg mark paste-target')
         call(['i3-msg', '[con_mark="', mark, '"]',
               'move container to mark', 'paste-target'])
-        paste_target = '[con_mark="paste-target"]'
         call(['i3-msg', '[con_mark="', mark, '"]', 'focus'])
         call('i3-msg unmark paste-target')
         call(['i3-msg unmark', mark])
