@@ -72,6 +72,16 @@ mode "buffer" {
     bindsym p exec $i3c buffer-paste ; $exit
     bindsym j exec $i3c jump-to-window ; $exit
     bindsym b exec $i3c bring-window ; $exit
+    bindsym c $popup cast-buffer ; mode "cast-buffer"
+
+    bindsym Escape $exit
+}
+
+mode "cast-buffer" {
+    bindsym h exec $i3c cast-buffer-left ; $exit
+    bindsym j exec $i3c cast-buffer-down ; $exit
+    bindsym k exec $i3c cast-buffer-up ; $exit
+    bindsym l exec $i3c cast-buffer-right ; $exit
 
     bindsym Escape $exit
 }

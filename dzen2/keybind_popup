@@ -16,7 +16,8 @@ elif [ "${1}" == "buffer" ]; then
     TEXT="y - buffer yank
 p - buffer paste
 j - jump to window
-b - bring window"
+b - bring window
+c - cast buffer"
 
 elif [ "${1}" == "frame" ]; then
     TITLE="frame"
@@ -37,6 +38,12 @@ p - type pass
 b - type user and pass
 U - copy user
 P - copy pass"
+elif [ "${1}" == "cast-buffer" ]; then
+    TITLE="cast buffer"
+    TEXT="h - cast buffer left
+j - cast buffer down
+k - cast buffer up
+l - cast buffer right"
 
 
 fi

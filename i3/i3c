@@ -345,17 +345,17 @@ class I3C:
             call(['i3-msg split', other_direction])
             call('i3-msg layout tabbed')
 
-    def buffer_yank(self):
-        call(['i3-msg mark window-buffer'])
+    def buffer_yank(self, mark='window-buffer'):
+        call(['i3-msg mark', mark])
 
-    def buffer_paste(self):
+    def buffer_paste(self, mark='window-buffer'):
         call('i3-msg mark paste-target')
-        call(['i3-msg', '[con_mark="window-buffer"]',
+        call(['i3-msg', '[con_mark="', mark, '"]',
               'move container to mark', 'paste-target'])
         paste_target = '[con_mark="paste-target"]'
-        call(['i3-msg', '[con_mark="window-buffer"]', 'focus'])
+        call(['i3-msg', '[con_mark="', mark, '"]', 'focus'])
         call('i3-msg unmark paste-target')
-        call('i3-msg unmark window-buffer')
+        call(['i3-msg unmark', mark])
 
     def get_output_nums(self):
         outputs = self.get_outputs()
@@ -450,6 +450,21 @@ class I3C:
         call('i3-msg unmark target')
         call(['i3-msg', window_str, 'focus'])
 
+    def cast_buffer(self, direction):
+        self.buffer_yank('cast-buffer')
+
+        if direction == 'left':
+            self.focus_left()
+        elif direction == 'down':
+            self.focus_down()
+        elif direction == 'up':
+            self.focus_up()
+        elif direction == 'right':
+            self.focus_right()
+
+        self.buffer_paste('cast-buffer')
+
+
 if len(sys.argv) <= 0:
     exit(1)
 
@@ -494,6 +509,14 @@ elif command == 'jump-to-window':
     i3c.jump_to_window()
 elif command == 'bring-window':
     i3c.bring_window()
+elif command == 'cast-buffer-left':
+    i3c.cast_buffer('left')
+elif command == 'cast-buffer-down':
+    i3c.cast_buffer('down')
+elif command == 'cast-buffer-up':
+    i3c.cast_buffer('up')
+elif command == 'cast-buffer-right':
+    i3c.cast_buffer('right')
 
 elif command == 'get-output-nums':
     i3c.get_output_nums()
