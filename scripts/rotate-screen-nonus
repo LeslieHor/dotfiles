@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+## Screen is mounted 90 degrees anti-clockwise
+
+case ${1} in
+    90)
+        DIRECTION=normal
+        MATRIX='1 0 0 0 1 0 0 0 1'
+        ;;
+    270)
+        DIRECTION=inverted
+        MATRIX='-1 0 1 0 -1 1 0 0 1'
+        ;;
+    180)
+        DIRECTION=right
+        MATRIX='0 1 0 -1 0 1 0 0 1'
+        ;;
+    *)
+        DIRECTION=left
+        MATRIX='0 -1 1 1 0 0 0 0 1'
+        ;;
+esac
+
+
+xrandr -o ${DIRECTION}
+xinput set-prop "GXTP7386:00 27C6:0113" --type=float "Coordinate Transformation Matrix" ${MATRIX}
+xinput set-prop "GXTP7386:00 27C6:0113 UNKNOWN" --type=float "Coordinate Transformation Matrix" ${MATRIX}
+
+. ~/.config/i3status/run_dzen2_bar

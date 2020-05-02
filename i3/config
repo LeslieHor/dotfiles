@@ -183,9 +183,5 @@ exec_always --no-startup-id ~/.config/i3status/run_dzen2_bar
 
 # One Mix 3s
 exec --no-startup-id keynav
-
-exec xrandr -o left
-exec xinput set-prop "GXTP7386:00 27C6:0113" --type=float "Coordinate Transformation Matrix" 0 -1 1 1 0 0 0 0 1
-exec xinput set-prop "GXTP7386:00 27C6:0113 UNKNOWN" --type=float "Coordinate Transformation Matrix" 0 -1 1 1 0 0 0 0 1
-
+exec rotate-screen
 exec setxkbmap -option caps:none
