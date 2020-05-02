@@ -106,7 +106,7 @@ mode "pass" {
 
 mode "utils" {
     bindsym d exec echo " DISABLED (S1-F11 to return)" > ~/.config/i3/i3_keys_disabled_status ; exec ~/.config/i3/keybind_popup ; mode "disabled"
-    bindsym r restart
+    bindsym r exec ~/.config/i3/keybind_popup ; mode "default" ; restart
     bindsym l exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
 
     bindsym Escape $exit

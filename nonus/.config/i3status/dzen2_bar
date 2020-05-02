@@ -7,6 +7,11 @@ BAR_X=$(${i3c} dzen2-bar-x ${1})
 BAR_WIDTH=$(${i3c} dzen2-bar-width ${1})
 
 BAR_FONT="-*-terminus-*-*-*-*-24-*-*-*-*-*-*-*"
+CPU_SPEED_WARN=10
+CPU_SPEED_ALERT=20
+CPU_TEMP_WARN=40
+CPU_TEMP_ALERT=50
+
 BAR_FG="#ffffff"
 BAR_BG="#222222"
 BAR_BG_ACTIVE="#228822"
@@ -106,9 +111,9 @@ cpu_speed() {
     d=$((${d} / 100))
     e=$(( ( ${a} + ${b} + ${c} + ${d} ) / 4))
 
-    if [ "${e}" -lt 10 ]; then
+    if [ "${e}" -lt "${CPU_SPEED_WARN}" ]; then
         INFO="${FG_OK}${e}${FG_END}"
-    elif [ "${e}" -lt 20 ]; then
+    elif [ "${e}" -lt "${CPU_SPEED_ALERT}" ]; then
         INFO="${FG_WARN}${e}${FG_END}"
     else
         INFO="${FG_ALERT}${e}${FG_END}"
@@ -120,9 +125,9 @@ cpu_speed() {
 cpu_temps() {
     TEMP=$(sensors | grep -oP 'Package id 0: *\+\K[0-9]*')
 
-    if [ "${TEMP}" -lt 40 ]; then
+    if [ "${TEMP}" -lt "${CPU_TEMP_WARN}" ]; then
         echo "${FG_HEADER}CTP:${FG_END} ${FG_OK}${TEMP}${FG_END}"
-    elif [ "${TEMP}" -lt 50 ]; then
+    elif [ "${TEMP}" -lt "${CPU_TEMP_ALERT}" ]; then
         echo "${FG_HEADER}CTP:${FG_END} ${FG_WARN}${TEMP}${FG_END}"
     else
         echo "${FG_HEADER}CTP:${FG_END} ${FG_ALERT}${TEMP}${FG_END}"
