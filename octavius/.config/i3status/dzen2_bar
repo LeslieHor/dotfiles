@@ -147,6 +147,10 @@ active_display() {
     fi
 }
 
+i3_keys_disabled() {
+    cat ~/.config/i3/i3_keys_disabled_status
+}
+
 while sleep 1; do
     # Left block
     left=""
@@ -159,6 +163,7 @@ while sleep 1; do
     # Centre block
     centre=""
     centre="${centre}$(active_display ${1})"
+    centre="${centre}$(i3_keys_disabled)"
 
     ## find the offset for the centre block
     width=$(dzen2-textwidth "${BAR_FONT}" "${centre}")
