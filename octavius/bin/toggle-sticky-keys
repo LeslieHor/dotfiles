@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+STATUS=$(xkbset q | grep -oP 'Sticky-Keys = \K.*')
+
+if [ "${STATUS}" == "Off" ]; then
+    xkbset sticky -twokey -latchlock
+else
+    xkbset -sticky
+fi

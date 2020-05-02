@@ -1,0 +1,14 @@
+#!/bin/bash
+
+DEVICE_NAME='ELECOM TrackBall Mouse DEFT Pro TrackBall'
+PROP_NAME='libinput Accel Speed'
+SETTING='-0.8'
+
+ID=$(xinput list | grep "${DEVICE_NAME}" | grep 'pointer' | grep -oP "id=\K[0-9]*")
+#xinput set-button-map ${ID} 1 2 3 4 5 6 7 8 9 10 11 12 # Defaults
+xinput set-button-map ${ID} 1 2 3 4 5 6 7 8 9 2 11 12 # FN1 -> Middle Click
+# 180 turn should move cursor almost 40-45% across a screen
+
+PROP_ID=$(xinput --list-props ${ID} | grep -oP "${PROP_NAME} \(\K[0-9]*")
+echo "ID: ${ID} ; Prod ID: ${PROP_ID}"
+xinput --set-prop ${ID} ${PROP_ID} ${SETTING}

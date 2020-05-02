@@ -1,0 +1,532 @@
+#!/usr/bin/env python
+
+import json
+import subprocess
+import sys
+import time
+
+def call(command):
+    """Call into the system and run Command (string)"""
+    cmd = join_and_sanitize(command)
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            shell=True)
+    result, _err = proc.communicate()
+    return result
+
+def join_and_sanitize(list_):
+    """Join a list of items into a single string"""
+    if isinstance(list_, str):
+        return list_
+
+    new_list = []
+    for item in list_:
+        if isinstance(item, str):
+            new_list.append(item)
+        elif isinstance(item, int):
+            new_list.append(str(item))
+        elif isinstance(item, float):
+            new_list.append(str(item))
+        elif isinstance(item, unicode):
+            new_list.append(str(item))
+        else:
+            raise Exception('Invalid type when attempting to join and sanitize')
+
+    return ' '.join(new_list)
+
+class I3C:
+    def __init__(self):
+        self.tree = {}
+        self.workspaces = {}
+        self.outputs = {}
+        self.displays = []
+
+    def get_tree(self, force=False):
+        if self.tree == {} or force:
+            self.tree = json.loads(call('i3-msg -t get_tree'))
+        return self.tree
+
+    def get_workspaces(self, force=False):
+        if self.workspaces == {} or force:
+            self.workspaces = json.loads(call('i3-msg -t get_workspaces'))
+        return self.workspaces
+
+    def get_outputs(self, force=False):
+        if self.outputs == {} or force:
+            self.outputs = json.loads(call('i3-msg -t get_outputs'))
+        return self.outputs
+
+    def get_displays(self, force=False):
+        if self.displays == [] or force:
+            displays = filter(lambda d: d['active'], self.get_outputs())
+            displays = sorted(displays, key=lambda d: d['rect']['x'])
+            displays = [d['name'] for d in displays]
+            self.displays = displays
+        return self.displays
+
+    def get_focused_workspace(self):
+        focused_workspace = filter(lambda w: w['focused'], self.get_workspaces())[0]
+        return focused_workspace
+
+    def get_visible_workspaces(self):
+        return filter(lambda w: w['visible'], self.get_workspaces())
+
+
+    def get_windows_with_parent_data(self):
+        data = self._get_windows_with_parent_data(self.get_tree(),
+                                                  self._get_parent_data(self.get_tree()))
+        return data
+
+    def _get_windows_with_parent_data(self, tree, parent_data):
+        if tree['window']:
+            data = {}
+            data['parent'] = parent_data
+            data['window'] = tree
+            return [data]
+
+        d = []
+        for node in tree['nodes']:
+            data = self._get_windows_with_parent_data(node, self._get_parent_data(tree))
+            d += data
+
+        return d
+
+    def _get_parent_data(self, node):
+        data = {}
+        data['layout'] = node['layout']
+        data['focus'] = node['focus']
+        data['nodes'] = node['nodes']
+        return data
+
+    def get_all_leafs(self):
+        data = self._get_all_leafs(self.get_tree()),
+        return data[0] # TODO : Why do i need this?
+
+    def _get_all_leafs(self, tree):
+        if len(tree['nodes']) <= 0:
+            return [tree]
+
+        d = []
+        for node in tree['nodes']:
+            data = self._get_all_leafs(node)
+            d += data
+        return d
+
+    def get_empty_window(self):
+        empty_window = filter(lambda w: \
+                              (w['deco_rect']['x'] != 0 or \
+                               w['deco_rect']['y'] != 0 or \
+                               w['deco_rect']['width'] != 0 or \
+                               w['deco_rect']['height'] != 0) \
+                              and \
+                              (w['window_rect']['x'] == 0 and \
+                               w['window_rect']['y'] == 0 and \
+                               w['window_rect']['width'] == 0 and \
+                               w['window_rect']['height'] == 0)
+                              and \
+                              w['name'] == None, \
+                              self.get_all_leafs())[0]
+
+        return empty_window
+
+    def sleep_focus(self, num):
+        # Sleep due to race condition with i3 changing focus after the second move
+        time.sleep(0.1)
+        call(['i3-msg workspace number', num])
+
+    def swap_workspace(self, direction):
+        "Swap workspaces"
+        visible_workspaces = self.get_visible_workspaces()
+
+        focused_workspace = self.get_focused_workspace()
+        focused_display = focused_workspace['output']
+        focused_workspace_num = focused_workspace['num']
+
+        i = self.get_displays().index(focused_display)
+        if direction == 'left':
+            i = (i - 1) % len(self.get_displays())
+        else:
+            i = (i + 1) % len(self.get_displays())
+
+        target_display = self.get_displays()[i]
+        target_workspace = filter(lambda o: o['output'] == target_display,
+                                  visible_workspaces)[0]
+        target_workspace_num = target_workspace['num']
+
+        call(['i3-msg move workspace to output', target_display])
+        call(['i3-msg workspace number', target_workspace_num])
+        call(['i3-msg move workspace to output', focused_display])
+        self.sleep_focus(target_workspace_num)
+
+    def focus_workspace(self, num):
+        "Focus on a workspace. If it is not visible, bring it to the current display"
+
+        focused_workspace = self.get_focused_workspace()
+        focused_display = focused_workspace['output']
+
+        target_workspace = filter(lambda w: w['num'] == num, self.get_workspaces())
+        call(['i3-msg workspace number', num])
+        if target_workspace == []:
+            # Workspace didn't exist, new one will be created, so no need to swap
+            return
+        target_workspace = target_workspace[0]
+
+        if not target_workspace['visible']:
+            call(['i3-msg move workspace to output', focused_display])
+            self.sleep_focus(num)
+
+    def next_workspace(self, flag='next'):
+        """
+        Focus on the next non-visible workspace"
+        """
+        non_visible_workspaces = filter(lambda w: not w['visible'],
+                                        self.get_workspaces())
+
+        if non_visible_workspaces == []:
+            return
+
+        focused_workspace = self.get_focused_workspace()
+        focused_num = focused_workspace['num']
+
+        non_visible_workspaces_nums = [w['num'] for w in non_visible_workspaces]
+        non_visible_workspaces_nums = sorted(non_visible_workspaces_nums)
+
+
+        if flag == 'next':
+            fallback = non_visible_workspaces_nums[0]
+            rest = filter(lambda n: n > focused_num,
+                          non_visible_workspaces_nums)
+        else:
+            fallback = non_visible_workspaces_nums[-1]
+            rest = filter(lambda n: n < focused_num,
+                          non_visible_workspaces_nums)
+            rest.reverse()
+
+        if len(rest) > 0:
+            self.focus_workspace(rest[0])
+        else:
+            self.focus_workspace(fallback)
+
+    def maybe_focus_parent(self):
+        """
+        When focusing to a different output, in which the focus will be on a
+        tabbed group, i3 has a bug in which is selects the left / right most
+        window.
+
+        To fix this, we need the old tree data. Find the newly focused window
+        and find the old state of its parent. If the parent is a tabbed
+        container, then reselect the window that was active in that container
+        before the focus changed.
+        """
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)
+        if len(focused_node) <= 0:
+            return
+        focused_node = focused_node[0]
+
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+        if focused_parent['layout'] == 'tabbed':
+            call('i3-msg focus parent')
+
+    def maybe_focus_last_tab(self):
+        self.get_tree()
+        old_parent_window_data = self.get_windows_with_parent_data()
+
+        self.get_tree(True)
+
+        new_parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], new_parent_window_data)
+        if len(focused_node) <= 0:
+            return
+        focused_node = focused_node[0]
+
+        focused_node_id = focused_node['window']['id']
+
+        old_node = filter(lambda w: w['window']['id'] == focused_node_id, old_parent_window_data)[0]
+        old_parent = old_node['parent']
+
+        if old_parent['layout'] == 'tabbed':
+            last_tab = old_parent['focus'][0]
+            selector_str = '[con_id=' + str(last_tab) + ']'
+            call(['i3-msg', selector_str, 'focus'])
+
+    def focus_left(self):
+        self.maybe_focus_parent()
+        call('i3-msg focus left')
+        call('i3-msg focus child')
+        # This is a fail-safe if i3 fails to focus in a particilar direction
+        # i3 always reports a success, even if focus change fails
+        self.maybe_focus_last_tab()
+
+    def focus_down(self):
+        self.maybe_focus_parent()
+        call('i3-msg focus down')
+        call('i3-msg focus child')
+        self.maybe_focus_last_tab()
+
+    def focus_up(self):
+        self.maybe_focus_parent()
+        call('i3-msg focus up')
+        call('i3-msg focus child')
+        self.maybe_focus_last_tab()
+
+    def focus_right(self):
+        self.maybe_focus_parent()
+        call('i3-msg focus right')
+        call('i3-msg focus child')
+        self.maybe_focus_last_tab()
+
+    def next_tab(self):
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+        if focused_parent['layout'] != 'tabbed':
+            return
+
+        child_ids = [w['id'] for w in focused_parent['nodes']]
+        active_id = focused_window['id']
+        active_index = child_ids.index(active_id)
+        next_index = active_index + 1
+        if next_index > (len(child_ids) - 1):
+            next_index = 0
+        next_tab = child_ids[next_index]
+        selector_str = '[con_id=' + str(next_tab) + ']'
+        call(['i3-msg', selector_str, 'focus'])
+
+    def prev_tab(self):
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+        if focused_parent['layout'] != 'tabbed':
+            return
+
+        child_ids = [w['id'] for w in focused_parent['nodes']]
+        active_id = focused_window['id']
+        active_index = child_ids.index(active_id)
+        prev_index = active_index - 1
+        prev_tab = child_ids[prev_index]
+        selector_str = '[con_id=' + str(prev_tab) + ']'
+        call(['i3-msg', selector_str, 'focus'])
+
+    def split(self, direction):
+        if direction == 'right':
+            self._split('horizontal', 'vertical')
+        elif direction == 'down':
+            self._split('vertical', 'horizontal')
+
+    def _split(self, direction, other_direction):
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_window = focused_node['window']
+        focused_window_id = focused_window['id']
+        call('i3-msg focus parent')
+        call(['i3-msg split', direction])
+        call('i3 open') # TODO anything else?
+        self.get_tree(True)
+        empty_window = self.get_empty_window()
+        empty_window_id = empty_window['id']
+
+        focused_window_str = '[con_id=' + str(focused_window_id) + ']'
+        empty_window_str = '[con_id=' + str(empty_window_id) + ']'
+
+        call(['i3-msg', focused_window_str, 'move container to workspace temp'])
+        call(['i3-msg', empty_window_str, 'focus'])
+        call(['i3-msg', focused_window_str, 'move container to workspace current'])
+        call(['i3-msg', empty_window_str, 'kill'])
+        call(['i3-msg', focused_window_str, 'focus'])
+
+        self.get_tree(True)
+        new_parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'],
+                              new_parent_window_data)[0]
+        if focused_node['parent']['layout'] != "tabbed":
+            call(['i3-msg split', other_direction])
+            call('i3-msg layout tabbed')
+
+    def buffer_yank(self, mark='window-buffer'):
+        call(['i3-msg mark', mark])
+
+    def buffer_paste(self, mark='window-buffer'):
+        call('i3-msg mark paste-target')
+        call(['i3-msg', '[con_mark="', mark, '"]',
+              'move container to mark', 'paste-target'])
+        call(['i3-msg', '[con_mark="', mark, '"]', 'focus'])
+        call('i3-msg unmark paste-target')
+        call(['i3-msg unmark', mark])
+
+    def get_output_nums(self):
+        outputs = self.get_outputs()
+        outputs = filter(lambda o: o['active'], outputs)
+        outputs = [str(x) for x in range(len(outputs))]
+        print ' '.join(outputs)
+
+    def dzen2_bar_x(self, i):
+        outputs = self.get_outputs()
+        outputs = filter(lambda o: o['active'], outputs)
+        outputs = sorted(outputs, key=lambda d: d['rect']['x'])
+        output = outputs[i]
+        print(output['rect']['x'])
+
+    def dzen2_bar_width(self, i):
+        outputs = self.get_outputs()
+        outputs = filter(lambda o: o['active'], outputs)
+        outputs = sorted(outputs, key=lambda o: o['rect']['x'])
+        output = outputs[i]
+        print(output['rect']['width'])
+
+    def bar_workspaces(self, i):
+        outputs = self.get_outputs()
+        outputs = filter(lambda o: o['active'], outputs)
+        outputs = sorted(outputs, key=lambda d: d['rect']['x'])
+        output = outputs[i]
+        current_workspace = output['current_workspace']
+
+        workspaces = self.get_workspaces()
+        workspaces = filter(lambda w: w['num'] > 0, workspaces)
+        workspaces = sorted(workspaces, key=lambda w: w['num'])
+
+        ws_strings = []
+        for ws in workspaces:
+            ws_string = ''
+
+            ws_name = '%s' % ws['name']
+            if ws['name'] == current_workspace:
+                ws_string += 'A%s' % ws_name
+            elif ws['visible']:
+                ws_string += 'V%s' % ws_name
+            else:
+                ws_string += 'H%s' % ws_name
+
+            ws_strings.append(ws_string)
+
+        ws_string = '\t'.join(ws_strings)
+        print(ws_string)
+
+    def active_display(self):
+        workspace = filter(lambda w: w['focused'], self.get_workspaces())[0]
+        active_display = workspace['output']
+        displays = self.get_displays()
+        print displays.index(active_display)
+
+    def rename_workspace(self, name):
+        workspace = filter(lambda w: w['focused'], self.get_workspaces())[0]
+        workspace_num = workspace['num']
+        new_name = '"%s: %s"' % (workspace_num, name)
+        # Extra single-quotes needed for i3 to understand
+        call(['i3-msg \'rename workspace to', new_name, '\''])
+
+    def create_new_workspace(self):
+        workspace_nums = [w['num'] for w in self.get_workspaces()]
+        workspace_nums = filter(lambda n: n > 0, workspace_nums)
+        workspace_nums = sorted(workspace_nums)
+
+        for i in range(1, len(workspace_nums) + 1):
+            if i in workspace_nums:
+                continue
+            call(['i3-msg workspace number', i])
+            return
+        call(['i3-msg workspace number', len(workspace_nums) + 1])
+
+    def prompt_for_window(self, prompt):
+        return call(['wmctrl -l |',
+                     'awk \'{printf $1" : "$2+1" : "; for(i=4;i<=NF;i++) printf $i" "; print""}\' |',
+                     'sort -t":" -k2 |',
+                     'dmenu -i -fn "terminus-8" -l 10 -p "%s" | ' % prompt,
+                     'awk \'{print $1}\'']).rstrip()
+
+    def jump_to_window(self):
+        window_id = self.prompt_for_window("Jump")
+        window_id_str = "[id=%s]" % window_id
+        call(['i3-msg', window_id_str, 'focus'])
+
+    def bring_window(self):
+        window_id = self.prompt_for_window("Bring")
+        window_str = '[id=' + str(window_id) + ']'
+        call('i3-msg mark target')
+        call(['i3-msg', window_str, 'move container to mark target'])
+        call('i3-msg unmark target')
+        call(['i3-msg', window_str, 'focus'])
+
+    def cast_buffer(self, direction):
+        self.buffer_yank('cast-buffer')
+
+        if direction == 'left':
+            self.focus_left()
+        elif direction == 'down':
+            self.focus_down()
+        elif direction == 'up':
+            self.focus_up()
+        elif direction == 'right':
+            self.focus_right()
+
+        self.buffer_paste('cast-buffer')
+
+
+if len(sys.argv) <= 0:
+    exit(1)
+
+i3c = I3C()
+command = sys.argv[1]
+
+if command == 'swap-workspace-left':
+    i3c.swap_workspace('left')
+elif command == 'swap-workspace-right':
+    i3c.swap_workspace('right')
+elif command == 'focus-workspace':
+    i3c.focus_workspace(int(sys.argv[2]))
+elif command == 'next-workspace':
+    i3c.next_workspace('next')
+elif command == 'prev-workspace':
+    i3c.next_workspace('prev')
+elif command == 'focus-left':
+    i3c.focus_left()
+elif command == 'focus-down':
+    i3c.focus_down()
+elif command == 'focus-up':
+    i3c.focus_up()
+elif command == 'focus-right':
+    i3c.focus_right()
+elif command == 'next-tab':
+    i3c.next_tab()
+elif command == 'prev-tab':
+    i3c.prev_tab()
+elif command == 'split-right':
+    i3c.split('right')
+elif command == 'split-down':
+    i3c.split('down')
+elif command == 'buffer-yank':
+    i3c.buffer_yank()
+elif command == 'buffer-paste':
+    i3c.buffer_paste()
+elif command == 'rename-workspace':
+    i3c.rename_workspace(sys.argv[2])
+elif command == 'create-new-workspace':
+    i3c.create_new_workspace()
+elif command == 'jump-to-window':
+    i3c.jump_to_window()
+elif command == 'bring-window':
+    i3c.bring_window()
+elif command == 'cast-buffer-left':
+    i3c.cast_buffer('left')
+elif command == 'cast-buffer-down':
+    i3c.cast_buffer('down')
+elif command == 'cast-buffer-up':
+    i3c.cast_buffer('up')
+elif command == 'cast-buffer-right':
+    i3c.cast_buffer('right')
+
+elif command == 'get-output-nums':
+    i3c.get_output_nums()
+elif command == 'dzen2-bar-x':
+    i3c.dzen2_bar_x(int(sys.argv[2]))
+elif command == 'dzen2-bar-width':
+    i3c.dzen2_bar_width(int(sys.argv[2]))
+elif command == 'bar-workspaces':
+    i3c.bar_workspaces(int(sys.argv[2]))
+elif command == 'active-display':
+    i3c.active_display()
+elif command == 'debug':
+    i3c.get_displays()
+    print i3c.displays

@@ -1,47 +1,77 @@
 * dotfiles
 
 ** Install
-*** i3
-Sym link the following:
+Install the following packages:
 
-#+BEGIN_SRC
-i3/config --> ~/.config/i3/config
-i3/i3c --> ~/.config/i3/i3c
-
-dzen2/dzen2_bar --> ~/.config/i3status/dzen2_bar
-dzen2/run_dzen2_bar --> ~/.config/i3status/run_dzen2_bar
+#+BEGIN_SRC sh
+stow -nSv <VERSION> -t ~
+stow -Sv <VERSION> -t ~
 #+END_SRC
 
+** TODO Uninstall
+#+BEGIN_SRC sh
+stow -nDv <VERSION> -t ~
+stow -Dv <VERSION> -t ~
+#+END_SRC
+
+
+** Files
+*** =.bashrc=
+*** =.bash_aliases=
+*** =.keynavrc=
+*** =.tmux.conf=
+*** =.bash_prompt=
+*** =.tridactylrc=
+*** =.stalonetrayrc=
+*** =.config=
+**** =i3status=
+***** =dzen2_bar=
+The =dzen2= bar depends on =i3c= to detect displays and add a dock to each display.
+***** =run_dzen2_bar=
+**** =dunst=
+***** =dunstrc=
+**** =i3=
+***** =i3c=
 The =i3c= python script offers some functionality that is missing from =i3=.
 
 Compatible with =i3wm= versions:
-- 4.12 [[https://github.com/i3/i3/blob/c9f0bc174d0746c925443d49bcc07727b631e335/docs/userguide][User guide]]
-- 4.14.1 [[https://github.com/i3/i3/blob/83a62267dce22d5d898d861bc957a6266268d030/docs/userguide][User guide]]
+- 4.12 ([[https://github.com/i3/i3/blob/c9f0bc174d0746c925443d49bcc07727b631e335/docs/userguide][User guide]])
+- 4.14.1 ([[https://github.com/i3/i3/blob/83a62267dce22d5d898d861bc957a6266268d030/docs/userguide][User guide]])
 
 =i3= v4.12 lacks the =swap= command, so marks are used to facilitate.
 
-The =dzen2= bar depends on =i3c= to detect displays and add a dock to each display.
+***** =config=
+***** =keybind_popup=
+***** =mini_popup=
+*** =bin=
+**** =set-cpu-max=
+**** =brightness-up=
+**** =org-clip=
+**** =passmenu=
+**** =brightness-down=
+**** =toggle-sticky-keys=
+**** =toggle-mute=
 
-*** TODO Firefox
+** TODO Firefox
+Unfortunately, =firefox= uses unique ids for profile names, which I am unable to handle using stow.
+
 Sym link the following:
 
 #+BEGIN_SRC
-USERCHROME.CSS --> ~/.mozilla/firefox/<ID>.default/chrome/userChrome.css
+firefox/userChrome.css --> ~/.mozilla/firefox/<ID>.default/chrome/userChrome.css
 #+END_SRC
 
-Make sure the setting =toolkit.legacyUserProfileCustomizations.stylesheets= in =about:config= is set to =true=.
+Make sure the setting =toolkit.legacyUserProfileCustomizations.stylesheets= in
+=about:config= is set to =true=. TODO: Needed anymore?
 
 You may need to create parent directories.
 
-Note the css that hides the tab bar. I do not use tabs in firefox. Instead, I use =i3='s tab layout to achieve the same thing but with better integration with the wm. This has the advantage of being able to use the same commands to move tabs around my desktop as moving normal windows. E.g. I can yank a tab and paste it to a different workspace whilst leaving all other tabs alone.
+Note the css that hides the tab bar. I do not use tabs in firefox. Instead, I
+use =i3='s tab layout to achieve the same thing but with better integration with
+the wm. This has the advantage of being able to use the same commands to move
+tabs around my desktop as moving normal windows. E.g. I can yank a tab and paste
+it to a different workspace whilst leaving all other tabs alone.
 
 To facilitate this:
 
 Go to =about:config= and set =browser.tabs.opentabfor.middleclick= to =false=.
-
-If you use =tridactyl=, rebind the =t= and =T= keys to open new windows instead of new tabs, and rebind =F= to open links in new windows.
-#+BEGIN_SRC
-:bind t fillcmdline winopen
-:bind T current_url winopen
-:bind F hint -w
-#+END_SRC

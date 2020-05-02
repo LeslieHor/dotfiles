@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+CURRENT_BRIGHTNESS=$(xrandr --verbose | grep eDP-1 -A 10 | grep -oP 'Brightness: \K[0-9]*\.[0-9]*')
+CURRENT_BRIGHTNESS=$(awk "BEGIN {print (${CURRENT_BRIGHTNESS} + 0.1) * 100}" | grep -oP '^[0-9]*')
+
+if [ ${CURRENT_BRIGHTNESS} -gt 100 ]; then
+    echo no
+else
+    CURRENT_BRIGHTNESS=$(awk "BEGIN {print (${CURRENT_BRIGHTNESS} / 100.00)}")
+    xrandr --output eDP-1 --brightness ${CURRENT_BRIGHTNESS}
+fi
+
+echo ${CURRENT_BRIGHTNESS}

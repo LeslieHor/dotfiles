@@ -1,0 +1,159 @@
+#!/usr/bin/python
+
+import sys
+import math
+
+OPERATORS = []
+STACK = []
+LIMIT_EXCEEDED = False
+
+DEBUG = False
+
+REGISTER = {}
+
+def main():
+    global OPERATORS
+    OPERATORS = sys.argv[1:]
+
+    if len(OPERATORS) == 1:
+        OPERATORS = OPERATORS[0].split(" ")
+    elif len(OPERATORS) == 0:
+        OPERATORS = sys.stdin.readlines()
+        OPERATORS = [ X.rstrip() for X in OPERATORS ]
+
+    stack_process()
+
+    if LIMIT_EXCEEDED:
+        print("ERROR: STACK LIMIT EXCEEDED")
+
+def stack_process():
+    global STACK
+    global OPERATORS
+    global LIMIT_EXCEEDED
+    while len(OPERATORS) > 0:
+        # Pop off the first element
+        Operator = OPERATORS[0]
+        OPERATORS = OPERATORS[1:]
+
+        process(Operator)
+
+        LIMIT_DEBUG = ''
+        if len(STACK) > 4:
+            LIMIT_EXCEEDED = True
+            LIMIT_DEBUG = ' <-- STACK LIMIT EXCEEDED'
+
+        if DEBUG:
+            print(Operator + ' '*(10 - len(Operator)) + " : " + str(STACK) + \
+                  LIMIT_DEBUG)
+
+    if len(STACK) == 1:
+        STACK = STACK[0]
+
+    print STACK
+
+def process(Operator):
+    global STACK
+    global OPERATORS
+    global REGISTER
+    global DEBUG
+    # First, check if it is a number
+    try:
+        Num = float(Operator)
+        push(Num)
+        return
+    except:
+        None
+
+    # Otherwise, try and process the operator
+    if Operator == "+":
+        X = pop()
+        Y = pop()
+        push(X + Y)
+    elif Operator == "-":
+        X = pop()
+        Y = pop()
+        push(Y - X)
+    elif Operator == "x" or Operator == "*":
+        X = pop()
+        Y = pop()
+        push(X * Y)
+    elif Operator == "/":
+        X = pop()
+        Y = pop()
+        push(Y / X)
+    elif Operator == "pi":
+        push(math.pi)
+    elif Operator == "^":
+        X = pop()
+        Y = pop()
+        push(Y ** X)
+    elif Operator == "sum":
+        STACK = [sum(STACK)]
+    elif Operator == "swap" or Operator == "s":
+        X = pop()
+        Y = pop()
+        push(X)
+        push(Y)
+    elif Operator == "d":
+        X = pop()
+        push(X)
+        push(X)
+    elif Operator == "trunc":
+        X = pop()
+        Y = pop()
+        Places = 10 ** X
+        Y2 = Y * Places
+        push(math.floor(Y2) / Places)
+    elif Operator == "r":
+        STACK = STACK[1:] + STACK[:1]
+    elif Operator == "sqrt":
+        X = pop()
+        push(X ** 0.5)
+    elif Operator == "DEBUG":
+        DEBUG = True
+    elif Operator == "intg":
+        X = pop()
+        push(math.trunc(X))
+    elif Operator == "frac":
+        X = pop()
+        push(X - math.trunc(X))
+    elif Operator == "percent" or Operator == "%":
+        X = pop()
+        Y = pop()
+        push(Y)
+        push(Y * (X / 100.0))
+
+    elif Operator == "le":
+        X = pop()
+        Y = pop()
+        push(Y)
+        push(X)
+
+        if not (X <= Y):
+            OPERATORS = OPERATORS[1:]
+
+    elif Operator[:3] == "sto":
+        X = pop()
+        R = Operator[3:]
+        REGISTER[R] = X
+        push(X)
+    elif Operator[:3] == "rcl":
+        R = Operator[3:]
+        push(REGISTER[R])
+
+    elif Operator == "clear":
+        STACK = []
+
+
+def pop():
+    global STACK
+    X = STACK[0]
+    STACK = STACK[1:]
+    return X
+
+def push(X):
+    global STACK
+    STACK = [X] + STACK
+
+if __name__ == '__main__':
+    main()

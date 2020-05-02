@@ -1,0 +1,63 @@
+# This is a keynavrc file. Yours should live in
+# $HOME/.keynavrc
+#
+# Lines beginning with '#' are comments.
+# Format is:
+#   keysequence cmd1,cmd2,cmd3...
+#
+# Other special values are:
+#   'clear' on a line by itself (no quotes) will erase all keybindings
+#   (including the defaults)
+#   'daemonize' on a line by itself (no quotes) will make keynav background
+#   after parsing the configfile and having no critical errors.
+#
+# The 'start' command alone is handled specially, in that any key sequence
+# mapped to 'start' will be grabbed when keynav starts up so you can invoke it
+# to activate keynav. The remaining keys are only recognized while keynav is
+# active
+#
+# Project page; http://www.semicomplete.com/projects/keynav
+
+### Example using the 'sh' command.
+# Make firefox the active window
+#f sh "xdotool windowactivate $(xdotool search -title -- '- Mozilla Firefox')", end
+# Make a new tab in google chrome:
+#t sh "xdotool windowactivate $(xdotool search --title -- '- Google Chrome' | head -1); xdotool key ctrl+t",end
+# Paste
+#v sh "xdotool key shift+Insert"
+
+# Use 'clear' to blow away any previous keybindings
+clear
+
+# Use 'daemonize' to background ourselves.
+daemonize
+
+Hyper_L+semicolon start,grid 2x2
+Escape end
+
+# Zoom to the current window
+w windowzoom
+
+# Zoom to the cursor location with a given height and width
+z cursorzoom 200 200
+
+h cut-left
+j cut-down
+k cut-up
+l cut-right
+
+BackSpace history-back
+space     warp,end
+
+m      warp,click 1,end
+comma  warp,click 2,end
+period warp,click 3,end
+
+e click 4 # scroll up
+d click 5 # scroll down
+s click 6 # scroll left
+f click 6 # scroll right
+
+shift+x warp,drag 1
+shift+c warp,drag 2
+shift+v warp,drag 3

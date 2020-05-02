@@ -1,0 +1,11 @@
+#!/bin/bash
+
+DEVICE_NAME='Kensington'
+PROP_NAME='libinput Accel Speed'
+SETTING='-0.65'
+
+ID=$(xinput --list | grep "${DEVICE_NAME}" | grep -oP 'id=\K[0-9]*')
+PROP_ID=$(xinput --list-props ${ID} | grep -oP "${PROP_NAME} \(\K[0-9]*")
+echo "ID: ${ID} ; Prod ID: ${PROP_ID}"
+
+xinput --set-prop ${ID} ${PROP_ID} ${SETTING}

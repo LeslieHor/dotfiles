@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+if [[ "${1}" == "--dmenu" ]]; then
+   ITEM=$(echo -n | dmenu -p "Clip")
+   if [[ ${?} != 0 ]]; then
+       exit 1
+   fi
+else
+    ITEM="${@}"
+fi
+
+if [[ -z "${ITEM}" ]]; then
+    exit 1
+fi
+
+echo "* ${ITEM}" >> ~/pims/inbox.org
+echo "Clipped ${ITEM}"
