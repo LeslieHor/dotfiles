@@ -11,12 +11,19 @@ BAR_FG="#ffffff"
 BAR_BG="#222222"
 BAR_BG_ACTIVE="#228822"
 BAR_MARGIN=10
+BG_WS_ACTIVE="^bg(#006600)"
+BG_WS_VISIBLE="^bg(#114400)"
+BG_WS_HIDDEN="^bg(#444444)"
+BG_END="^bg()"
 
 FG_END="^fg()"
 FG_ON="^fg(#00FF00)"
 FG_OFF="^fg(#FF0000)"
 FG_ACTIVE="^fg(#00FF00)"
 FG_INACTIVE="^fg(#999999)"
+FG_OK="^fg(#00FF00)"
+FG_WARN="^fg(#FFFF00)"
+FG_ALERT="^fg(#FF0000)"
 FG_HEADER="^fg(#999999)"
 
 SEP="^fg(#555555) | ^fg()"
@@ -40,18 +47,24 @@ diskusage() {
 
 battery() {
     BATT_INFO=$(upower -i /org/freedesktop/UPower/devices/battery_BAT0)
-    PERCENT=$(echo -e "${BATT_INFO}" | grep -oP 'percentage: *\K[0-9]*%')
+    PERCENT=$(echo -e "${BATT_INFO}" | grep -oP 'percentage: *\K[0-9]*')
     STATE=$(echo -e "${BATT_INFO}" | grep -oP 'state: *\K.*')
     TIME_TO_FULL=$(echo -e "${BATT_INFO}" | grep -oP 'time to full: *\K.*' | sed 's/ hours/h/')
     TIME_TO_EMPTY=$(echo -e "${BATT_INFO}" | grep -oP 'time to empty: *\K.*' | sed 's/ hours/h/')
     ENERGY_RATE=$(echo -e "${BATT_INFO}" | grep -oP 'energy-rate: *\K.*')
 
     if [ "${STATE}" == "charging" ]; then
-        INFO="${FG_ON}${PERCENT} (${ENERGY_RATE} ${TIME_TO_FULL})${FG_END}"
+        INFO="${FG_ON}${PERCENT}% (${ENERGY_RATE} ${TIME_TO_FULL})${FG_END}"
     elif [ "${STATE}" == "discharging" ]; then
-        INFO="${PERCENT} (${ENERGY_RATE} ${TIME_TO_EMPTY})"
+        if [ "${PERCENT}" -lt 15 ]; then
+            INFO="${FG_ALERT}${PERCENT}% (${ENERGY_RATE} ${TIME_TO_EMPTY})${FG_END}"
+        elif [ "${PERCENT}" -lt 30 ]; then
+            INFO="${FG_WARN}${PERCENT}% (${ENERGY_RATE} ${TIME_TO_EMPTY})${FG_END}"
+        else
+            INFO="${PERCENT}% (${ENERGY_RATE} ${TIME_TO_EMPTY})"
+        fi
     else
-        INFO="${PERCENT} ${STATE} (${ENERGY_RATE} ${TIME_TO_FULL}${TIME_TO_EMPTY})"
+        INFO="${PERCENT}percent ${STATE} (${ENERGY_RATE} ${TIME_TO_FULL}${TIME_TO_EMPTY})"
     fi
 
     echo "${FG_HEADER}BAT:${FG_END} ${INFO}"
@@ -93,12 +106,27 @@ cpu_speed() {
     d=$((${d} / 100))
     e=$(( ( ${a} + ${b} + ${c} + ${d} ) / 4))
 
-    echo "${FG_HEADER}CPU:${FG_END} ${e}"
+    if [ "${e}" -lt 10 ]; then
+        INFO="${FG_OK}${e}${FG_END}"
+    elif [ "${e}" -lt 20 ]; then
+        INFO="${FG_WARN}${e}${FG_END}"
+    else
+        INFO="${FG_ALERT}${e}${FG_END}"
+    fi
+
+    echo "${FG_HEADER}CPU:${FG_END} ${INFO}"
 }
 
 cpu_temps() {
-    TEMPS=$(sensors | grep -oP 'Package id 0: *\+\K[0-9]*')
-    echo "${FG_HEADER}CTP:${FG_END} ${TEMPS}"
+    TEMP=$(sensors | grep -oP 'Package id 0: *\+\K[0-9]*')
+
+    if [ "${TEMP}" -lt 40 ]; then
+        echo "${FG_HEADER}CTP:${FG_END} ${FG_OK}${TEMP}${FG_END}"
+    elif [ "${TEMP}" -lt 50 ]; then
+        echo "${FG_HEADER}CTP:${FG_END} ${FG_WARN}${TEMP}${FG_END}"
+    else
+        echo "${FG_HEADER}CTP:${FG_END} ${FG_ALERT}${TEMP}${FG_END}"
+    fi
 }
 
 wifi() {
@@ -114,16 +142,39 @@ wifi() {
     echo "${FG_HEADER}NET:${FG_END} ${INFO}"
 }
 
-while sleep 1; do
-    # TODO: Finish this
-    active_display=$(${i3c} dzen2-active-display)
-    if [ ${active_display} == ${1} ]; then
-        BACKGROUND=${BAR_BG_ACTIVE}
-    fi
+workspaces() {
+    WORKSPACES=""
+    IFS=$'\t'
+    for WS in $(${i3c} bar-workspaces ${1}); do
+        INDICATOR=${WS:0:1}
+        NAME=${WS:1}
+        WS_NUM=$(echo ${NAME} | grep -oP '^[0-9]*')
+        if [[ "${INDICATOR}" == "A" ]]; then
+            BG=${BG_WS_ACTIVE}
+        elif [[ "${INDICATOR}" == "V" ]]; then
+            BG=${BG_WS_VISIBLE}
+        elif [[ "${INDICATOR}" == "H" ]]; then
+            BG=${BG_WS_HIDDEN}
+        fi
 
+        CLICK_TARGET="^ca(1, ${i3c} focus-workspace ${WS_NUM})"
+        WORKSPACES="${WORKSPACES} ${BG}${CLICK_TARGET} ${NAME} ^ca()${BG_END}"
+    done
+
+    echo "${WORKSPACES}"
+}
+
+active_display() {
+    active_display=$(${i3c} active-display)
+    if [ ${active_display} == ${1} ]; then
+        echo "ACTIVE"
+    fi
+}
+
+while sleep 1; do
     # Left block
     left=""
-    left="${left}$(${i3c} dzen2-bar-workspaces ${1})"
+    left="${left}$(workspaces ${1})"
 
     ## add margin for left side
     printf "^pa(${BAR_MARGIN})"
@@ -131,7 +182,7 @@ while sleep 1; do
 
     # Centre block
     centre=""
-    centre="${centre}"
+    centre="${centre}$(active_display ${1})"
 
     ## find the offset for the centre block
     width=$(dzen2-textwidth "${BAR_FONT}" "${centre}")
@@ -155,6 +206,7 @@ while sleep 1; do
     bare_text=$(echo "${right}" | sed "s/\^[a-z][a-z]([A-Za-z0-9#]*)//g")
     width=$(dzen2-textwidth "${BAR_FONT}" "${bare_text}")
     offset=$((${BAR_WIDTH} - ${width} - ${BAR_MARGIN}))
+    #offset=$((${BAR_WIDTH} - ${width} + ${BAR_MARGIN}))
 
     # Correct percentage signs
     right=$(echo ${right} | sed 's/%/%%/g')

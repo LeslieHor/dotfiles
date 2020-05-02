@@ -48,7 +48,6 @@ set $s4 Control+Mod4
 
 # Key tables
 
-## Windows
 mode "window" {
     bindsym h exec $i3c split-right ; $exit
     bindsym v exec $i3c split-down ; $exit
@@ -105,6 +104,19 @@ mode "pass" {
     bindsym Escape $exit
 }
 
+mode "utils" {
+    bindsym d exec echo " DISABLED (S1-F11 to return)" > ~/.config/i3/i3_keys_disabled_status ; exec ~/.config/i3/keybind_popup ; mode "disabled"
+    bindsym r restart
+    bindsym l exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
+
+    bindsym Escape $exit
+}
+
+mode "disabled" {
+    bindsym $s1+F11 exec echo "" > ~/.config/i3/i3_keys_disabled_status ; $exit
+}
+
+
 # Mouse bindings
 
 ## The middle button over a titlebar kills the window
@@ -146,6 +158,7 @@ bindsym $s1+o $popup applications ; mode "applications"
 bindsym $s1+w $popup window ; mode "window"
 bindsym $s1+comma exec $i3c prev-tab
 bindsym $s1+period exec $i3c next-tab
+bindsym $s1+F11 $popup utils ; mode "utils"
 
 bindsym $s1+s exec ~/.config/i3/toggle-sticky-keys
 
@@ -186,9 +199,13 @@ bindsym $s4+t scratchpad show
 bindsym $s4+r move scratchpad
 bindsym $s4+a [class="Emacs"] scratchpad show
 
-# restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
-bindsym $mod+Shift+r restart
-# exit i3 (logs you out of your X session)
-bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
+# Rules
+for_window [class="Wfica_Seamless"] floating enable
+mouse_warping none
 
 exec_always --no-startup-id ~/.config/i3status/run_dzen2_bar
+
+# One Mix 3s
+exec --no-startup-id keynav
+exec rotate-screen
+exec setxkbmap -option caps:none
