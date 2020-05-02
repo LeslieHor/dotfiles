@@ -125,7 +125,7 @@ bindsym --release button2 kill
 # Keybindings
 
 bindsym Mod4+BackSpace exec i3lock -fc 222222
-bindsym Mod4+space exec i3-sensible-terminal
+bindsym Mod4+space exec xterm
 
 bindsym XF86MonBrightnessUp exec ~/.config/i3/brightness-up
 bindsym XF86MonBrightnessDown exec ~/.config/i3/brightness-down
