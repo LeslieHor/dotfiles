@@ -127,11 +127,11 @@ bindsym --release button2 kill
 bindsym Mod4+BackSpace exec i3lock -fc 222222
 bindsym Mod4+space exec xterm
 
-bindsym XF86MonBrightnessUp exec ~/.config/i3/brightness-up
-bindsym XF86MonBrightnessDown exec ~/.config/i3/brightness-down
+bindsym XF86MonBrightnessUp exec brightness-up
+bindsym XF86MonBrightnessDown exec brightness-down
 bindsym XF86AudioRaiseVolume exec amixer -q set Master 2dB+
 bindsym XF86AudioLowerVolume exec amixer -q set Master 2dB-
-bindsym XF86AudioMute exec ~/.config/i3/toggle-mute
+bindsym XF86AudioMute exec toggle-mute
 
 ## SYS-1
 
