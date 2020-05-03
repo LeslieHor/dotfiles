@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+# For computer specific commands
+
+exec rotate-screen
+exec setxkbmap -option caps:none

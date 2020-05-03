@@ -12,7 +12,7 @@ if [ -f ${PID_FILE} ]; then
     rm ${PID_FILE}
 fi
 
-FONT="-*-terminus-*-*-*-*-24-*-*-*-*-*-*-*"
+FONT="$(xrdb-query 'Leslie.bar.font')"
 FG='#FFFFFF'
 BG='#222222'
 DELAY=0.5

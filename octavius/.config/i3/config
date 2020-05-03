@@ -205,5 +205,6 @@ mouse_warping none
 
 exec_always --no-startup-id ~/.config/i3status/run_dzen2_bar
 
-# Octavius
 exec --no-startup-id keynav
+
+exec --no-startup-id ~/.config/i3/i3_startup

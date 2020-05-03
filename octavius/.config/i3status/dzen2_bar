@@ -6,7 +6,7 @@ i3c="${HOME}/.config/i3/i3c"
 BAR_X=$(${i3c} dzen2-bar-x ${1})
 BAR_WIDTH=$(${i3c} dzen2-bar-width ${1})
 
-BAR_FONT="-*-terminus-*-*-*-*-12-*-*-*-*-*-*-*"
+BAR_FONT="$(xrdb-query 'Leslie.bar.font')"
 CPU_SPEED_WARN=30
 CPU_SPEED_ALERT=40
 CPU_TEMP_WARN=60
@@ -46,7 +46,7 @@ ram() {
 }
 
 diskusage() {
-    DISK_USAGE=$(df -h ${1} | tail -n 1 | awk '{print $4}')
+    DISK_USAGE=$(df -h ${1} 2> /dev/null | tail -n 1 | awk '{print $4}')
     echo "${FG_HEADER}D${2}:${FG_END} ${DISK_USAGE}"
 }
 
