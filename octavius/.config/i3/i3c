@@ -431,7 +431,7 @@ class I3C:
 
     def prompt_for_window(self, prompt):
         return call(['wmctrl -l |',
-                     'awk \'{printf $1" : "$2+1" : "; for(i=4;i<=NF;i++) printf $i" "; print""}\' |',
+                     'awk \'{printf $1" : "; for(i=4;i<=NF;i++) printf $i" "; print""}\' |',
                      'sort -t":" -k2 |',
                      'dmenu -i -fn "terminus-8" -l 10 -p "%s" | ' % prompt,
                      'awk \'{print $1}\'']).rstrip()
@@ -448,6 +448,15 @@ class I3C:
         call(['i3-msg', window_str, 'move container to mark target'])
         call('i3-msg unmark target')
         call(['i3-msg', window_str, 'focus'])
+
+    def collapse_group(self):
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        child_ids = [w['id'] for w in focused_parent['nodes']]
+        for child in child_ids:
+            selector_str = '[con_id=' + str(child) + ']'
+            call(['i3-msg', selector_str, 'move to workspace hidden'])
 
     def cast_buffer(self, direction):
         self.buffer_yank('cast-buffer')
@@ -508,6 +517,8 @@ elif command == 'jump-to-window':
     i3c.jump_to_window()
 elif command == 'bring-window':
     i3c.bring_window()
+elif command == 'collapse-group':
+    i3c.collapse_group()
 elif command == 'cast-buffer-left':
     i3c.cast_buffer('left')
 elif command == 'cast-buffer-down':
