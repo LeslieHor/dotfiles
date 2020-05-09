@@ -30,17 +30,10 @@ set $popup exec ~/.config/i3/keybind_popup
 set $exit exec ~/.config/i3/keybind_popup ; mode "default"
 
 ### Key aliases
-#
-# |    | Ergo                    | Standard        |
-# |----+-------------------------+-----------------|
-# | S1 | Meta + Hyper            | Hyper           |
-# | S2 | Control + Shift + Hyper | Meta + Hyper    |
-# | S3 | Control + Meta + Hyper  | Shift + Hyper   |
-# | S4 | Shift + Meta + Hyper    | Control + Hyper |
-
-### default
+#### default
 set $mod Mod4
 
+#### S Keys
 set $s1 Mod4
 set $s2 Mod1+Mod4
 set $s3 Shift+Mod4
@@ -107,7 +100,7 @@ mode "pass" {
 mode "utils" {
     bindsym d exec echo " DISABLED (S1-F11 to return)" > ~/.config/i3/i3_keys_disabled_status ; exec ~/.config/i3/keybind_popup ; mode "disabled"
     bindsym r exec ~/.config/i3/keybind_popup ; mode "default" ; restart
-    bindsym l exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
+    bindsym l exit
 
     bindsym Escape $exit
 }

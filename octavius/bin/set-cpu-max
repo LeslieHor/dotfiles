@@ -1,14 +1,10 @@
 #!/usr/bin/env bash
 
-CPUS="0 1 2 3"
-MAX_FREQ="3.4Ghz"
-
-FREQ=${1:-${MAX_FREQ}}
+CPUS=$(seq 0 $(( $(nproc --all) - 1)))
 
 for CPU in $CPUS; do
+    MAX_FREQ=$(cat /sys/devices/system/cpu/cpu${CPU}/cpufreq/cpuinfo_max_freq)
+    FREQ=${1:-${MAX_FREQ}}
     sudo cpufreq-set -c ${CPU} --max ${FREQ}
-done
-
-for CPU in $CPUS; do
     cpufreq-info -c ${CPU} -p
 done

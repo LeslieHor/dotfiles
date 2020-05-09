@@ -202,7 +202,7 @@ while sleep 1; do
 
     # Right block
     right=""
-    if [ "${1}" == 0 ]; then
+    if [ "${1}" == 2 ]; then
         right="${right}${SEP}$(cpu_speed)"
         right="${right}${SEP}$(cpu_temps)"
         right="${right}${SEP}$(diskusage / 'F/')"
