@@ -1,6 +1,6 @@
 @charset "utf-8"; /* CSS Document */
 
-@-moz-document url("about:newtab") {
+@-moz-document url("about:newtab"), url("about:blank") {
     body {
         background-color: #222222 !important;
     }
