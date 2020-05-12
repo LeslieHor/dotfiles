@@ -153,7 +153,7 @@ bindsym $s1+comma exec $i3c prev-tab
 bindsym $s1+period exec $i3c next-tab
 bindsym $s1+F11 $popup utils ; mode "utils"
 
-bindsym $s1+s exec ~/.config/i3/toggle-sticky-keys
+bindsym $s1+s exec toggle-sticky-keys
 
 ## SYS-2
 

@@ -163,7 +163,7 @@ workspaces() {
         fi
 
         CLICK_TARGET="^ca(1, ${i3c} focus-workspace ${WS_NUM})"
-        WORKSPACES="${WORKSPACES} ${BG}${CLICK_TARGET} ${NAME} ^ca()${BG_END}"
+        WORKSPACES="${WORKSPACES}${BG}${CLICK_TARGET} ${NAME} ^ca()${BG_END} "
     done
 
     echo "${WORKSPACES}"
