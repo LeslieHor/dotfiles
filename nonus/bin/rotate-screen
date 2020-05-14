@@ -26,4 +26,4 @@ xrandr -o ${DIRECTION}
 xinput set-prop "GXTP7386:00 27C6:0113" --type=float "Coordinate Transformation Matrix" ${MATRIX}
 xinput set-prop "GXTP7386:00 27C6:0113 UNKNOWN" --type=float "Coordinate Transformation Matrix" ${MATRIX}
 
-. ~/.config/i3status/run_dzen2_bar
+[ "${1}" != "startup"] && . ~/.config/i3status/run_dzen2_bar
