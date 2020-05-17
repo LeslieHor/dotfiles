@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+ARCHIVE_DL_DIR=~/Downloads/web_page_archive
+
+PREV=$(ls ${ARCHIVE_DL_DIR} | wc -l)
+xdotool key "Ctrl+Alt+1"
+
+while [ ${PREV} == $(ls ${ARCHIVE_DL_DIR} | wc -l) ]; do
+    sleep 1
+done
+
+cd ${ARCHIVE_DL_DIR}
+
+rename 'y/A-Z )(#][/a-z_____/' *.html
+rename 's/__*/_/g' ./*.html
+rename "s/[']//g" ./*.html
+
+for F in $(ls ./*.html); do
+    BARENAME=$(basename -s ".html" ${F})
+    STRIPPED_NAME=$(echo "${BARENAME}" | tr -d '.')
+    mv "${BARENAME}.html" "${STRIPPED_NAME}.html"
+done
+
+echo "Archived web page"
