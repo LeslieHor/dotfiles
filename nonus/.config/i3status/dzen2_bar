@@ -2,9 +2,11 @@
 
 i3c="${HOME}/.config/i3/i3c"
 
+DISPLAY_NUM=${1}
+
 # Data from i3c
-BAR_X=$(${i3c} dzen2-bar-x ${1})
-BAR_WIDTH=$(${i3c} dzen2-bar-width ${1})
+BAR_X=$(${i3c} dzen2-bar-x ${DISPLAY_NUM})
+BAR_WIDTH=$(${i3c} dzen2-bar-width ${DISPLAY_NUM})
 
 BAR_FONT="$(xrdb-query 'Leslie.bar.font')"
 CPU_SPEED_WARN=10
@@ -181,9 +183,34 @@ i3_keys_disabled() {
 }
 
 while sleep 1; do
+    # Evaluate variables
+    if [ $(( ${SECONDS} % 1 )) == 0 ] || [ ${SECONDS} -lt 3 ]; then
+        workspaces=$(workspaces ${DISPLAY_NUM})
+        active_display=$(active_display ${DISPLAY_NUM})
+        sticky_keys=$(sticky_keys)
+        date=$(date '+%Y-%m-%d %H:%M:%S')
+        volume=$(volume)
+    fi
+
+    if [ $(( ${SECONDS} % 5 )) == 0 ] || [ ${SECONDS} -lt 3 ]; then
+        cpu_speed=$(cpu_speed)
+        cpu_temps=$(cpu_temps)
+        ram=$(ram)
+        wifi=$(wifi)
+    fi
+
+    if [ $(( ${SECONDS} % 10 )) == 0 ] || [ ${SECONDS} -lt 3 ]; then
+        i3_keys_disabled=$(i3_keys_disabled)
+        battery=$(battery)
+    fi
+
+    if [ $(( ${SECONDS} % 600 )) == 0 ] || [ ${SECONDS} -lt 3 ]; then
+        diskusage_f=$(diskusage / 'F/')
+    fi
+
     # Left block
     left=""
-    left="${left}$(workspaces ${1})"
+    left="${left}${workspaces}"
 
     ## add margin for left side
     printf "^pa(${BAR_MARGIN})"
@@ -191,8 +218,8 @@ while sleep 1; do
 
     # Centre block
     centre=""
-    centre="${centre}$(active_display ${1})"
-    centre="${centre}$(i3_keys_disabled)"
+    centre="${centre}${active_display}"
+    centre="${centre}${i3_keys_disabled}"
 
     ## find the offset for the centre block
     width=$(dzen2-textwidth "${BAR_FONT}" "${centre}")
@@ -202,15 +229,15 @@ while sleep 1; do
 
     # Right block
     right=""
-    right="${right}$(wifi)"
-    right="${right}${SEP}$(cpu_speed)"
-    right="${right}${SEP}$(cpu_temps)"
-    right="${right}${SEP}$(diskusage / 'F/')"
-    right="${right}${SEP}$(ram)"
-    right="${right}${SEP}$(volume)"
-    right="${right}${SEP}$(battery)"
-    right="${right}${SEP}$(sticky_keys)"
-    right="${right}${SEP}$(date '+%Y-%m-%d %H:%M:%S')"
+    right="${right}${wifi}"
+    right="${right}${SEP}${cpu_speed}"
+    right="${right}${SEP}${cpu_temps}"
+    right="${right}${SEP}${diskusage_f}"
+    right="${right}${SEP}${ram}"
+    right="${right}${SEP}${volume}"
+    right="${right}${SEP}${battery}"
+    right="${right}${SEP}${sticky_keys}"
+    right="${right}${SEP}${date}"
 
     ## find the offset for the right block
     bare_text=$(echo "${right}" | sed "s/\^[a-z][a-z]([A-Za-z0-9#]*)//g")
