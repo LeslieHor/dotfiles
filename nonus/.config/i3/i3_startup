@@ -2,5 +2,6 @@
 
 # For computer specific commands
 
-exec rotate-screen startup
-exec setxkbmap -option caps:none
+rotate-screen startup
+setxkbmap -option caps:none
+xset s off ; xset -dpms ; xset s noblank

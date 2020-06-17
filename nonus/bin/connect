@@ -2,8 +2,8 @@
 
 case $1 in
 active)
-    FIRST=""
-    HOSTS=""
+    FIRST="adama"
+    HOSTS="agathon billy cally dualla lucy zarek zoe"
     ;;
 inactive)
     FIRST=""
@@ -16,12 +16,12 @@ inactive)
 esac
 
 tmux new-window "env HOST=${FIRST} ${SHELL}"
-tmux send-keys "ssh ${FIRST}" C-m
+tmux send-keys "echo ${FIRST}" C-m
 
 for HOST in ${HOSTS}
 do
     tmux split-window -h "env HOST=${HOST} ${SHELL}"
-    tmux send-keys "ssh ${HOST}" C-m
+    tmux send-keys "echo ${HOST}" C-m
     tmux select-layout tiled
 done
 

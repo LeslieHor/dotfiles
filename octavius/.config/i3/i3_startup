@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
 
 # For computer specific commands
+
+feh --bg-fill ~/wallpapers/single/kQmiQof.jpg
+xset s off ; xset -dpms ; xset s noblank

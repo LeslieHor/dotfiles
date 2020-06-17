@@ -55,11 +55,8 @@ command ril composite get_current_url | exclaim ril
 " Adds to org inbox
 command clip composite get_current_url | exclaim clip
 
-" Evaluates to: $ archive-web-page
-" Send keyboard commands to download web page using "SingleFile" and renames the
-" resulting file.
-" Assumes SingleFile is bound to Ctrl+Alt+1
-command archive exclaim archive-web-page
+" Evaluates to: $ monolith <CURRENT_URL>
+command archive composite js "'" + window.location.href + "' '" + btoa(window.document.title) + "'" | exclaim archive-web-page
 
 " ------------------------------------------------------------------------------
 " Misc settings

@@ -81,7 +81,7 @@ mode "cast-buffer" {
 mode "applications" {
     bindsym o exec dmenu_run -fn "terminus-8" ; $exit
     bindsym f exec firefox ; $exit
-    bindsym e exec emacsclient -c -n ; $exit
+    bindsym e exec e --hacky-exec-fix ; $exit
     bindsym t exec thunderbird ; $exit
 
     bindsym Escape $exit
