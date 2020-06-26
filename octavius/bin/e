@@ -46,4 +46,3 @@ if [ -z "${FILE}" ]; then
 else
     emacsclient ${CREATE_FRAME} -a 'false' --no-wait ${FILE} || emacs ${FILE}
 fi
-

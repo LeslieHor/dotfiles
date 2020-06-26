@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+emacsclient -c -a 'false' --no-wait --eval "(circ/startup/agenda)" || emacs --agenda
