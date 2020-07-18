@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-emacsclient -c -a 'false' --no-wait --eval "(circ/startup/inbox)" || emacs --inbox
+emacsclient -c -a 'false' --eval "(circ/startup/inbox)" || emacs --inbox
