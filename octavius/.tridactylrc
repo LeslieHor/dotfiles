@@ -58,6 +58,9 @@ command clip composite get_current_url | exclaim clip
 " Evaluates to: $ monolith <CURRENT_URL>
 command archive composite js "'" + window.location.href + "' '" + btoa(window.document.title) + "'" | exclaim archive-web-page
 
+" Open current url in mpv
+command mpv composite get_current_url | exclaim_quiet mpv
+
 " ------------------------------------------------------------------------------
 " Misc settings
 " ------------------------------------------------------------------------------

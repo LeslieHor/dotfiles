@@ -60,8 +60,6 @@ mode "frame" {
 }
 
 mode "buffer" {
-    bindsym y exec $i3c buffer-yank ; $exit
-    bindsym p exec $i3c buffer-paste ; $exit
     bindsym j exec $i3c jump-to-window ; $exit
     bindsym b exec $i3c bring-window ; $exit
     bindsym c $popup cast-buffer ; mode "cast-buffer"
@@ -138,7 +136,6 @@ bindsym $s1+7 exec $i3c focus-workspace 7
 bindsym $s1+8 exec $i3c focus-workspace 8
 bindsym $s1+9 exec $i3c focus-workspace 9
 bindsym $s1+0 exec $i3c focus-workspace 10
-
 bindsym $s1+h exec $i3c focus-left
 bindsym $s1+j exec $i3c focus-down
 bindsym $s1+k exec $i3c focus-up
@@ -161,6 +158,8 @@ bindsym $s2+h resize shrink width 2 px or 2 ppt
 bindsym $s2+j resize grow height 2 px or 2 ppt
 bindsym $s2+k resize shrink height 2 px or 2 ppt
 bindsym $s2+l resize grow width 2 px or 2 ppt
+bindsym $s2+y exec $i3c buffer-yank ; $exit
+bindsym $s2+p exec $i3c buffer-paste ; $exit
 
 ## SYS-3
 
