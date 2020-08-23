@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+case ${1} in
+    maindrive)
+        sudo mkdir -p /media/leslie/maindrive/
+        sudo mount -t cifs -o username=Administrator //tertiaseptima/maindrive /media/leslie/maindrive/
+        ;;
+    bay)
+        sudo mkdir -p /media/leslie/bay/
+        sudo mount -t cifs -o username=Administrator //tertiaseptima/bay /media/leslie/bay/
+        ;;
+    *)
+        echo "maindrive | bay"
+        ;;
+esac

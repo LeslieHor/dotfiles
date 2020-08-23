@@ -81,6 +81,7 @@ mode "applications" {
     bindsym f exec firefox ; $exit
     bindsym e exec e --hacky-exec-fix ; $exit
     bindsym t exec thunderbird ; $exit
+    bindsym m exec music ; $exit
 
     bindsym Escape $exit
 }
@@ -123,6 +124,9 @@ bindsym XF86MonBrightnessDown exec brightness-down
 bindsym XF86AudioRaiseVolume exec amixer -q set Master 2dB+
 bindsym XF86AudioLowerVolume exec amixer -q set Master 2dB-
 bindsym XF86AudioMute exec toggle-mute
+bindsym XF86AudioPlay exec mpc toggle
+bindsym XF86AudioNext exec mpc next
+bindsym XF86AudioPrev exec mpc prev
 
 ## SYS-1
 

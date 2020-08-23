@@ -27,7 +27,8 @@ elif [ "${1}" == "applications" ]; then
     TEXT="o - open application
 f - firefox
 e - emacs
-t - thunderbird"
+t - thunderbird
+m - music"
 
 elif [ "${1}" == "pass" ]; then
     TITLE="pass"

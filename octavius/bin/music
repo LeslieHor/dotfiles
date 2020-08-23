@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+
+DMENU="dmenu -i -l 30"
+
+
+# Find functions should return a list of files
+
+find_artist_album () {
+    ARTIST=$(mpc --format '%albumartist%' search artist '' |\
+                 sort -u | ${DMENU} -p "Artist:")
+    [ ${?} -gt 0 ] && exit 1
+    ALBUM=$(mpc --format '%album%' find albumartist "${ARTIST}" |\
+                sort -u | ${DMENU} -p "Artist Album:")
+    [ ${?} -gt 0 ] && exit 1
+    mpc find albumartist "${ARTIST}" album "${ALBUM}"
+}
+
+find_album () {
+    ARTISTALBUM=$(mpc --format '%albumartist%\t- %album%' search artist '' |\
+                      sort -u |\
+                      column -s$'\t' -t |\
+                      ${DMENU} -p "Album:")
+    [ ${?} -gt 0 ] && exit 1
+    ARTIST=$(echo "${ARTISTALBUM}" | awk -F'-' '{print $1}' | xargs)
+    ALBUM=$(echo "${ARTISTALBUM}" | awk -F'-' '{print $2}' | xargs)
+    mpc find albumartist "${ARTIST}" album "${ALBUM}"
+}
+
+find_song () {
+    ARTISTALBUM=$(mpc --format '%albumartist%\t- %album%\t- %track% - %title%' search artist '' |\
+                      column -s$'\t' -t |\
+                      ${DMENU} -p "Song:")
+    ARTIST=$(echo "${ARTISTALBUM}" | awk -F'-' '{print $1}' | xargs)
+    ALBUM=$(echo "${ARTISTALBUM}" | awk -F'-' '{print $2}' | xargs)
+    TITLE=$(echo "${ARTISTALBUM}" | awk -F'-' '{print $4}' | xargs)
+    mpc find albumartist "${ARTIST}" album "${ALBUM}" title "${TITLE}"
+}
+
+play () {
+    USER_INPUT=$(printf 'Append\nInsert\nReplace\n' | ${DMENU} -p 'Play:')
+    [ ${?} -gt 0 ] && exit 1
+    case "${USER_INPUT}" in
+        "Append")
+            printf "${1}" | mpc add
+            ;;
+        "Insert")
+            printf "${1}" | mpc insert
+            ;;
+        "Replace")
+            mpc clear
+            printf "${1}" | mpc add
+            mpc play
+            ;;
+    esac
+
+}
+
+queue () {
+    CURRENT_PLAY_POSITION=$(mpc --format '%position%' current)
+    mpc --format '%position%:\t \t%albumartist%\t%album%\t%track%. %title%\t\[%time%\]' playlist |\
+        sed "s/^${CURRENT_PLAY_POSITION}:\t /${CURRENT_PLAY_POSITION}:\t\>/" |\
+        column -s$'\t' -t |\
+        ${DMENU} -p "Queue:" |\
+        grep -oP '^[0-9]*'
+}
+
+while true; do
+    USER_INPUT=$(printf "Artist -> Album\nAlbum\nSong\nQueue Play\nQueue Delete\nQueue Delete All\nUpdate Library\n" |\
+                     ${DMENU} -p "Search by:")
+    [ ${?} -gt 0 ] && exit 0
+
+    case "${USER_INPUT}" in
+        "Artist -> Album")
+            RESULTS=$(find_artist_album)
+            [ ! -z "${RESULTS}" ] && play "${RESULTS}"
+            ;;
+        "Album")
+            RESULTS=$(find_album)
+            [ ! -z "${RESULTS}" ] && play "${RESULTS}"
+            ;;
+        "Song")
+            RESULTS=$(find_song)
+            [ ! -z "${RESULTS}" ] && play "${RESULTS}"
+            ;;
+        "Queue Play")
+            POS=$(queue)
+            mpc play "${POS}"
+            ;;
+        "Queue Delete")
+            while true; do
+                POS=$(queue)
+                [ ${?} -gt 0 ] && exit 0
+                mpc del "${POS}"
+            done
+            ;;
+        "Queue Delete All")
+            mpc clear
+            ;;
+        "Update Library")
+            mpc --wait update
+            notify-send "MPD libary updated"
+            exit 0
+            ;;
+    esac
+done

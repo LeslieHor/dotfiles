@@ -182,6 +182,29 @@ i3_keys_disabled() {
     cat ~/.config/i3/i3_keys_disabled_status
 }
 
+music() {
+    mpc_status=$(mpc --format '%albumartist% - %title%' status)
+    current_song=$(head -n1 <<< "${mpc_status}" | \
+                       sed "y/’/'/") # Clean up song titles
+
+    case $(sed '2q;d' <<< "${mpc_status}" | grep -oP '\[.*\]') in
+        "[playing]")
+            play_status="Playing"
+            ;;
+        "[paused]")
+            play_status="Paused"
+            ;;
+        *)
+            play_status=""
+            ;;
+    esac
+
+    track_pos=$(grep -oP '#[0-9]*/[0-9]*' <<< "${mpc_status}")
+    track_progress=$(grep -oP '#[0-9]*/[0-9]* *\K[0-9]*:[0-9]*/[0-9]*:[0-9]*' <<< "${mpc_status}")
+
+    echo "${FG_HEADER}MUS:${FG_END} [${play_status}] ${track_pos} - ${track_progress} - ${current_song}"
+}
+
 while sleep 1; do
     # Evaluate variables
     if [ $(( ${SECONDS} % 1 )) == 0 ] || [ ${SECONDS} -lt 3 ]; then
@@ -189,6 +212,7 @@ while sleep 1; do
         active_display=$(active_display ${DISPLAY_NUM})
         sticky_keys=$(sticky_keys)
         date=$(date '+%Y-%m-%d %H:%M:%S')
+        music=$(music)
     fi
 
     if [ $(( ${SECONDS} % 5 )) == 0 ] || [ ${SECONDS} -lt 3 ]; then
@@ -227,14 +251,19 @@ while sleep 1; do
 
     # Right block
     right=""
-    if [ "${DISPLAY_NUM}" == 2 ]; then
-        right="${right}${SEP}${cpu_speed}"
-        right="${right}${SEP}${cpu_temps}"
-        right="${right}${SEP}${diskusage_f}"
-        right="${right}${SEP}${diskusage_s}"
-        right="${right}${SEP}${ram}"
-        right="${right}${SEP}${sticky_keys}"
-    fi
+    case "${DISPLAY_NUM}" in
+        0)
+            right="${right}${SEP}${music}"
+            ;;
+        2)
+            right="${right}${SEP}${cpu_speed}"
+            right="${right}${SEP}${cpu_temps}"
+            right="${right}${SEP}${diskusage_f}"
+            right="${right}${SEP}${diskusage_s}"
+            right="${right}${SEP}${ram}"
+            right="${right}${SEP}${sticky_keys}"
+            ;;
+    esac
     right="${right}${SEP}${date}"
 
     ## find the offset for the right block

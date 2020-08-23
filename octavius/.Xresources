@@ -10,7 +10,7 @@ XTerm.termName: xterm-256color
 
 ! Font
 XTerm*faceName: Liberation Mono
-XTerm*faceSize: 7
+XTerm*faceSize: 9
 
 ! Fix the use of 'alt' key
 XTerm.vt100.metaSendsEscape: true

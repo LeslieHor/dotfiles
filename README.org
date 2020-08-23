@@ -82,6 +82,7 @@ window search to also find browser tabs.
 | =browser.tabs.opentabfor.middleclick=                 | =false= |
 | =layout.css.devPixelsPerPx=                           | =0.70=  |
 | =browser.fixup.alternative.enabled=                   | =false= |
+| =browser.urlbar.trimURLs=                             | =false= |
 
 *** Addons
 - Ublock origin
