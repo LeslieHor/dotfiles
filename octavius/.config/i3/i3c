@@ -430,8 +430,9 @@ class I3C:
         call(['i3-msg workspace number', len(workspace_nums) + 1])
 
     def prompt_for_window(self, prompt):
-        return call(['wmctrl -l |',
-                     'awk \'{printf $1" : "; for(i=4;i<=NF;i++) printf $i" "; print""}\' |',
+        return call(['wmctrl -lx |',
+                     'awk \'{printf "id:"$1",class:"$3",title:"; for(i=5;i<=NF;i++) printf $i" "; print""}\' |',
+                     'sed \'s/^id:\\(.*\\),class:.*\\.\\(.*\\),title:\\(.*\\)$/\\1 : [\\2]  ....  \\3/\' |',
                      'sort -t":" -k2 |',
                      'dmenu -i -fn "terminus-8" -l 10 -p "%s" | ' % prompt,
                      'awk \'{print $1}\'']).rstrip()
