@@ -197,7 +197,8 @@ music() {
     fi
 
     current_song=$(head -n1 <<< "${mpc_status}" | \
-                       sed "y/’/'/") # Clean up song titles
+                       sed "y/’‐ö/'-o/" | \
+                       tr -c "[:print:]\n" "?")
 
     case $(sed '2q;d' <<< "${mpc_status}" | grep -oP '\[.*\]') in
         "[playing]")
@@ -239,7 +240,7 @@ while sleep 1; do
 
     if [ $(( ${SECONDS} % 600 )) == 0 ] || [ ${SECONDS} -lt 3 ]; then
         diskusage_f=$(diskusage / 'F/')
-        diskusage_s=$(diskusage /media/leslie/slave/ 'S/')
+        diskusage_s=$(diskusage /mnt/slave/ 'S/')
     fi
 
     # Left block

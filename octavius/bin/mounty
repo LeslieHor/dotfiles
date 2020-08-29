@@ -2,12 +2,12 @@
 
 case ${1} in
     maindrive)
-        sudo mkdir -p /media/leslie/maindrive/
-        sudo mount -t cifs -o username=Administrator //tertiaseptima/maindrive /media/leslie/maindrive/
+        sudo mkdir -p /mnt/maindrive/
+        sudo mount -t cifs -o username=Administrator //tertiaseptima/maindrive /mnt/maindrive/
         ;;
     bay)
-        sudo mkdir -p /media/leslie/bay/
-        sudo mount -t cifs -o username=Administrator //tertiaseptima/bay /media/leslie/bay/
+        sudo mkdir -p /mnt/bay/
+        sudo mount -t cifs -o username=Administrator //tertiaseptima/bay /mnt/bay/
         ;;
     *)
         echo "maindrive | bay"
