@@ -6,12 +6,20 @@ DMENU="dmenu -i -l 30"
 # Find functions should return a list of files
 
 find_artist_album () {
-    ARTIST=$(mpc --format '%albumartist%' search artist '' |\
-                 sort -u | ${DMENU} -p "Artist:")
+    ARTIST=$((echo "<Random>" ; mpc --format '%albumartist%' search artist '' |\
+                 sort -u) | ${DMENU} -p "Artist:")
     [ ${?} -gt 0 ] && exit 1
-    ALBUM=$(mpc --format '%album%' find albumartist "${ARTIST}" |\
-                sort -u | ${DMENU} -p "Artist Album:")
+    if [ "${ARTIST}" == "<Random>" ]; then
+        ARTIST=$(mpc --format '%albumartist%' search artist '' | sort -R | head -n 1)
+    fi
+
+    ALBUM=$((echo "<Random>" ; mpc --format '%album%' find albumartist "${ARTIST}" |\
+                sort -u) | ${DMENU} -p "Artist Album:")
     [ ${?} -gt 0 ] && exit 1
+    if [ "${ALBUM}" == "<Random>" ]; then
+        ALBUM=$(mpc --format '%album%' find albumartist "${ARTIST}" | sort -R | head -n 1)
+    fi
+
     mpc find albumartist "${ARTIST}" album "${ALBUM}"
 }
 
@@ -37,18 +45,19 @@ find_song () {
 }
 
 play () {
+    SONGS="${1}"
     USER_INPUT=$(printf 'Append\nInsert\nReplace\n' | ${DMENU} -p 'Play:')
     [ ${?} -gt 0 ] && exit 1
     case "${USER_INPUT}" in
         "Append")
-            printf "${1}" | mpc add
+            printf "${SONGS}" | mpc add
             ;;
         "Insert")
-            printf "${1}" | mpc insert
+            printf "${SONGS}" | mpc insert
             ;;
         "Replace")
             mpc clear
-            printf "${1}" | mpc add
+            printf "${SONGS}" | mpc add
             mpc play
             ;;
     esac
