@@ -190,7 +190,8 @@ music() {
         return
     fi
 
-    if [ "$(printf ${mpc_status} | wc -l)" -lt 2 ]; then
+    line_count=$(wc -l <<< "${mpc_status}")
+    if [ "${line_count}" -lt 2 ]; then
         echo "${FG_HEADER}MUS:${FG_END} ${FG_INACTIVE}No track loaded${FG_END}"
         return
     fi
