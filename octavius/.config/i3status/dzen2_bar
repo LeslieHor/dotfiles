@@ -184,6 +184,17 @@ i3_keys_disabled() {
 
 music() {
     mpc_status=$(mpc --format '%albumartist% - %title%' status)
+
+    if [ "$?" -gt 0 ]; then
+        echo "${FG_HEADER}MUS:${FG_END} ${FG_OFF}MPD not running${FG_END}"
+        return
+    fi
+
+    if [ "$(printf ${mpc_status} | wc -l)" -lt 2 ]; then
+        echo "${FG_HEADER}MUS:${FG_END} ${FG_INACTIVE}No track loaded${FG_END}"
+        return
+    fi
+
     current_song=$(head -n1 <<< "${mpc_status}" | \
                        sed "y/’/'/") # Clean up song titles
 

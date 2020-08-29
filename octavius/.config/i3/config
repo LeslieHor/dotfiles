@@ -82,6 +82,8 @@ mode "applications" {
     bindsym e exec e --hacky-exec-fix ; $exit
     bindsym t exec thunderbird ; $exit
     bindsym m exec music ; $exit
+    bindsym r exec $i3c find-or-open "Navigator.Firefox" "Tiny Tiny RSS - Mozilla Firefox" "firefox 'http://zarek/rssreader/index.php'" ; $exit
+    bindsym n exec $i3c find-or-open "netflix.com.Google-chrome" "Netflix" "netflix" ; $exit
 
     bindsym Escape $exit
 }
@@ -146,7 +148,8 @@ bindsym $s1+k exec $i3c focus-up
 bindsym $s1+l exec $i3c focus-right
 
 bindsym $s1+q kill
-bindsym $s1+c exec $i3c collapse-group
+#bindsym $s1+c exec $i3c collapse-group
+bindsym $s1+c move container to workspace hidden
 bindsym $s1+b $popup buffer ; mode "buffer"
 bindsym $s1+o $popup applications ; mode "applications"
 bindsym $s1+w $popup window ; mode "window"
