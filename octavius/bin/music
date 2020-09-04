@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-DMENU="dmenu -i -l 30"
+DMENU="dmenu -fn terminus-8 -i -l 50"
 
 
 # Find functions should return a list of files

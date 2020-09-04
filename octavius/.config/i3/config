@@ -202,6 +202,8 @@ bindsym $s4+a [class="Emacs"] scratchpad show
 for_window [class="Wfica_Seamless"] floating enable
 mouse_warping none
 
+exec --no-startup-id xrandr --output DP-1-1 --auto --right-of DVI-I-1
+exec --no-startup-id xrandr --output DVI-D-1 --auto --right-of DP-1-1
 exec_always --no-startup-id ~/.config/i3status/run_dzen2_bar
 
 exec --no-startup-id keynav

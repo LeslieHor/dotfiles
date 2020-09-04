@@ -2,10 +2,6 @@
 
 # For computer specific commands
 
-xrandr --output DP-1-1 --auto --right-of DVI-I-1
-xrandr --output DVI-D-1 --auto --right-of DP-1-1
-
-. ~/.config/i3status/run_dzen2_bar
-
+mpd
 feh --bg-fill ~/wallpapers/triple/grand_canyon/{0,1,2}.jpg
 xset s off ; xset -dpms ; xset s noblank
