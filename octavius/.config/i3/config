@@ -146,6 +146,7 @@ bindsym $s1+h exec $i3c focus-left
 bindsym $s1+j exec $i3c focus-down
 bindsym $s1+k exec $i3c focus-up
 bindsym $s1+l exec $i3c focus-right
+bindsym $s1+m exec bring-mouse
 
 bindsym $s1+q kill
 #bindsym $s1+c exec $i3c collapse-group
@@ -167,6 +168,7 @@ bindsym $s2+k resize shrink height 2 px or 2 ppt
 bindsym $s2+l resize grow width 2 px or 2 ppt
 bindsym $s2+y exec $i3c buffer-yank ; $exit
 bindsym $s2+p exec $i3c buffer-paste ; $exit
+bindsym $s1+m exec banish-mouse
 
 ## SYS-3
 

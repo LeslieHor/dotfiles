@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+DATA=$(xdotool getactivewindow getwindowgeometry)
+POS=$(grep -oP 'Position: \K[0-9]*,[0-9]*' <<< "${DATA}")
+GEO=$(grep -oP 'Geometry: \K[0-9]*x[0-9]*' <<< "${DATA}")
+POS_X=$(awk -F',' '{print $1}' <<< "${POS}")
+POS_Y=$(awk -F',' '{print $2}' <<< "${POS}")
+GEO_X=$(awk -F'x' '{print $1}' <<< "${GEO}")
+GEO_Y=$(awk -F'x' '{print $2}' <<< "${GEO}")
+
+CENTRE_X=$(( "${POS_X}" + ( "${GEO_X}" / 2 ) ))
+CENTRE_Y=$(( "${POS_Y}" + ( "${GEO_Y}" / 2 ) ))
+
+xdotool mousemove ${CENTRE_X} ${CENTRE_Y}

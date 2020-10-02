@@ -294,6 +294,7 @@ while sleep 1; do
 done | dzen2 -dock \
              -ta l \
              -x ${BAR_X} \
+             -y "9999" \
              -w ${BAR_WIDTH} \
              -fg ${BAR_FG} \
              -bg ${BAR_BG} \
