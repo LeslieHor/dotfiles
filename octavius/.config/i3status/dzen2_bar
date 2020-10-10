@@ -196,9 +196,8 @@ music() {
         return
     fi
 
-    current_song=$(head -n1 <<< "${mpc_status}" | \
-                       sed "y/’‐ö/'-o/" | \
-                       tr -c "[:print:]\n" "?")
+    current_song="$(head -n1 <<< "${mpc_status}" | \
+                       tr -d '\200-\277' | tr '\300-\377' '[#*]')"
 
     case $(sed '2q;d' <<< "${mpc_status}" | grep -oP '\[.*\]') in
         "[playing]")
@@ -225,7 +224,7 @@ while sleep 1; do
         active_display=$(active_display ${DISPLAY_NUM})
         sticky_keys=$(sticky_keys)
         date=$(date '+%Y-%m-%d %H:%M:%S')
-        music=$(music)
+        music="$(music)"
     fi
 
     if [ $(( ${SECONDS} % 5 )) == 0 ] || [ ${SECONDS} -lt 3 ]; then
@@ -285,7 +284,7 @@ while sleep 1; do
     offset=$((${BAR_WIDTH} - ${width} - ${BAR_MARGIN}))
 
     # Correct percentage signs
-    right=$(echo ${right} | sed 's/%/%%/g')
+    right="$(echo ${right} | sed 's/%/%%/g')"
 
     printf "^pa(${offset})"
     printf "${right}"
@@ -294,7 +293,7 @@ while sleep 1; do
 done | dzen2 -dock \
              -ta l \
              -x ${BAR_X} \
-             -y "9999" \
+             -y "0" \
              -w ${BAR_WIDTH} \
              -fg ${BAR_FG} \
              -bg ${BAR_BG} \
