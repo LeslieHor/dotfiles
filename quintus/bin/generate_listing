@@ -1,0 +1,9 @@
+#!/bin/bash
+
+ID=$(basename $(pwd))
+
+for f in $(find -type f); do
+    [[ "${f}" == *".chk" ]] && continue
+    MD5=$(grep "${f}" ./*.chk | awk '{print $1}')
+    echo "${f},$(wc -c < ${f}),${MD5}" | sed "s/^./${ID}/"
+done

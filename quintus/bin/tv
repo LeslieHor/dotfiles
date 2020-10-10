@@ -1,0 +1,382 @@
+#!/usr/bin/env python
+
+import json
+import sys
+import os
+import re
+import subprocess
+
+# Example config file:
+# {"library_path": "/mnt/TV",
+#  "extensions": [".avi", ".m4v", ".mkv", ".mp4", ".webm"],
+#  "video_command": "mpv '%s'"}
+
+# Example empty data file:
+# {"shows": []}
+
+CONFIG_FILE = "~/.config/tv-tracker/config.json"
+DATA_FILE = "~/.config/tv-tracker/data.json"
+
+# ------------------------------------------------------------------------------
+# Utils
+# ------------------------------------------------------------------------------
+
+DATA = []
+def data():
+    global DATA
+    if (len(DATA) <= 0):
+        with open(os.path.expanduser(DATA_FILE), 'r') as JsonData:
+            DATA = json.load(JsonData)
+    return DATA
+
+CONFIG = []
+def config():
+    global CONFIG
+    if (len(CONFIG) <= 0):
+        with open(os.path.expanduser(CONFIG_FILE), 'r') as JsonData:
+            CONFIG = json.load(JsonData)
+    return CONFIG
+
+def save_data(Json):
+    with open(os.path.expanduser(DATA_FILE), 'w') as JsonFile:
+        json.dump(Json, JsonFile)
+
+def recursive_list_dir(DirName):
+    ListOfFile = os.listdir(DirName)
+    CompleteFileList = []
+    for File in ListOfFile:
+        CompletePath = os.path.join(DirName, File)
+        if os.path.isdir(CompletePath):
+            CompleteFileList = CompleteFileList + recursive_list_dir(CompletePath)
+        else:
+            CompleteFileList.append(CompletePath)
+
+    return CompleteFileList
+
+def get_show_dir(ShowName):
+    return "%s/%s" % (config()["library_path"], ShowName)
+
+def get_episodes(ShowName, Basename=False):
+    ShowFiles = recursive_list_dir(get_show_dir(ShowName))
+    ShowFiles = [E for E in ShowFiles
+                 if os.path.splitext(E)[1] in config()["extensions"]]
+    if Basename:
+        ShowFiles = [os.path.basename(E) for E in ShowFiles]
+    return ShowFiles
+
+def get_season_episode(Title):
+    SeasonEpisodeSearchSE = re.search(' S([0-9]*)E([0-9]*) ', Title, re.IGNORECASE)
+    SeasonEpisodeSearchX = re.search(' ([0-9]*)x([0-9]*) ', Title, re.IGNORECASE)
+
+    if SeasonEpisodeSearchSE:
+        return (int(SeasonEpisodeSearchSE.group(1)),
+                int(SeasonEpisodeSearchSE.group(2)))
+    elif SeasonEpisodeSearchX:
+        return (int(SeasonEpisodeSearchX.group(1)),
+                int(SeasonEpisodeSearchX.group(2)))
+    return False
+
+def sort_episodes_list(EpisodesList):
+    return sorted(EpisodesList, cmp=episode_compare)
+
+def episode_compare(E1, E2):
+    if (E1["season"] < E2["season"]):
+        return -1
+    elif (E2["season"] < E1["season"]):
+        return 1
+    elif (E1["episode"] < E2 ["episode"]):
+        return -1
+    elif (E2["episode"] < E1 ["episode"]):
+        return 1
+    else:
+        return 0
+
+def get_episode(Season, Episode, EpisodeList):
+    Results = [E for E in EpisodeList
+               if (E["season"] == Season and
+                   E["episode"] == Episode)]
+    if (len(Results) == 1):
+        return Results[0]
+    return None
+
+def get_last_episode(Show):
+    [LastSeason, LastEpisode] = Show["last_watched"]
+    return get_episode(LastSeason, LastEpisode, Show["episodes"])
+
+def next_episode(Season, Episode, EpisodeList):
+    NextEpisode = Episode + 1
+    Result = get_episode(Season, NextEpisode, EpisodeList)
+    if Result:
+        return Result
+
+    NextSeason = Season + 1
+    NextEpisode = 1
+    Result = get_episode(NextSeason, NextEpisode, EpisodeList)
+    if Result:
+        return Result
+
+    return False
+
+def get_next_episode(Show):
+    [LastSeason, LastEpisode] = Show["last_watched"]
+    Episodes = Show["episodes"]
+    NextEpisode = next_episode(LastSeason, LastEpisode, Episodes)
+    return NextEpisode
+
+def search_for_show(SearchTerm):
+    FilteredShows = [S for S in data()["shows"]
+                     if SearchTerm.lower() in S["show_title"].lower()]
+
+    if (len(FilteredShows) == 0):
+        print("No shows found for search term: %s" % SearchTerm)
+        exit(1)
+    elif (1 < len(FilteredShows)):
+        print("Multiple shows found, please select one:")
+        Index = 0
+        for Show in FilteredShows:
+            Index += 1
+            ShowTitle = Show["show_title"]
+            NextEpisode = get_next_episode(Show)
+            if NextEpisode:
+                NextEpisodeTitle = NextEpisode["title"]
+            else:
+                NextEpisodeTitle = "=== NO MORE EPISODES ==="
+            print("%s: %s - %s" % (Index, ShowTitle, NextEpisodeTitle))
+        print("")
+        ShowIndex = int(input("> "))
+        Show = FilteredShows[ShowIndex - 1]
+    else:
+        Show = FilteredShows[0]
+
+    return Show
+
+def print_episodes(Show):
+    Index = 0
+    for Episode in Show["episodes"]:
+        Index += 1
+
+        EpisodeTitle = Episode["title"]
+        Watched = Episode["watched"]
+
+        IndexStr = str(Index).rjust(3, " ")
+        if Watched:
+            WatchedStr = "W"
+        else:
+            WatchedStr = "U"
+
+        print("%s: %s %s" % (IndexStr, WatchedStr, EpisodeTitle))
+
+# ------------------------------------------------------------------------------
+# API
+# ------------------------------------------------------------------------------
+
+def print_help():
+    print("Usage:")
+    print("")
+    print("tv add <SEARCH_TERM>")
+    print("tv list-ext")
+    print("tv ls [SEARCH_TERM]")
+    print("tv watch [SEARCH_TERM]")
+    print("tv fast-forward [SEARCH_TERM]")
+
+def add(SearchTerm):
+    SearchTerm = SearchTerm.lower()
+    print("Searching for: %s" % (SearchTerm))
+    Shows = os.listdir(config()["library_path"])
+    FilteredList = []
+    for I in range(len(Shows)):
+        CurrentShow = Shows[I]
+        if SearchTerm in CurrentShow.lower():
+            FilteredList.append(CurrentShow)
+    print("")
+    print("Results:")
+    for I in range(1, len(FilteredList) + 1):
+        CurrentShow = FilteredList[I - 1]
+        print("%s: %s" % (I, CurrentShow))
+    print("")
+    print("'q' to quit.")
+    print("")
+
+    UserInput = raw_input("> ")
+
+    if (UserInput == "q"):
+        exit(0)
+
+    Index = int(UserInput)
+    SelectedShow = FilteredList[Index - 1]
+    print("Selected Show: %s" % (SelectedShow))
+
+    if SelectedShow in data()["shows"]:
+        print("Show already exists")
+        return
+
+    Episodes = get_episodes(SelectedShow)
+    print("Found %s episodes" % len(Episodes))
+
+    ShowData = {}
+    ShowData["show_title"] = SelectedShow
+    ShowData["last_watched"] = [0, 0]
+    EpisodesData = []
+    for Episode in Episodes:
+        EpisodeTitle = os.path.basename(Episode)
+        (SeasonNumber, EpisodeNumber) = get_season_episode(EpisodeTitle)
+
+        EpisodeData = {}
+        EpisodeData["path"] = Episode
+        EpisodeData["title"] = EpisodeTitle
+        EpisodeData["watched"] = False
+        EpisodeData["season"] = SeasonNumber
+        EpisodeData["episode"] = EpisodeNumber
+        EpisodesData.append(EpisodeData)
+    EpisodesData = sort_episodes_list(EpisodesData)
+    ShowData["episodes"] = EpisodesData
+
+    NewData = data()
+    NewData["shows"].append(ShowData)
+    save_data(NewData)
+    print("Show added")
+    return
+
+def list_extensions():
+    AllFiles = recursive_list_dir(config()["library_path"])
+    CountDict = {}
+    for File in AllFiles:
+        Extension = os.path.splitext(File)[1]
+        if Extension in CountDict:
+            CountDict[Extension] += 1
+        else:
+            CountDict[Extension] = 1
+
+    for Extension, Count in CountDict.items():
+        print("%s: %s" % (Extension, Count))
+
+def list_episodes(SearchTerm):
+    Show = search_for_show(SearchTerm)
+    ShowTitle = Show["show_title"]
+    LastEpisode = get_last_episode(Show)
+    NextEpisode = get_next_episode(Show)
+
+    print("Show: %s" % (ShowTitle))
+    print("")
+    print("Episodes:")
+
+    print_episodes(Show)
+
+def list_shows():
+    ShowData = []
+    for Show in data()["shows"]:
+        ShowPreviewData = {}
+        ShowPreviewData["title"] = Show["show_title"]
+
+        try:
+            Episodes = Show["episodes"]
+            NextEpisode = get_next_episode(Show)
+            NextEpisodeTitle = NextEpisode["title"]
+            ShowPreviewData["next_episode_title"] = NextEpisodeTitle
+        except:
+            ShowPreviewData["next_episode_title"] = "=== NO MORE EPISODES! ==="
+
+        ShowData.append(ShowPreviewData)
+
+    Index = 0
+    for Show in ShowData:
+        ShowTitle = Show["title"]
+        NextEpisodeTitle = Show["next_episode_title"]
+        Index += 1
+        print("%s: %s - %s" % (Index, ShowTitle, NextEpisodeTitle))
+
+def watch(SearchTerm):
+    Show = search_for_show(SearchTerm)
+
+    ShowTitle = Show["show_title"]
+    Episode = get_next_episode(Show)
+
+    EpisodeTitle = Episode["title"]
+    EpisodePath = Episode["path"]
+
+    print("Found show: %s" % (ShowTitle))
+    print("Playing: %s" % (EpisodeTitle))
+    print("")
+    SanitisedPath = EpisodePath.replace('"', '\"')
+    print SanitisedPath
+    Command = config()["video_command"] % (SanitisedPath)
+    print Command
+    os.system(Command),
+
+    NewLastSeason = Episode["season"]
+    NewLastEpisode = Episode["episode"]
+    Episode["watched"] = True
+
+    Show["last_watched"] = [NewLastSeason, NewLastEpisode]
+    save_data(data())
+
+def fast_forward(SearchTerm):
+    Show = search_for_show(SearchTerm)
+
+    ShowTitle = Show["show_title"]
+    print("")
+    print("Episodes:")
+
+    print_episodes(Show)
+
+    print("")
+    print("Enter index of last watched:")
+    print("'q' to quit")
+    UserInput = raw_input("> ")
+
+    if UserInput == 'q':
+        exit(0)
+
+    Index = int(UserInput) - 1
+
+    Episode = Show["episodes"][Index]
+
+    S, E = 0, 0
+    for I in range(0, Index):
+        Episode = Show["episodes"][I]
+        print("Setting watched: %s" % (Episode["title"]))
+        Episode["watched"] = True
+        S = Episode["season"]
+        E = Episode["episode"]
+
+    print("Setting last watched to season %s, episode %s" % (S, E))
+    Show["last_watched"] = [S, E]
+    save_data(data())
+
+if (len(sys.argv) <= 1):
+    print_help()
+    exit(1)
+
+if (not os.path.exists(config()["library_path"])):
+    print("Library path does not exist!")
+    exit(1)
+
+Command = sys.argv[1]
+
+if Command == "help":
+    print_help()
+elif Command == "add":
+    if (len(sys.argv) <= 2):
+        print_help()
+        exit(1)
+    add(sys.argv[2])
+elif Command == "list-ext":
+    list_extensions()
+elif Command == "ls":
+    if (len(sys.argv) <= 2):
+        list_shows()
+    else:
+        list_episodes(sys.argv[2])
+elif Command == "watch":
+    if (len(sys.argv) <= 2):
+        watch("")
+    else:
+        watch(sys.argv[2])
+elif Command == "fast-forward":
+    if (len(sys.argv) <= 2):
+        fast_forward("")
+    else:
+        fast_forward(sys.argv[2])
+else:
+    print_help()
+    exit(1)

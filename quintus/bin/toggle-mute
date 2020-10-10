@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+if amixer get Master | grep -q '\[off\]'; then
+    amixer -q set Master unmute
+    amixer -q set Headphone unmute
+    amixer -q set Speaker unmute
+else
+    amixer -q set Master mute
+    amixer -q set Headphone mute
+    amixer -q set Speaker mute
+fi

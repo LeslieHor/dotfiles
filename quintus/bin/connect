@@ -1,0 +1,30 @@
+#!/bin/bash
+
+case $1 in
+active)
+    FIRST="adama"
+    HOSTS="agathon billy cally dualla lucy zarek zoe"
+    ;;
+inactive)
+    FIRST=""
+    HOSTS=""
+    ;;
+*)
+    FIRST=${1}
+    HOSTS="${@:2}"
+    ;;
+esac
+
+tmux new-window "env HOST=${FIRST} ${SHELL}"
+tmux send-keys "echo ${FIRST}" C-m
+
+for HOST in ${HOSTS}
+do
+    tmux split-window -h "env HOST=${HOST} ${SHELL}"
+    tmux send-keys "echo ${HOST}" C-m
+    tmux select-layout tiled
+done
+
+tmux setw synchronize-panes on
+tmux select-pane -t 0
+tmux rename-window connect

@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+MINI_POPUP=~/.config/i3/mini_popup
+
+if [ "${1}" == "window" ]; then
+    TITLE="window"
+    TEXT="h - split right
+v - split vertical
+u - focus parent
+d - focus child
+m - toggle fullscreen
+f - toggle floating"
+
+elif [ "${1}" == "buffer" ]; then
+    TITLE="buffer"
+    TEXT="j - jump to window
+b - bring window
+c - cast buffer"
+
+elif [ "${1}" == "frame" ]; then
+    TITLE="frame"
+    TEXT="r - rename workspace
+c - create new workspace"
+
+elif [ "${1}" == "applications" ]; then
+    TITLE="applications"
+    TEXT="o - open application
+f - firefox
+e - emacs
+t - thunderbird
+m - music
+r - rss
+n - netflix"
+
+elif [ "${1}" == "pass" ]; then
+    TITLE="pass"
+    TEXT="u - type user
+p - type pass
+b - type user and pass
+U - copy user
+P - copy pass"
+elif [ "${1}" == "cast-buffer" ]; then
+    TITLE="cast buffer"
+    TEXT="h - cast buffer left
+j - cast buffer down
+k - cast buffer up
+l - cast buffer right"
+elif [ "${1}" == "utils" ]; then
+    TITLE="utils"
+    TEXT="d - disable i3 bindings
+r - restart i3
+l - logout"
+
+fi
+
+${MINI_POPUP} "${TITLE}" "${TEXT}"

@@ -1,0 +1,76 @@
+" Lines beginning with double quotes are comments
+
+" ------------------------------------------------------------------------------
+" Bindings
+" ------------------------------------------------------------------------------
+
+bind q tabclose
+bind d scrollpage 0.5
+bind u scrollpage -0.5
+bind I mode ignore
+
+" Allow youtube keys
+unbindurl youtube.com/watch/* a
+unbindurl youtube.com/watch/* s
+unbindurl youtube.com/watch/* d
+unbindurl youtube.com/watch/* j
+unbindurl youtube.com/watch/* k
+unbindurl youtube.com/watch/* l
+
+" Allow rss reader keys
+unbindurl zarek/rssreader/index.php n
+unbindurl zarek/rssreader/index.php p
+unbindurl zarek/rssreader/index.php o
+unbindurl zarek/rssreader/index.php j
+unbindurl zarek/rssreader/index.php k
+unbindurl zarek/rssreader/index.php s
+unbindurl zarek/rssreader/index.php S
+
+" Open links in new windows rather than new tabs
+bind F hint -w
+bind t fillcmdline winopen
+bind T current_url winopen
+
+" Undo tab close
+bind X undo
+
+" Comment toggler for Reddit and Hacker News
+bind ;c hint -c [class*="expand"],[class="togg"]
+
+" Allow Ctrl-a to select all in the commandline
+unbind --mode=ex <C-a>
+
+" Allow Ctrl-c to copy in the commandline
+unbind --mode=ex <C-c>
+
+" ------------------------------------------------------------------------------
+" Custom Commands
+" ------------------------------------------------------------------------------
+
+" Evaluates to: $ ril <CURRENT_URL>
+" Adds to read it later rss feed
+command ril composite get_current_url | exclaim ril
+
+" Evaluates to: $ clip <CURRENT_URL>
+" Adds to org inbox
+command clip composite get_current_url | exclaim clip
+
+" Evaluates to: $ monolith <CURRENT_URL>
+command archive composite js "'" + window.location.href + "' '" + btoa(window.document.title) + "'" | exclaim archive-web-page
+
+" Open current url in mpv
+command mpv composite get_current_url | exclaim_quiet mpv
+
+" ------------------------------------------------------------------------------
+" Misc settings
+" ------------------------------------------------------------------------------
+
+" Hacker mode
+colourscheme dark
+
+" Sane hinting mode
+set hintfiltermode vimperator-reflow
+set hintnames numeric
+
+" Defaults to 300ms
+set hintdelay 100

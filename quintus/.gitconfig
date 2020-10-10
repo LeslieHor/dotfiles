@@ -1,0 +1,6 @@
+[user]
+    email = Leslie.Hor@Gmail.com
+    name = Leslie Hor
+
+[difftool "ediff"]
+    cmd = emacsclient --eval \"(ediff-files \\\"$LOCAL\\\" \\\"$REMOTE\\\")\"

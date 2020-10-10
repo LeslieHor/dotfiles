@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+killall dzen2 || true
+for N in $(~/.config/i3/i3c get-output-nums); do
+    ~/.config/i3status/dzen2_bar ${N} &
+done
