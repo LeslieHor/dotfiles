@@ -110,6 +110,10 @@ class I3C:
             data = self._get_windows_with_parent_data(node, self._get_parent_data(tree))
             d += data
 
+        for node in tree['floating_nodes']:
+            data = self._get_windows_with_parent_data(node, self._get_parent_data(tree))
+            d += data
+
         return d
 
     def _get_parent_data(self, node):
