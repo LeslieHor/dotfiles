@@ -1,0 +1,1 @@
+{"layout": "tabbed", "type": "con", "nodes": [{"name": "Empty Container", "marks": ["new_empty_container"], "swallows": [{"class": "^$"}], "type": "con"}]}

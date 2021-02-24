@@ -5,6 +5,8 @@ import subprocess
 import sys
 import time
 
+EMPTY_CONTAINER_PATH = '~/.config/i3/empty-container.json'
+
 def i3(*args):
     new_list = []
     for item in args:
@@ -91,7 +93,6 @@ class I3C:
     def get_visible_workspaces(self):
         return filter(lambda w: w['visible'], self.get_workspaces())
 
-
     def get_windows_with_parent_data(self):
         data = self._get_windows_with_parent_data(self.get_tree(),
                                                   self._get_parent_data(self.get_tree()))
@@ -132,27 +133,27 @@ class I3C:
             d += data
         return d
 
-    def get_empty_window(self):
-        empty_window = filter(lambda w: \
-                              (w['deco_rect']['x'] != 0 or \
-                               w['deco_rect']['y'] != 0 or \
-                               w['deco_rect']['width'] != 0 or \
-                               w['deco_rect']['height'] != 0) \
-                              and \
-                              (w['window_rect']['x'] == 0 and \
-                               w['window_rect']['y'] == 0 and \
-                               w['window_rect']['width'] == 0 and \
-                               w['window_rect']['height'] == 0)
-                              and \
-                              w['name'] == None, \
-                              self.get_all_leafs())[0]
-
-        return empty_window
+    def get_new_empty_container(self):
+        leafs = filter(lambda w: 'marks' in w, self.get_all_leafs())
+        empty_container = filter(lambda w: 'new_empty_container' in w['marks'],
+                                 leafs)[0]
+        return empty_container
 
     def sleep_focus(self, num):
         # Sleep due to race condition with i3 changing focus after the second move
         time.sleep(0.1)
         i3('workspace', 'number', num)
+
+    def create_empty_container(self):
+        i3('append_layout', EMPTY_CONTAINER_PATH)
+        self.get_tree(True)
+        empty_container = self.get_new_empty_container()
+        empty_container_id = empty_container['id']
+        empty_container_str = '[con_id=' + str(empty_container_id) + ']'
+        i3(empty_container_str, 'focus')
+        i3(empty_container_str, 'unmark', 'new_empty_container')
+        timestamp = time.time(),
+        i3(empty_container_str, 'mark --add empty_container_%s' % (timestamp))
 
     def swap_workspace(self, direction):
         "Swap workspaces"
@@ -180,6 +181,17 @@ class I3C:
 
     def focus_workspace(self, num):
         "Focus on a workspace. If it is not visible, bring it to the current display"
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+        # If there is only one window on the desktop, and it is an empty
+        # container, kill it.
+        if self.number_of_windows_on_current_desktop() <= 1 and \
+           self.is_empty_container(focused_window):
+            empty_container_id = focused_window['id']
+            selector_str = '[con_id=' + str(empty_container_id) + ']'
+            i3(selector_str, 'kill')
 
         focused_workspace = self.get_focused_workspace()
         focused_display = focused_workspace['output']
@@ -188,6 +200,8 @@ class I3C:
         i3('workspace', 'number', num)
         if target_workspace == []:
             # Workspace didn't exist, new one will be created, so no need to swap
+            # New workspaces need an empty container
+            self.create_empty_container()
             return
         target_workspace = target_workspace[0]
 
@@ -344,19 +358,7 @@ class I3C:
         focused_window_id = focused_window['id']
         i3('focus', 'parent')
         i3('split', direction)
-        call(['i3-msg', 'open']) # TODO anything else?
-        self.get_tree(True)
-        empty_window = self.get_empty_window()
-        empty_window_id = empty_window['id']
-
-        focused_window_str = '[con_id=' + str(focused_window_id) + ']'
-        empty_window_str = '[con_id=' + str(empty_window_id) + ']'
-
-        i3(focused_window_str, 'move', 'container', 'to', 'workspace', 'temp')
-        i3(empty_window_str, 'focus')
-        i3(focused_window_str, 'move', 'container', 'to', 'workspace', 'current')
-        i3(empty_window_str, 'kill')
-        i3(focused_window_str, 'focus')
+        self.create_empty_container()
 
         self.get_tree(True)
         new_parent_window_data = self.get_windows_with_parent_data()
@@ -367,10 +369,10 @@ class I3C:
             i3('layout', 'tabbed')
 
     def buffer_yank(self, mark='window-buffer'):
-        i3('mark', mark)
+        i3('mark --add %s' % (mark))
 
     def buffer_paste(self, mark='window-buffer'):
-        i3('mark', 'paste-target')
+        i3('mark --add paste-target')
         i3('[con_mark="' + mark + '"]', 'move', 'container', 'to', 'mark', 'paste-target')
         i3('[con_mark="' + mark + '"]', 'focus')
         i3('unmark', 'paste-target')
@@ -428,16 +430,62 @@ class I3C:
         workspace = filter(lambda w: w['focused'], self.get_workspaces())[0]
         active_display = workspace['output']
         displays = self.get_displays()
-        print displays.index(active_display)
+        print(displays.index(active_display))
 
-    def rename_workspace(self, name):
+    def get_workspace_nums(self):
+        workspace_nums = [str(ws['num']) for ws in self.get_workspaces()]
+        print(' '.join(workspace_nums))
+
+    def init_populate_with_empty_containers(self):
+        active_workspace = filter(lambda w: w['focused'], self.get_workspaces())[0]
+        workspace_nums = [str(ws['num']) for ws in self.get_workspaces()]
+        for num in workspace_nums:
+            i3('workspace', 'number', num)
+            self.create_empty_container()
+        i3('workspace', 'number', active_workspace['num'])
+
+    def rename_workspace(self, name=''):
         workspace = filter(lambda w: w['focused'], self.get_workspaces())[0]
         workspace_num = workspace['num']
-        new_name = '"%s: %s"' % (workspace_num, name)
+
+        index_in_name = name.split(': ')[0]
+        try:
+            index_in_name = int(index_in_name)
+            name = name.split(': ')[1]
+        except:
+            index_in_name = -1
+
+        just_a_number = False
+        try:
+            new_index = int(name)
+            just_a_number = True
+        except:
+            just_a_number = False
+
+        if name == '':
+            new_name = '"%s"' % (workspace_num)
+        elif just_a_number:
+            new_name = '"%s"' % (new_index)
+        elif 0 < index_in_name:
+            new_name = '"%s: %s"' % (index_in_name, name)
+        else:
+            new_name = '"%s: %s"' % (workspace_num, name)
         # Extra single-quotes needed for i3 to understand
         i3('rename', 'workspace', 'to', new_name)
 
     def create_new_workspace(self):
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+        # If there is only one window on the desktop, and it is an empty
+        # container, kill it.
+        if self.number_of_windows_on_current_desktop() <= 1 and \
+           self.is_empty_container(focused_window):
+            empty_container_id = focused_window['id']
+            selector_str = '[con_id=' + str(empty_container_id) + ']'
+            i3(selector_str, 'kill')
+
         workspace_nums = [w['num'] for w in self.get_workspaces()]
         workspace_nums = filter(lambda n: n > 0, workspace_nums)
         workspace_nums = sorted(workspace_nums)
@@ -446,11 +494,16 @@ class I3C:
             if i in workspace_nums:
                 continue
             i3('workspace', 'number', i)
+            # New workspaces need an empty container
+            self.create_empty_container()
             return
         i3('workspace', 'number', len(workspace_nums) + 1)
+        # New workspaces need an empty container
+        self.create_empty_container()
 
     def prompt_for_window(self, prompt):
         return call(['wmctrl -lx | ',
+                     'awk \'$4!="N/A"\' | ', # Remove empty container windows
                      'awk \'{printf $1" : \\t"$3"\\t"; for(i=5;i<=NF;i++) printf $i" "; print""}\' | ',
                      'sed \'s/\\t.*\\.\\(.*\\)\\t/\\t\\1\\t/\' | ',
                      'sort -t"\t" -k2 | ',
@@ -467,19 +520,44 @@ class I3C:
         if not window_id:
             window_id = self.prompt_for_window("Bring")
         window_str = '[id=' + str(window_id) + ']'
-        i3('mark', 'target')
+        i3('mark --add target')
         i3(window_str, 'move', 'container' 'to', 'mark', 'target')
         i3('unmark target')
         i3(window_str, 'focus')
+
+    def number_of_windows_on_current_desktop(self):
+        current_desktop_number = call(['xdotool get_desktop']).rstrip()
+        workspace_windows = call(['wmctrl -l | ',
+                                  'awk \'$2 == "%s" {print "t"}\''  % (current_desktop_number)]).rstrip().split('\n')
+        return len(workspace_windows)
 
     def collapse_group(self):
         parent_window_data = self.get_windows_with_parent_data()
         focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
         focused_parent = focused_node['parent']
-        child_ids = [w['id'] for w in focused_parent['nodes']]
-        for child in child_ids:
-            selector_str = '[con_id=' + str(child) + ']'
-            i3(selector_str, 'move', 'to', 'workspace', 'hidden')
+        children = focused_parent['nodes']
+
+        for child in children:
+            child_id = child['id']
+            selector_str = '[con_id=' + str(child_id) + ']'
+
+            if self.is_empty_container(child):
+                # Don't delete the empty container yet.
+                # Hide all the other windows first.
+                empty_container = child
+            else:
+                i3(selector_str, 'move', 'to', 'workspace', 'hidden')
+
+        # If the empty container is the only window left on the workspace, remove it
+        # otherwise, keep it to maintain the workspace layout
+        #
+        # If there are more windows than just the one empty container, it is
+        # safe to kill the container, because the collapse group is intended to
+        # remove a tile
+        if 1 < self.number_of_windows_on_current_desktop():
+            empty_container_id = empty_container['id']
+            selector_str = '[con_id=' + str(empty_container_id) + ']'
+            i3(selector_str, 'kill')
 
     def cast_buffer(self, direction):
         self.buffer_yank('cast-buffer')
@@ -508,6 +586,29 @@ class I3C:
             self.bring_window(window_id)
         else:
             call(launch_cmd)
+
+    def kill(self):
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+        if self.is_empty_container(focused_window):
+            # Can't kill empty windows, just collapse them to kill them.
+            return
+        else:
+            i3('kill')
+
+    def is_empty_container(self, window):
+        marks = []
+        if 'marks' in window:
+            marks = window['marks']
+        else:
+            return False
+
+        for mark in marks:
+            if "empty_container" in mark:
+                return True
+        return False
 
 if len(sys.argv) <= 0:
     exit(1)
@@ -546,7 +647,10 @@ elif command == 'buffer-yank':
 elif command == 'buffer-paste':
     i3c.buffer_paste()
 elif command == 'rename-workspace':
-    i3c.rename_workspace(sys.argv[2])
+    if 2 < len(sys.argv):
+        i3c.rename_workspace(sys.argv[2])
+    else:
+        i3c.rename_workspace()
 elif command == 'create-new-workspace':
     i3c.create_new_workspace()
 elif command == 'jump-to-window':
@@ -578,6 +682,14 @@ elif command == 'bar-workspaces':
     i3c.bar_workspaces(int(sys.argv[2]))
 elif command == 'active-display':
     i3c.active_display()
+elif command == 'get-workspace-nums':
+    i3c.get_workspace_nums()
+elif command == 'init-populate-with-empty-containers':
+    i3c.init_populate_with_empty_containers()
+elif command == 'kill':
+    i3c.kill()
+elif command == 'create-empty-container':
+    i3c.create_empty_container()
 elif command == 'debug':
     i3c.get_displays()
     print i3c.displays

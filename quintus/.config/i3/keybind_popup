@@ -15,7 +15,8 @@ elif [ "${1}" == "buffer" ]; then
     TITLE="buffer"
     TEXT="j - jump to window
 b - bring window
-c - cast buffer"
+c - cast buffer
+n - buffer name"
 
 elif [ "${1}" == "frame" ]; then
     TITLE="frame"
@@ -49,6 +50,8 @@ elif [ "${1}" == "utils" ]; then
     TITLE="utils"
     TEXT="d - disable i3 bindings
 r - restart i3
+q - force kill window
+c - force create empty container
 l - logout"
 
 fi

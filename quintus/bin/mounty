@@ -3,11 +3,11 @@
 case ${1} in
     maindrive)
         sudo mkdir -p /mnt/maindrive/
-        sudo mount -t cifs -o username=Administrator //tertiaseptima/maindrive /mnt/maindrive/
+        sudo mount -t cifs -o username=$(pass show network-drives/${1} | grep -oP 'user: \K.*') -o password=$(pass show network-drives/${1} | head -n1) //tertiaseptima/maindrive /mnt/maindrive/
         ;;
     bay)
         sudo mkdir -p /mnt/bay/
-        sudo mount -t cifs -o username=Administrator //tertiaseptima/bay /mnt/bay/
+        sudo mount -t cifs -o username=$(pass show network-drives/${1} | grep -oP 'user: \K.*') -o password=$(pass show network-drives/${1} | head -n1) //tertiaseptima/maindrive /mnt/maindrive/
         ;;
     *)
         echo "maindrive | bay"
