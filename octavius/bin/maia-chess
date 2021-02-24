@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+LC0=~/projects/lc0/build/release/lc0
+
+while read LINE;
+do
+    case ${LINE} in
+        "go infinite") # For engine eval in scid
+            echo "go depth 1 nodes 1"
+            ;;
+        "go depth 3") # For game in scid
+            echo "go depth 1 nodes 1"
+            ;;
+        "go"*)
+            echo "go depth 1 nodes 1"
+            ;;
+        *)
+            echo "${LINE}"
+            ;;
+    esac
+done | ${LC0} ${@}

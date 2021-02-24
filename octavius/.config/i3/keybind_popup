@@ -15,7 +15,8 @@ elif [ "${1}" == "buffer" ]; then
     TITLE="buffer"
     TEXT="j - jump to window
 b - bring window
-c - cast buffer"
+c - cast buffer
+n - buffer name"
 
 elif [ "${1}" == "frame" ]; then
     TITLE="frame"

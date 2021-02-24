@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+TERM_WINDOW=$(xdotool getactivewindow)
+
+echo "Setting monitors"
+xrandr --output DP-1-1 --auto --right-of DVI-I-1
+sleep 0.5
+xrandr --output DVI-D-1 --auto --right-of DP-1-1
+sleep 0.5
+
+echo "Setting background image"
+feh --bg-fill ~/wallpapers/triple/grand_canyon/{0,2,1}.jpg
+
+echo "Restarting i3"
+i3-msg restart
+
+OUTPUT_DEVICE=speakers
+INPUT_DEVICE=webcam
+echo "Setting audio out to ${OUTPUT_DEVICE}"
+echo "Setting audio in to ${INPUT_DEVICE}"
+switch-audio-device output ${OUTPUT_DEVICE}
+switch-audio-device input ${INPUT_DEVICE}
+
+emacs &
+
+sleep 2
+xdotool windowfocus ${TERM_WINDOW}
+sleep 0.5
+xdotool type "exit"

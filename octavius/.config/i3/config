@@ -5,7 +5,7 @@
 # Settings
 
 # Font
-font pango:Liberation Mono 7
+font pango:Liberation Mono 0
 
 ## All workspaces start in tabbed layout
 workspace_layout tabbed
@@ -15,18 +15,28 @@ floating_modifier Mod4
 
 ## Colours
 # class                 border  bground text    indicator child_border
-client.focused          #006600 #004400 #FFFFFF #004400   #006600
-client.focused_inactive #333333 #222222 #FFFFFF #FF0000   #333333
-client.unfocused        #333333 #555555 #FFFFFF #FF0000   #333333
+#client.focused          #006600 #004400 #FFFFFF #004400   #006600
+#client.focused_inactive #333333 #222222 #FFFFFF #FF0000   #333333
+#client.unfocused        #333333 #555555 #FFFFFF #FF0000   #333333
+
+# Trying out a hidden tab bar
+# Focus colour = cyan to make it way more obvious
+client.focused          #555555 #555555 #555555 #555555   #00FFFF
+client.focused_inactive #555555 #555555 #555555 #555555   #555555
+client.unfocused        #555555 #555555 #555555 #555555   #555555
+
 client.urgent           #FF0000 #FF0000 #FFFFFF #FF0000   #FF0000
-client.placeholder      #FF0000 #FF0000 #FFFFFF #FF0000   #FF0000
+client.placeholder      #FF0000 #222222 #222222 #FF0000   #FF0000
 
 client.background       #FFFFFF
+
+default_border pixel 4
 
 ## Keybind shortcuts
 
 set $i3c ~/.config/i3/i3c
 set $popup exec ~/.config/i3/keybind_popup
+set $message exec ~/.config/i3/message
 set $exit exec ~/.config/i3/keybind_popup ; mode "default"
 
 ### Key aliases
@@ -53,7 +63,7 @@ mode "window" {
 }
 
 mode "frame" {
-    bindsym r exec $i3c rename-workspace $(echo -n | dmenu -fn "terminus-8" -p "Rename workspace:") ; $exit
+    bindsym r exec $i3c rename-workspace "$(echo -n | dmenu -fn 'terminus-8' -p 'Rename workspace:')" ; $exit
     bindsym c exec $i3c create-new-workspace ; $exit
 
     bindsym Escape $exit
@@ -63,6 +73,7 @@ mode "buffer" {
     bindsym j exec $i3c jump-to-window ; $exit
     bindsym b exec $i3c bring-window ; $exit
     bindsym c $popup cast-buffer ; mode "cast-buffer"
+    bindsym n $message "$(xdotool getactivewindow getwindowname)" ; mode "default"
 
     bindsym Escape $exit
 }
@@ -202,7 +213,13 @@ bindsym $s4+a [class="Emacs"] scratchpad show
 
 # Rules
 for_window [class="Wfica_Seamless"] floating enable
+# For scid dialog windows
+for_window [class="Toplevel"] floating enable
+
 mouse_warping none
+
+# Start each workspace with an empty container
+exec $i3c init-populate-with-empty-containers
 
 exec --no-startup-id xrandr --output DP-1-1 --auto --right-of DVI-I-1
 exec --no-startup-id xrandr --output DVI-D-1 --auto --right-of DP-1-1

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# For opening databases automatically
+
+/usr/local/bin/scid \
+    ~/chess/caissabase/Caissabase_2020_11_14/Caissabase_2020_11_14 \
+    ~/chess/personal_games/scid_db/person_games

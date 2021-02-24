@@ -39,6 +39,10 @@ if [ -f ~/.bash_prompt ]; then
     . ~/.bash_prompt
 fi
 
+if [ -d "$HOME/adb-android/platform-tools" ] ; then
+ export PATH="$HOME/adb-android/platform-tools:$PATH"
+fi
+
 # ------------------------------------------------------------------------------
 # Editors
 # ------------------------------------------------------------------------------

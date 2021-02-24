@@ -1,2 +1,5 @@
 library: /mnt/slave/music_library.db
 directory: /mnt/slave/Music
+asciify_paths: yes
+import:
+    move: yes

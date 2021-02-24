@@ -1,0 +1,5 @@
+library: /mnt/slave/music_library_flac.db
+directory: /mnt/slave/flac/
+asciify_paths: yes
+import:
+    move: yes

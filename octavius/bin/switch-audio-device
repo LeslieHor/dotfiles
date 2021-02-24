@@ -1,0 +1,27 @@
+#!/usr/bin/bash
+
+if [ -z "${1}" ]; then
+    echo "output headset|speakers"
+    echo "input  headset|webcam"
+fi
+
+HEADSET_OUTPUT='alsa_output.usb-SteelSeries_Arctis_Pro_Wireless-00.analog-stereo'
+SPEAKER_OUTPUT='alsa_output.usb-FiiO_DigiHug_USB_Audio-01.iec958-stereo'
+
+HEADSET_INPUT='alsa_input.usb-SteelSeries_Arctis_Pro_Wireless-00.analog-mono'
+WEBCAM_INPUT='alsa_input.usb-046d_081b_D67F2BC0-02.multichannel-input'
+
+case "${1}" in
+    "output")
+        case "${2}" in
+            "headset")  pacmd set-default-sink "${HEADSET_OUTPUT}" ;;
+            "speakers") pacmd set-default-sink "${SPEAKER_OUTPUT}" ;;
+        esac
+        ;;
+    "input")
+        case "${2}" in
+            "headset") pacmd set-default-source "${HEADSET_INPUT}" ;;
+            "webcam")  pacmd set-default-source "${WEBCAM_INPUT}" ;;
+        esac
+        ;;
+esac
