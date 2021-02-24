@@ -50,6 +50,8 @@ elif [ "${1}" == "utils" ]; then
     TITLE="utils"
     TEXT="d - disable i3 bindings
 r - restart i3
+q - force kill window
+c - force create empty container
 l - logout"
 
 fi

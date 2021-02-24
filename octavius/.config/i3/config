@@ -5,6 +5,7 @@
 # Settings
 
 # Font
+#font pango:Liberation Mono 7
 font pango:Liberation Mono 0
 
 ## All workspaces start in tabbed layout
@@ -14,10 +15,11 @@ workspace_layout tabbed
 floating_modifier Mod4
 
 ## Colours
+
 # class                 border  bground text    indicator child_border
-#client.focused          #006600 #004400 #FFFFFF #004400   #006600
-#client.focused_inactive #333333 #222222 #FFFFFF #FF0000   #333333
-#client.unfocused        #333333 #555555 #FFFFFF #FF0000   #333333
+# client.focused          #006600 #004400 #FFFFFF #004400   #006600
+# client.focused_inactive #333333 #222222 #FFFFFF #FF0000   #333333
+# client.unfocused        #333333 #555555 #FFFFFF #FF0000   #333333
 
 # Trying out a hidden tab bar
 # Focus colour = cyan to make it way more obvious
@@ -113,6 +115,8 @@ mode "utils" {
     bindsym d exec echo " DISABLED (S1-F11 to return)" > ~/.config/i3/i3_keys_disabled_status ; exec ~/.config/i3/keybind_popup ; mode "disabled"
     bindsym r exec ~/.config/i3/keybind_popup ; mode "default" ; restart
     bindsym l exit
+    bindsym q kill ; $exit
+    bindsym c exec $i3c create-empty-container ; $exit
 
     bindsym Escape $exit
 }
@@ -159,9 +163,9 @@ bindsym $s1+k exec $i3c focus-up
 bindsym $s1+l exec $i3c focus-right
 bindsym $s1+m exec bring-mouse
 
-bindsym $s1+q kill
-#bindsym $s1+c exec $i3c collapse-group
-bindsym $s1+c move container to workspace hidden
+bindsym $s1+q exec $i3c kill
+bindsym $s1+c exec $i3c collapse-group
+#bindsym $s1+c move container to workspace hidden
 bindsym $s1+b $popup buffer ; mode "buffer"
 bindsym $s1+o $popup applications ; mode "applications"
 bindsym $s1+w $popup window ; mode "window"
