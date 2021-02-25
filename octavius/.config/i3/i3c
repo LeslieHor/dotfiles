@@ -360,6 +360,7 @@ class I3C:
         focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
         focused_window = focused_node['window']
         focused_window_id = focused_window['id']
+        self.buffer_yank()
         i3('focus', 'parent')
         i3('split', direction)
         self.create_empty_container()
@@ -371,6 +372,8 @@ class I3C:
         if focused_node['parent']['layout'] != "tabbed":
             i3('split', other_direction)
             i3('layout', 'tabbed')
+
+        self.buffer_paste()
 
     def buffer_yank(self, mark='window-buffer'):
         i3('mark --add %s' % (mark))
