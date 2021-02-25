@@ -551,8 +551,8 @@ class I3C:
 
     def prompt_for_window(self, prompt):
         return call(['wmctrl -lxp | ',
-                     'sort -hrk3 | ',
                      'grep -vP \' N/A *N/A Empty Container\' | ', # Remove empty container windows
+                     'sort -hrk3 | ',
                      'awk \'{printf $1" : \\t"$2"\\t"$4"\\t"; for(i=6;i<=NF;i++) printf $i" "; print""}\' | ',
                      'sed \'s/\\t\\(.*\\)\\t.*\\.\\(.*\\)\\t/\\t\\1\\t\\2\\t/\' | ',
                      'column -s"\t" -t | ',
