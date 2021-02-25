@@ -385,6 +385,47 @@ class I3C:
         i3('unmark', 'paste-target')
         i3('unmark', mark)
 
+    def transpose_buffer_left(self):
+        self.transpose_buffer('left')
+    def transpose_buffer_down(self):
+        self.transpose_buffer('down')
+    def transpose_buffer_up(self):
+        self.transpose_buffer('up')
+    def transpose_buffer_right(self):
+        self.transpose_buffer('right')
+
+    def transpose_buffer(self, direction):
+        i3('mark --add transpose_a')
+
+        if direction == 'left':
+            self.focus_left()
+        elif direction == 'down':
+            self.focus_down()
+        elif direction == 'up':
+            self.focus_up()
+        elif direction == 'right':
+            self.focus_right()
+
+        i3('mark --add transpose_b')
+
+        if direction == 'left':
+            self.focus_right()
+        elif direction == 'down':
+            self.focus_up()
+        elif direction == 'up':
+            self.focus_down()
+        elif direction == 'right':
+            self.focus_left()
+
+        i3('[con_mark="' + 'transpose_a' + '"]', 'move', 'container', 'to', 'mark', 'transpose_b')
+        i3('mark --add transpose_c')
+        i3('[con_mark="' + 'transpose_b' + '"]', 'move', 'container', 'to', 'mark', 'transpose_c')
+        i3('[con_mark="' + 'transpose_b' + '"]', 'focus')
+        i3('[con_mark="' + 'transpose_a' + '"]', 'focus')
+        i3('unmark' 'transpose_a')
+        i3('unmark' 'transpose_b')
+        i3('unmark' 'transpose_c')
+
     def get_output_nums(self):
         outputs = self.get_outputs()
         outputs = filter(lambda o: o['active'], outputs)
@@ -697,6 +738,14 @@ elif command == 'kill':
     i3c.kill()
 elif command == 'create-empty-container':
     i3c.create_empty_container()
+elif command == 'transpose-buffer-left':
+    i3c.transpose_buffer_left()
+elif command == 'transpose-buffer-down':
+    i3c.transpose_buffer_down()
+elif command == 'transpose-buffer-up':
+    i3c.transpose_buffer_up()
+elif command == 'transpose-buffer-right':
+    i3c.transpose_buffer_right()
 elif command == 'debug':
     i3c.get_displays()
     print i3c.displays
