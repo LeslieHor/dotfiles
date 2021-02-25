@@ -550,11 +550,11 @@ class I3C:
         self.create_empty_container()
 
     def prompt_for_window(self, prompt):
-        return call(['wmctrl -lx | ',
-                     'awk \'$4!="N/A"\' | ', # Remove empty container windows
-                     'awk \'{printf $1" : \\t"$3"\\t"; for(i=5;i<=NF;i++) printf $i" "; print""}\' | ',
-                     'sed \'s/\\t.*\\.\\(.*\\)\\t/\\t\\1\\t/\' | ',
-                     'sort -t"\t" -k2 | ',
+        return call(['wmctrl -lxp | ',
+                     'sort -hrk3 | ',
+                     'grep -vP \' N/A *N/A Empty Container\' | ', # Remove empty container windows
+                     'awk \'{printf $1" : \\t"$2"\\t"$4"\\t"; for(i=6;i<=NF;i++) printf $i" "; print""}\' | ',
+                     'sed \'s/\\t\\(.*\\)\\t.*\\.\\(.*\\)\\t/\\t\\1\\t\\2\\t/\' | ',
                      'column -s"\t" -t | ',
                      'dmenu -i -fn "terminus-8" -l 10 -p "%s" | ' % prompt,
                      'awk \'{print $1}\'']).rstrip()
