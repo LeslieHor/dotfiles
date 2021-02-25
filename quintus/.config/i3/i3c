@@ -110,6 +110,10 @@ class I3C:
             data = self._get_windows_with_parent_data(node, self._get_parent_data(tree))
             d += data
 
+        for node in tree['floating_nodes']:
+            data = self._get_windows_with_parent_data(node, self._get_parent_data(tree))
+            d += data
+
         return d
 
     def _get_parent_data(self, node):
@@ -356,6 +360,7 @@ class I3C:
         focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
         focused_window = focused_node['window']
         focused_window_id = focused_window['id']
+        self.buffer_yank()
         i3('focus', 'parent')
         i3('split', direction)
         self.create_empty_container()
@@ -368,6 +373,8 @@ class I3C:
             i3('split', other_direction)
             i3('layout', 'tabbed')
 
+        self.buffer_paste()
+
     def buffer_yank(self, mark='window-buffer'):
         i3('mark --add %s' % (mark))
 
@@ -377,6 +384,47 @@ class I3C:
         i3('[con_mark="' + mark + '"]', 'focus')
         i3('unmark', 'paste-target')
         i3('unmark', mark)
+
+    def transpose_buffer_left(self):
+        self.transpose_buffer('left')
+    def transpose_buffer_down(self):
+        self.transpose_buffer('down')
+    def transpose_buffer_up(self):
+        self.transpose_buffer('up')
+    def transpose_buffer_right(self):
+        self.transpose_buffer('right')
+
+    def transpose_buffer(self, direction):
+        i3('mark --add transpose_a')
+
+        if direction == 'left':
+            self.focus_left()
+        elif direction == 'down':
+            self.focus_down()
+        elif direction == 'up':
+            self.focus_up()
+        elif direction == 'right':
+            self.focus_right()
+
+        i3('mark --add transpose_b')
+
+        if direction == 'left':
+            self.focus_right()
+        elif direction == 'down':
+            self.focus_up()
+        elif direction == 'up':
+            self.focus_down()
+        elif direction == 'right':
+            self.focus_left()
+
+        i3('[con_mark="' + 'transpose_a' + '"]', 'move', 'container', 'to', 'mark', 'transpose_b')
+        i3('mark --add transpose_c')
+        i3('[con_mark="' + 'transpose_b' + '"]', 'move', 'container', 'to', 'mark', 'transpose_c')
+        i3('[con_mark="' + 'transpose_b' + '"]', 'focus')
+        i3('[con_mark="' + 'transpose_a' + '"]', 'focus')
+        i3('unmark' 'transpose_a')
+        i3('unmark' 'transpose_b')
+        i3('unmark' 'transpose_c')
 
     def get_output_nums(self):
         outputs = self.get_outputs()
@@ -502,11 +550,11 @@ class I3C:
         self.create_empty_container()
 
     def prompt_for_window(self, prompt):
-        return call(['wmctrl -lx | ',
-                     'awk \'$4!="N/A"\' | ', # Remove empty container windows
-                     'awk \'{printf $1" : \\t"$3"\\t"; for(i=5;i<=NF;i++) printf $i" "; print""}\' | ',
-                     'sed \'s/\\t.*\\.\\(.*\\)\\t/\\t\\1\\t/\' | ',
-                     'sort -t"\t" -k2 | ',
+        return call(['wmctrl -lxp | ',
+                     'sort -hrk3 | ',
+                     'grep -vP \' N/A *N/A Empty Container\' | ', # Remove empty container windows
+                     'awk \'{printf $1" : \\t"$2"\\t"$4"\\t"; for(i=6;i<=NF;i++) printf $i" "; print""}\' | ',
+                     'sed \'s/\\t\\(.*\\)\\t.*\\.\\(.*\\)\\t/\\t\\1\\t\\2\\t/\' | ',
                      'column -s"\t" -t | ',
                      'dmenu -i -fn "terminus-8" -l 10 -p "%s" | ' % prompt,
                      'awk \'{print $1}\'']).rstrip()
@@ -690,6 +738,14 @@ elif command == 'kill':
     i3c.kill()
 elif command == 'create-empty-container':
     i3c.create_empty_container()
+elif command == 'transpose-buffer-left':
+    i3c.transpose_buffer_left()
+elif command == 'transpose-buffer-down':
+    i3c.transpose_buffer_down()
+elif command == 'transpose-buffer-up':
+    i3c.transpose_buffer_up()
+elif command == 'transpose-buffer-right':
+    i3c.transpose_buffer_right()
 elif command == 'debug':
     i3c.get_displays()
     print i3c.displays

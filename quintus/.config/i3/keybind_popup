@@ -16,6 +16,7 @@ elif [ "${1}" == "buffer" ]; then
     TEXT="j - jump to window
 b - bring window
 c - cast buffer
+t - transpose buffer
 n - buffer name"
 
 elif [ "${1}" == "frame" ]; then
@@ -46,6 +47,12 @@ elif [ "${1}" == "cast-buffer" ]; then
 j - cast buffer down
 k - cast buffer up
 l - cast buffer right"
+elif [ "${1}" == "transpose-buffer" ]; then
+    TITLE="transpose buffer"
+    TEXT="h - transpose buffer left
+j - transpose buffer down
+k - transpose buffer up
+l - transpose buffer right"
 elif [ "${1}" == "utils" ]; then
     TITLE="utils"
     TEXT="d - disable i3 bindings

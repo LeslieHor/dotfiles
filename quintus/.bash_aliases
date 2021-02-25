@@ -11,3 +11,4 @@ alias emact="emacsclient -t --alternate-editor=''"
 alias emacs-new="emacsclient -c -n"
 alias flush-caches="sudo systemd-resolve --flush-caches ; systemd-resolve --statistics"
 alias gitroot="while ! ls .git &> /dev/null && [ ! \$(pwd) == \"/\" ]; do cd .. ; done"
+alias beet-flac='beet -c ~/.config/beets/config-flac.yaml'
