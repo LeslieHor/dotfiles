@@ -1,6 +1,6 @@
 xrdb -load $HOME/.Xresources
 xsetroot -solid '#222222' &
-xterm &
+#xterm &
 
 # Here Xfce is kept as default
 session=${1:-i3}

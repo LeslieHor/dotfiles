@@ -45,3 +45,5 @@ fi
 export ALTERNATE_EDITOR=""
 export EDITOR="vim"
 export VISUAL="emacsclient -c -a emacs"
+
+startde

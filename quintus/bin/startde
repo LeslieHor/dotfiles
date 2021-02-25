@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 
 if [ -z "${DISPLAY}" ] && [ "${XDG_VTNR}" -eq 1 ]; then
+    echo "
+===================================
+  ___        _       _
+ / _ \\ _   _(_)_ __ | |_ _   _ ___
+| | | | | | | | '_ \\| __| | | / __|
+| |_| | |_| | | | | | |_| |_| \\__ \\
+ \\__\\_\\\\__,_|_|_| |_|\\__|\\__,_|___/
+
+==================================="
+    echo
     echo "TTY Detected. Asking to start DE."
     echo "Will load DE in 5 seconds by default."
     echo
