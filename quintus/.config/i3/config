@@ -225,8 +225,9 @@ mouse_warping none
 # Start each workspace with an empty container
 exec $i3c init-populate-with-empty-containers
 
-exec --no-startup-id xrandr --output DP-1-1 --auto --right-of DVI-I-1
-exec --no-startup-id xrandr --output DVI-D-1 --auto --right-of DP-1-1
+#exec --no-startup-id xrandr --output DP-1-1 --auto --right-of DVI-I-1
+#exec --no-startup-id xrandr --output DVI-D-1 --auto --right-of DP-1-1
+
 exec_always --no-startup-id ~/.config/i3status/run_dzen2_bar
 
 exec --no-startup-id keynav

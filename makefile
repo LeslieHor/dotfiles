@@ -7,11 +7,17 @@ install-octavius-preview:
 install-nonus-preview:
 	stow -nSv nonus -t ~
 
+install-quintus-preview:
+	stow -nSv quintus -t ~
+
 install-octavius:
 	stow -Sv octavius -t ~
 
 install-nonus:
 	stow -Sv nonus -t ~
+
+install-quintus:
+	stow -Sv quintus -t ~
 
 install: install-$(HOSTNAME)-preview
 	@echo ""

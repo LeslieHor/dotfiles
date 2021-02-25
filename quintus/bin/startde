@@ -9,6 +9,8 @@ if [ -z "${DISPLAY}" ] && [ "${XDG_VTNR}" -eq 1 ]; then
     case ${input} in
         [Yy]*)
             echo "Please select a DE:";;
+        '')
+            exec startx ~/.xinitrc i3;;
         *)
             echo "DE start up cancelled"
             exit;;
@@ -21,13 +23,14 @@ if [ -z "${DISPLAY}" ] && [ "${XDG_VTNR}" -eq 1 ]; then
     echo
     case ${input} in
         1)
-            exec startx ~/xinitrc i3;;
+            exec startx ~/.xinitrc i3;;
         2)
-            exec startx ~/xinitrc ubuntu;;
+            exec startx ~/.xinitrc ubuntu;;
         3)
-            exec startx ~/xinitrc kde;;
+            exec startx ~/.xinitrc kde;;
         4)
-            exec startx ~/xinitrc gnome;;
+            exec startx ~/.xinitrc gnome;;
+        *)
+            exec startx ~/.xinitrc i3;;
     esac
-    echo "Starting DE"
 fi

@@ -137,7 +137,7 @@ cpu_temps() {
 }
 
 wifi() {
-    NET_DATA=$(nmcli -t device show wlp2s0)
+    NET_DATA=$(nmcli -t device show wlp3s0)
     NETWORK=$(printf "${NET_DATA}" | grep -oP 'GENERAL\.CONNECTION:\K.*' | sed 's/ [0-9]*$//')
     CONNECTED=$(printf "${NET_DATA}" | grep -oP 'GENERAL\.STATE: *[0-9]* \(\K.*' | sed 's/)$//')
     if [ "${CONNECTED}" == "connected" ]; then
@@ -225,7 +225,7 @@ while sleep 1; do
         sticky_keys=$(sticky_keys)
         date=$(date '+%Y-%m-%d %H:%M:%S')
         volume=$(volume)
-        music="$(music)"
+        #music="$(music)"
     fi
 
     if [ $(( ${SECONDS} % 5 )) == 0 ] || [ ${SECONDS} -lt 3 ]; then
