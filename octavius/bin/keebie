@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+KEEBIE_DIR=~/.config/keebie
+if ! test -r $(head -n1 ${KEEBIE_DIR}/config); then
+    sudo chmod a+r $(head -n1 ${KEEBIE_DIR}/config)
+fi
+
+killall keebie.py
+${KEEBIE_DIR}/keebie.py ${@} &

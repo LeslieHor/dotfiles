@@ -1,0 +1,9 @@
+{
+    "KEY_1": "layer:default",
+    "KEY_2": "echo 2",
+    "KEY_Q": "script:demo.sh",
+    "KEY_W": "py:demo.py",
+    "KEY_E": "py2:demo_py2.py",
+    "KEY_R": "py3:demo_py3.py",
+    "KEY_T": "exec:demo"
+}
