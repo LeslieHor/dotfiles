@@ -6,6 +6,7 @@ if [ "${1}" == "window" ]; then
     TITLE="window"
     TEXT="h - split right
 v - split vertical
+e - balance windows
 u - focus parent
 d - focus child
 m - toggle fullscreen
@@ -31,7 +32,6 @@ f - firefox
 e - emacs
 t - thunderbird
 m - music
-r - rss
 n - netflix"
 
 elif [ "${1}" == "pass" ]; then

@@ -33,6 +33,7 @@ client.placeholder      #FF0000 #222222 #222222 #FF0000   #FF0000
 client.background       #FFFFFF
 
 default_border pixel 4
+default_floating_border pixel 4
 
 ## Keybind shortcuts
 
@@ -56,6 +57,7 @@ set $s4 Control+Mod4
 mode "window" {
     bindsym h exec $i3c split-right ; $exit
     bindsym v exec $i3c split-down ; $exit
+    bindsym e exec $i3c balance-windows ; $exit
     bindsym u focus parent ; $exit
     bindsym d focus child ; $exit
     bindsym m fullscreen toggle ; $exit
@@ -103,9 +105,8 @@ mode "applications" {
     bindsym o exec dmenu_run -fn "terminus-8" ; $exit
     bindsym f exec firefox ; $exit
     bindsym e exec e --hacky-exec-fix ; $exit
-    bindsym t exec thunderbird ; $exit
+    bindsym t exec $i3c find-or-open "Mail.Thunderbird" "Mozilla Thunderbird" "thunderbird" ; $exit
     bindsym m exec music ; $exit
-    bindsym r exec $i3c find-or-open "Navigator.Firefox" "Tiny Tiny RSS - Mozilla Firefox" "firefox 'http://zarek/rssreader/index.php'" ; $exit
     bindsym n exec $i3c find-or-open "netflix.com.Google-chrome" "Netflix" "netflix" ; $exit
 
     bindsym Escape $exit
@@ -208,10 +209,10 @@ bindsym $s3+8 move container to workspace number 8
 bindsym $s3+9 move container to workspace number 9
 bindsym $s3+0 move container to workspace number 10
 bindsym $s3+f $popup frame ; mode "frame"
-bindsym $s3+h move left
-bindsym $s3+j move down
-bindsym $s3+k move up
-bindsym $s3+l move right
+bindsym $s3+h exec $i3c cast-buffer-left
+bindsym $s3+j exec $i3c cast-buffer-down
+bindsym $s3+k exec $i3c cast-buffer-up
+bindsym $s3+l exec $i3c cast-buffer-right
 bindsym $s3+p exec $i3c prev-workspace
 bindsym $s3+n exec $i3c next-workspace
 bindsym $s3+comma exec $i3c swap-workspace-left
@@ -224,6 +225,10 @@ bindsym $s4+n exec org-clip --dmenu
 bindsym $s4+t scratchpad show
 bindsym $s4+r move scratchpad
 bindsym $s4+a [class="Emacs"] scratchpad show
+bindsym $s4+h move left
+bindsym $s4+j move down
+bindsym $s4+k move up
+bindsym $s4+l move right
 
 # Rules
 for_window [class="Wfica_Seamless"] floating enable

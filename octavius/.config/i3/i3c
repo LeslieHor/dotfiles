@@ -691,6 +691,114 @@ class I3C:
                 return True
         return False
 
+    def get_current_workspace_tree(self):
+        tree = self.get_tree()
+        focused_workspace = self.get_focused_workspace()
+        focused_workspace_num = focused_workspace['num']
+        focused_workspace_output = focused_workspace['output']
+        tree = tree['nodes']
+        tree = filter(lambda ws: ws['name'] == focused_workspace_output and \
+                      ws['layout'] == 'output',
+                      tree)[0],
+        tree = tree[0]
+        tree = tree['nodes']
+        tree = filter(lambda n: n['name'] == 'content', tree)[0]
+        tree = tree['nodes']
+        tree = filter(lambda ws: ws['num'] == focused_workspace_num,
+                      tree)[0],
+        tree = tree[0]
+        return tree
+
+    def balance_windows(self):
+        tree = self.get_current_workspace_tree()
+        self.balance_windows_horizontal(tree, tree['rect']['width'])
+        self.balance_windows_vertical(tree, tree['rect']['height'])
+
+    def balance_windows_horizontal(self, tree, container_width):
+        # If the container is tabbed or split vertically, no need to count any
+        # children that are horizontally split
+        # If it is split vertically, then the container must be recursivly balanced.
+        if tree['layout'] == 'tabbed':
+            return
+        elif tree['layout'] == 'splitv':
+            for node in tree['nodes']:
+                self.balance_windows_horizontal(node, container_width)
+            return
+
+        horizontals = self.get_horizontals(tree)
+        horizontal_count = len(horizontals)
+        desired_width = container_width / horizontal_count
+
+        # For each child, if the child is a tabbed or vertical split container,
+        # it logically only counts as a single horizontal window, so set the
+        # size directly and recursively resize its children.
+        #
+        # Otherwise, count how many horizontal children the child has, and use
+        # that to calculate the total size of the parent, then recursivly resize
+        # children.
+        for node in tree['nodes']:
+            node_id = node['id']
+            selector_str = '[con_id=' + str(node_id) + ']'
+            if node['layout'] != 'splith':
+                i3(selector_str, 'resize', 'set', 'width', desired_width, 'px')
+                if node['layout'] == 'splitv':
+                    self.balance_windows_horizontal(node, desired_width)
+                continue
+
+            count = len(self.get_horizontals(node))
+            width = desired_width * count
+
+            node_id = node['id']
+            selector_str = '[con_id=' + str(node_id) + ']'
+            i3(selector_str, 'resize', 'set', 'width', width, 'px')
+            self.balance_windows_horizontal(node, width)
+
+    def balance_windows_vertical(self, tree, container_height):
+        if tree['layout'] == 'tabbed':
+            return
+        elif tree['layout'] == 'splith':
+            for node in tree['nodes']:
+                self.balance_windows_vertical(node, container_height)
+            return
+
+        verticals = self.get_verticals(tree)
+        vertical_count = len(verticals)
+        desired_height = container_height / vertical_count
+
+        for node in tree['nodes']:
+            node_id = node['id']
+            selector_str = '[con_id=' + str(node_id) + ']'
+            if node['layout'] != 'splitv':
+                i3(selector_str, 'resize', 'set', 'height', desired_height, 'px')
+                if node['layout'] == 'splith':
+                    self.balance_windows_vertical(node, desired_height)
+                continue
+
+            count = len(self.get_verticals(node))
+            height = desired_height * count
+
+            node_id = node['id']
+            selector_str = '[con_id=' + str(node_id) + ']'
+            i3(selector_str, 'resize', 'set', 'height', height, 'px')
+            self.balance_windows_vertical(node, height)
+
+    def get_horizontals(self, tree):
+        if tree['layout'] != 'splith':
+            return [tree]
+        total = []
+        for node in tree['nodes']:
+            total += (self.get_horizontals(node))
+        return total
+
+    def get_verticals(self, tree):
+        if tree['layout'] != 'splitv':
+            return [tree]
+        total = []
+        for node in tree['nodes']:
+            total += (self.get_verticals(node))
+        return total
+
+
 if len(sys.argv) <= 0:
     exit(1)
 
@@ -779,6 +887,5 @@ elif command == 'transpose-buffer-up':
     i3c.transpose_buffer_up()
 elif command == 'transpose-buffer-right':
     i3c.transpose_buffer_right()
-elif command == 'debug':
-    i3c.get_displays()
-    print i3c.displays
+elif command == 'balance-windows':
+    i3c.balance_windows()
