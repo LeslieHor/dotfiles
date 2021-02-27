@@ -137,6 +137,10 @@ class I3C:
             d += data
         return d
 
+    def create_empty_window(self):
+        r = json.loads(i3('open'))
+        return r[0]['id']
+
     def get_new_empty_container(self):
         leafs = filter(lambda w: 'marks' in w, self.get_all_leafs())
         empty_container = filter(lambda w: 'new_empty_container' in w['marks'],
@@ -158,6 +162,7 @@ class I3C:
         i3(empty_container_str, 'unmark', 'new_empty_container')
         timestamp = time.time(),
         i3(empty_container_str, 'mark --add empty_container_%s' % (timestamp))
+        return empty_container
 
     def swap_workspace(self, direction):
         "Swap workspaces"
@@ -360,11 +365,35 @@ class I3C:
         focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
         focused_window = focused_node['window']
         focused_window_id = focused_window['id']
-        self.buffer_yank()
+
+        focused_workspace = self.get_focused_workspace()
+        focused_num = focused_workspace['num']
+
         i3('focus', 'parent')
         i3('split', direction)
-        self.create_empty_container()
+        empty_window_id = self.create_empty_window()
+        self.get_tree(True)
 
+        # Create an empty container in a temporary workspace
+        i3('workspace temp')
+        empty_container = self.create_empty_container()
+        empty_container_id = empty_container['id']
+        i3('workspace number', focused_num)
+
+        focused_window_str = '[con_id=' + str(focused_window_id) + ']'
+        empty_window_str = '[con_id=' + str(empty_window_id) + ']'
+        empty_container_str = '[con_id=' + str(empty_container_id) + ']'
+
+        # Move the empty container to the newlu splitted window
+        i3(empty_window_str, 'focus')
+        i3(empty_container_str, 'move', 'container', 'to', 'workspace', 'current')
+        i3(empty_container_str, 'mark --add new_container_target')
+
+        # Remove the empty window, as we have the empty container to reserve its spot
+        i3(empty_window_str, 'kill')
+        i3(empty_container_str, 'focus')
+
+        # Make the new node with the empty container tabbed.
         self.get_tree(True)
         new_parent_window_data = self.get_windows_with_parent_data()
         focused_node = filter(lambda w: w['window']['focused'],
@@ -373,7 +402,11 @@ class I3C:
             i3('split', other_direction)
             i3('layout', 'tabbed')
 
-        self.buffer_paste()
+        # Bring the window to the new splitted area.
+        if not self.is_empty_container(focused_window):
+            i3(focused_window_str, 'move', 'container', 'to', 'mark', 'new_container_target')
+            i3(focused_window_str, 'focus')
+        i3('unmark new_container_target')
 
     def buffer_yank(self, mark='window-buffer'):
         i3('mark --add %s' % (mark))
@@ -551,8 +584,8 @@ class I3C:
 
     def prompt_for_window(self, prompt):
         return call(['wmctrl -lxp | ',
-                     'sort -hrk3 | ',
                      'grep -vP \' N/A *N/A Empty Container\' | ', # Remove empty container windows
+                     'sort -hrk3 | ',
                      'awk \'{printf $1" : \\t"$2"\\t"$4"\\t"; for(i=6;i<=NF;i++) printf $i" "; print""}\' | ',
                      'sed \'s/\\t\\(.*\\)\\t.*\\.\\(.*\\)\\t/\\t\\1\\t\\2\\t/\' | ',
                      'column -s"\t" -t | ',
