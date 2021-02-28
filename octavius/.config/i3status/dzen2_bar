@@ -105,6 +105,33 @@ sticky_keys() {
     fi
 }
 
+keyboard_indicators() {
+    STATE=$(xset q | grep 'Caps Lock')
+
+    CAPS="C"
+    if [ "$(grep -oP 'Caps Lock: *\K[onf]*' <<< "${STATE}")" == "on" ]; then
+        CAPS="${FG_ACTIVE}${CAPS}${FG_END}"
+    else
+        CAPS="${FG_INACTIVE}${CAPS}${FG_END}"
+    fi
+
+    NUM="N"
+    if [ "$(grep -oP 'Num Lock: *\K[onf]*' <<< "${STATE}")" == "on" ]; then
+        NUM="${FG_ACTIVE}${NUM}${FG_END}"
+    else
+        NUM="${FG_INACTIVE}${NUM}${FG_END}"
+    fi
+
+    SCROLL="S"
+    if [ "$(grep -oP 'Scroll Lock: *\K[onf]*' <<< "${STATE}")" == "on" ]; then
+        SCROLL="${FG_ACTIVE}${SCROLL}${FG_END}"
+    else
+        SCROLL="${FG_INACTIVE}${SCROLL}${FG_END}"
+    fi
+
+    echo "${CAPS}${NUM}${SCROLL}"
+}
+
 cpu_speed() {
     read -r a b c d <<< $(grep -oP 'cpu MHz[ \t]*:[ \t]*\K[0-9]*' /proc/cpuinfo | tr '\n' ' ')
     a=$((${a} / 100))
@@ -223,6 +250,7 @@ while sleep 1; do
         workspaces=$(workspaces ${DISPLAY_NUM})
         active_display=$(active_display ${DISPLAY_NUM})
         sticky_keys=$(sticky_keys)
+        keyboard_indicators=$(keyboard_indicators)
         date=$(date '+%Y-%m-%d %H:%M:%S')
         music="$(music)"
     fi
@@ -274,6 +302,7 @@ while sleep 1; do
             right="${right}${SEP}${diskusage_s}"
             right="${right}${SEP}${ram}"
             right="${right}${SEP}${sticky_keys}"
+            right="${right}${SEP}${keyboard_indicators}"
             ;;
     esac
     right="${right}${SEP}${date}"
