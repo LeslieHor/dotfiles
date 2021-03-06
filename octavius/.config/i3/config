@@ -197,6 +197,10 @@ bindsym $s2+k resize shrink height 2 px or 2 ppt
 bindsym $s2+l resize grow width 2 px or 2 ppt
 bindsym $s2+y exec $i3c buffer-yank ; $exit
 bindsym $s2+p exec $i3c buffer-paste ; $exit
+bindsym $s2+e exec $i3c balance-windows ; $exit
+bindsym $s2+z exec $i3c maximise-window ; $exit
+bindsym $s2+t exec $i3c maximise-window-horizontal ; $exit
+bindsym $s2+v exec $i3c maximise-window-vertical ; $exit
 bindsym $s2+m exec banish-mouse
 
 ## SYS-3

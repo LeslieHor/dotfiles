@@ -53,7 +53,7 @@
     m:0x5d + c:96
     Control+Shift+Alt+Mod2+Mod4 + F12
 
-"notify-send 'Hyper KP0'"
+"set-up-i3; notify-send 'set up i3'"
     m:0x5d + c:90
     Control+Shift+Alt+Mod2+Mod4 + KP_Insert
 
