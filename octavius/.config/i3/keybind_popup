@@ -10,7 +10,8 @@ e - balance windows
 u - focus parent
 d - focus child
 m - toggle fullscreen
-f - toggle floating"
+f - toggle floating
+z - maximise window"
 
 elif [ "${1}" == "buffer" ]; then
     TITLE="buffer"
