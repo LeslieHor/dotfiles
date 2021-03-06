@@ -1,0 +1,98 @@
+# For the benefit of emacs users: -*- shell-script -*-
+###########################
+# xbindkeys configuration #
+###########################
+#
+# Version: 1.8.6
+
+"notify-send 'Hyper F1'"
+    m:0x5d + c:67
+    Control+Shift+Alt+Mod2+Mod4 + F1
+
+"notify-send 'Hyper F2'"
+    m:0x5d + c:68
+    Control+Shift+Alt+Mod2+Mod4 + F2
+
+"notify-send 'Hyper F3'"
+    m:0x5d + c:69
+    Control+Shift+Alt+Mod2+Mod4 + F3
+
+"notify-send 'Hyper F4'"
+    m:0x5d + c:70
+    Control+Shift+Alt+Mod2+Mod4 + F4
+
+"notify-send 'Hyper F5'"
+    m:0x5d + c:71
+    Control+Shift+Alt+Mod2+Mod4 + F5
+
+"notify-send 'Hyper F6'"
+    m:0x5d + c:72
+    Control+Shift+Alt+Mod2+Mod4 + F6
+
+"notify-send 'Hyper F7'"
+    m:0x5d + c:73
+    Control+Shift+Alt+Mod2+Mod4 + F7
+
+"notify-send 'Hyper F8'"
+    m:0x5d + c:74
+    Control+Shift+Alt+Mod2+Mod4 + F8
+
+"notify-send 'Hyper F9'"
+    m:0x5d + c:75
+    Control+Shift+Alt+Mod2+Mod4 + F9
+
+"notify-send 'Hyper F10'"
+    m:0x5d + c:76
+    Control+Shift+Alt+Mod2+Mod4 + F10
+
+"notify-send 'Hyper F11'"
+    m:0x5d + c:95
+    Control+Shift+Alt+Mod2+Mod4 + F11
+
+"notify-send 'Hyper F12'"
+    m:0x5d + c:96
+    Control+Shift+Alt+Mod2+Mod4 + F12
+
+"notify-send 'Hyper KP0'"
+    m:0x5d + c:90
+    Control+Shift+Alt+Mod2+Mod4 + KP_Insert
+
+"mpc prev; notify-send 'Previous track'"
+    m:0x5d + c:87
+    Control+Shift+Alt+Mod2+Mod4 + KP_End
+
+"mpc toggle; notify-send 'Play/Pause track'"
+    m:0x5d + c:88
+    Control+Shift+Alt+Mod2+Mod4 + KP_Down
+
+"mpc next; notify-send 'Next track'"
+    m:0x5d + c:89
+    Control+Shift+Alt+Mod2+Mod4 + KP_Next
+
+"notify-send 'Hyper KP4'"
+    m:0x5d + c:83
+    Control+Shift+Alt+Mod2+Mod4 + KP_Left
+
+"notify-send 'Hyper KP5'"
+    m:0x5d + c:84
+    Control+Shift+Alt+Mod2+Mod4 + KP_Begin
+
+"notify-send 'Hyper KP6'"
+    m:0x5d + c:85
+    Control+Shift+Alt+Mod2+Mod4 + KP_Right
+
+"notify-send 'Hyper KP7'"
+    m:0x5d + c:79
+    Control+Shift+Alt+Mod2+Mod4 + KP_Home
+
+"switch-audio-device output headset && switch-audio-device input headset && notify-send 'Audio switched to headset'"
+    m:0x5d + c:80
+    Control+Shift+Alt+Mod2+Mod4 + KP_Up
+
+"switch-audio-device output speakers && switch-audio-device input webcam && notify-send 'Audio switched to speakers'"
+    m:0x5d + c:81
+    Control+Shift+Alt+Mod2+Mod4 + KP_Prior
+
+##################################
+# End of xbindkeys configuration #
+##################################

@@ -246,6 +246,7 @@ exec --no-startup-id xrandr --output DP-1-1 --auto --right-of DVI-I-1
 exec_always --no-startup-id ~/.config/i3status/run_dzen2_bar
 
 exec --no-startup-id keynav
+exec --no-startup-id xbindkeys
 
 exec --no-startup-id ~/.config/i3/i3_startup
 

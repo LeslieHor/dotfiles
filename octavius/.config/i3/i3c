@@ -691,26 +691,8 @@ class I3C:
                 return True
         return False
 
-    def get_current_workspace_tree(self):
-        tree = self.get_tree()
-        focused_workspace = self.get_focused_workspace()
-        focused_workspace_num = focused_workspace['num']
-        focused_workspace_output = focused_workspace['output']
-        tree = tree['nodes']
-        tree = filter(lambda ws: ws['name'] == focused_workspace_output and \
-                      ws['layout'] == 'output',
-                      tree)[0],
-        tree = tree[0]
-        tree = tree['nodes']
-        tree = filter(lambda n: n['name'] == 'content', tree)[0]
-        tree = tree['nodes']
-        tree = filter(lambda ws: ws['num'] == focused_workspace_num,
-                      tree)[0],
-        tree = tree[0]
-        return tree
-
     def balance_windows(self):
-        tree = self.get_current_workspace_tree()
+        tree = self.get_workspace_tree()
         self.balance_windows_horizontal(tree, tree['rect']['width'])
         self.balance_windows_vertical(tree, tree['rect']['height'])
 
@@ -783,7 +765,9 @@ class I3C:
             self.balance_windows_vertical(node, height)
 
     def get_horizontals(self, tree):
-        if tree['layout'] != 'splith':
+        if tree['layout'] == 'tabbed':
+            return [tree]
+        elif tree['layout'] == 'splitv' and 1 < len(tree['nodes']):
             return [tree]
         total = []
         for node in tree['nodes']:
@@ -798,6 +782,40 @@ class I3C:
             total += (self.get_verticals(node))
         return total
 
+    def get_workspace_tree(self, workspace_num=None):
+        if not workspace_num:
+            focused_workspace = self.get_focused_workspace()
+            workspace_num = focused_workspace['num']
+        else:
+            workspace_num = int(workspace_num)
+
+        tree = self.get_tree()
+        tree = tree['nodes']
+        tree2 = []
+        for t in tree:
+            tree2 += t['nodes']
+        tree = tree2
+
+        tree2 = []
+        for t in tree:
+            tree2 += t['nodes']
+        tree = tree2
+        tree = filter(lambda t: t.get('num') == workspace_num, tree)[0]
+
+        return tree
+
+    def print_workspace_tree(self, workspace_num=None):
+        tree = self.get_workspace_tree(workspace_num)
+        self._print_tree(tree)
+
+    def _print_tree(self, tree, level=0):
+        num = tree.get('num', 0)
+        layout = tree.get('layout')
+        name = tree.get('name')
+        print("%s%s: - %s - %s" % ("  " * level, num, layout, name))
+
+        for node in tree['nodes']:
+            self._print_tree(node, level + 1)
 
 if len(sys.argv) <= 0:
     exit(1)
@@ -889,3 +907,8 @@ elif command == 'transpose-buffer-right':
     i3c.transpose_buffer_right()
 elif command == 'balance-windows':
     i3c.balance_windows()
+elif command == 'print-workspace-tree':
+    if 2 < len(sys.argv):
+        i3c.print_workspace_tree(sys.argv[2])
+    else:
+        i3c.print_workspace_tree()

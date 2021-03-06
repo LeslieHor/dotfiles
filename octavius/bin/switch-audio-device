@@ -9,7 +9,8 @@ HEADSET_OUTPUT='alsa_output.usb-SteelSeries_Arctis_Pro_Wireless-00.analog-stereo
 SPEAKER_OUTPUT='alsa_output.usb-FiiO_DigiHug_USB_Audio-01.iec958-stereo'
 
 HEADSET_INPUT='alsa_input.usb-SteelSeries_Arctis_Pro_Wireless-00.analog-mono'
-WEBCAM_INPUT='alsa_input.usb-046d_081b_D67F2BC0-02.multichannel-input'
+# WEBCAM_INPUT='alsa_input.usb-046d_081b_D67F2BC0-02.multichannel-input'
+WEBCAM_INPUT='alsa_input.usb-046d_081b_D67F2BC0-02.mono-fallback'
 
 case "${1}" in
     "output")
