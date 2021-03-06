@@ -63,6 +63,8 @@ mode "window" {
     bindsym m fullscreen toggle ; $exit
     bindsym f floating toggle ; $exit
     bindsym z exec $i3c maximise-window ; $exit
+    bindsym shift+h exec $i3c maximise-window-horizontal ; $exit
+    bindsym shift+v exec $i3c maximise-window-vertical ; $exit
 
     bindsym Escape $exit
 }

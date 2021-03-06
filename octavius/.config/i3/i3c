@@ -880,10 +880,36 @@ class I3C:
         self.maximise_windows_horizontal(tree, ws_width, focused_window_id)
         self.maximise_windows_vertical(tree, ws_height, focused_window_id)
 
-    def maximise_windows_horizontal(self, tree, container_width, target_id):
-        target_in_tree = self.is_container_id_in_tree(tree, target_id)
+    def maximise_window_horizontal(self):
+        tree = self.get_workspace_tree()
+        ws_width = tree['rect']['width']
+        ws_height = tree['rect']['height']
 
-        if tree['layout'] == 'tabbed':
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+        focused_window_id = focused_window['id']
+
+        self.maximise_windows_horizontal(tree, ws_width, focused_window_id)
+
+    def maximise_window_vertical(self):
+        tree = self.get_workspace_tree()
+        ws_width = tree['rect']['width']
+        ws_height = tree['rect']['height']
+
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+        focused_window_id = focused_window['id']
+
+        self.maximise_windows_vertical(tree, ws_height, focused_window_id)
+
+    def maximise_windows_horizontal(self, tree, container_width, target_id):
+        if not self.is_container_id_in_tree(tree, target_id):
+            return
+        elif tree['layout'] == 'tabbed':
             return
         elif tree['layout'] == 'splitv':
             for node in tree['nodes']:
@@ -901,9 +927,9 @@ class I3C:
                 self.set_window_width(node, other_window_width)
 
     def maximise_windows_vertical(self, tree, container_height, target_id):
-        target_in_tree = self.is_container_id_in_tree(tree, target_id)
-
-        if tree['layout'] == 'tabbed':
+        if not self.is_container_id_in_tree(tree, target_id):
+            return
+        elif tree['layout'] == 'tabbed':
             return
         elif tree['layout'] == 'splith':
             for node in tree['nodes']:
@@ -1017,3 +1043,7 @@ elif command == 'print-workspace-tree':
         i3c.print_workspace_tree()
 elif command == 'maximise-window':
     i3c.maximise_window()
+elif command == 'maximise-window-horizontal':
+    i3c.maximise_window_horizontal()
+elif command == 'maximise-window-vertical':
+    i3c.maximise_window_vertical()
