@@ -916,7 +916,7 @@ class I3C:
                 self.maximise_windows_horizontal(node, container_width, target_id)
             return
 
-        desired_width = int(container_width * 0.95)
+        desired_width = int(container_width * 0.97)
         other_window_width = container_width - desired_width
 
         for node in tree['nodes']:
