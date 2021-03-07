@@ -919,6 +919,9 @@ class I3C:
         desired_width = int(container_width * 0.97)
         other_window_width = container_width - desired_width
 
+        if len(tree['nodes']) == 1:
+            desired_width = container_width
+
         for node in tree['nodes']:
             if self.is_container_id_in_tree(node, target_id):
                 self.set_window_width(node, desired_width)
@@ -938,6 +941,9 @@ class I3C:
 
         desired_height = int(container_height * 0.95)
         other_window_height = container_height - desired_height
+
+        if len(tree['nodes']) == 1:
+            desired_height = container_height
 
         for node in tree['nodes']:
             if self.is_container_id_in_tree(node, target_id):
