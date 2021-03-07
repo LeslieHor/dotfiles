@@ -82,6 +82,7 @@ mode "buffer" {
     bindsym c $popup cast-buffer ; mode "cast-buffer"
     bindsym t $popup transpose-buffer ; mode "transpose-buffer"
     bindsym n $message "$(xdotool getactivewindow getwindowname)" ; mode "default"
+    bindsym m $message "$($i3c get-marks)" ; mode "default"
 
     bindsym Escape $exit
 }

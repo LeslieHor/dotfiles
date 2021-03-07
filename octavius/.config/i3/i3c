@@ -946,6 +946,17 @@ class I3C:
             else:
                 self.set_window_height(node, other_window_height)
 
+    def get_marks(self):
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+
+        if 'marks' in focused_window:
+            print ', '.join(focused_window['marks'])
+        else:
+            print 'NO MARKS'
+
 if len(sys.argv) <= 0:
     exit(1)
 
@@ -1047,3 +1058,5 @@ elif command == 'maximise-window-horizontal':
     i3c.maximise_window_horizontal()
 elif command == 'maximise-window-vertical':
     i3c.maximise_window_vertical()
+elif command == 'get-marks':
+    i3c.get_marks()
