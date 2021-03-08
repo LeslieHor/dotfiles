@@ -1,8 +1,9 @@
+# Required for xsession setup
+. /etc/X11/Xsession
 xrdb -load $HOME/.Xresources
 xsetroot -solid '#222222' &
-#xterm &
 
-# Here Xfce is kept as default
+# Here i3 is kept as default
 session=${1:-i3}
 
 case $session in

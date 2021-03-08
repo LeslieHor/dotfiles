@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-TERM_WINDOW=$(xdotool getactivewindow)
-
 echo "Setting monitors"
 xrandr --output DP-1-1 --auto --right-of DVI-I-1
 sleep 0.5
@@ -22,8 +20,3 @@ switch-audio-device output ${OUTPUT_DEVICE}
 switch-audio-device input ${INPUT_DEVICE}
 
 emacs &
-
-sleep 2
-xdotool windowfocus ${TERM_WINDOW}
-sleep 0.5
-xdotool type "exit"

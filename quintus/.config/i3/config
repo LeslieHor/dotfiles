@@ -33,6 +33,7 @@ client.placeholder      #FF0000 #222222 #222222 #FF0000   #FF0000
 client.background       #FFFFFF
 
 default_border pixel 4
+default_floating_border pixel 4
 
 ## Keybind shortcuts
 
@@ -56,10 +57,14 @@ set $s4 Control+Mod4
 mode "window" {
     bindsym h exec $i3c split-right ; $exit
     bindsym v exec $i3c split-down ; $exit
+    bindsym e exec $i3c balance-windows ; $exit
     bindsym u focus parent ; $exit
     bindsym d focus child ; $exit
     bindsym m fullscreen toggle ; $exit
     bindsym f floating toggle ; $exit
+    bindsym z exec $i3c maximise-window ; $exit
+    bindsym shift+h exec $i3c maximise-window-horizontal ; $exit
+    bindsym shift+v exec $i3c maximise-window-vertical ; $exit
 
     bindsym Escape $exit
 }
@@ -77,6 +82,7 @@ mode "buffer" {
     bindsym c $popup cast-buffer ; mode "cast-buffer"
     bindsym t $popup transpose-buffer ; mode "transpose-buffer"
     bindsym n $message "$(xdotool getactivewindow getwindowname)" ; mode "default"
+    bindsym m $message "$($i3c get-marks)" ; mode "default"
 
     bindsym Escape $exit
 }
@@ -103,9 +109,8 @@ mode "applications" {
     bindsym o exec dmenu_run -fn "terminus-8" ; $exit
     bindsym f exec firefox ; $exit
     bindsym e exec e --hacky-exec-fix ; $exit
-    bindsym t exec thunderbird ; $exit
+    bindsym t exec $i3c find-or-open "Mail.Thunderbird" "Mozilla Thunderbird" "thunderbird" ; $exit
     bindsym m exec music ; $exit
-    bindsym r exec $i3c find-or-open "Navigator.Firefox" "Tiny Tiny RSS - Mozilla Firefox" "firefox 'http://zarek/rssreader/index.php'" ; $exit
     bindsym n exec $i3c find-or-open "netflix.com.Google-chrome" "Netflix" "netflix" ; $exit
 
     bindsym Escape $exit
@@ -135,6 +140,21 @@ mode "disabled" {
     bindsym $s1+F11 exec echo "" > ~/.config/i3/i3_keys_disabled_status ; $exit
 }
 
+mode "maximise-window" {
+    bindsym z exec $i3c maximise-window ; $exit
+    bindsym h exec $i3c maximise-window-horizontal ; $exit
+    bindsym v exec $i3c maximise-window-vertical ; $exit
+
+    bindsym Escape $exit
+}
+
+mode "minimise-window" {
+    bindsym c exec $i3c minimise-window ; $exit
+    bindsym h exec $i3c minimise-window-horizontal ; $exit
+    bindsym v exec $i3c minimise-window-vertical ; $exit
+
+    bindsym Escape $exit
+}
 
 # Mouse bindings
 
@@ -191,8 +211,11 @@ bindsym $s2+h resize shrink width 2 px or 2 ppt
 bindsym $s2+j resize grow height 2 px or 2 ppt
 bindsym $s2+k resize shrink height 2 px or 2 ppt
 bindsym $s2+l resize grow width 2 px or 2 ppt
-bindsym $s2+y exec $i3c buffer-yank ; $exit
-bindsym $s2+p exec $i3c buffer-paste ; $exit
+bindsym $s2+y exec $i3c buffer-yank ; $message "Buffer yanked"
+bindsym $s2+p exec $i3c buffer-paste ; $message "Buffer pasted"
+bindsym $s2+e exec $i3c balance-windows
+bindsym $s2+z exec $popup maximise-window ; mode "maximise-window"
+bindsym $s2+c exec $popup minimise-window ; mode "minimise-window"
 bindsym $s2+m exec banish-mouse
 
 ## SYS-3
@@ -208,10 +231,10 @@ bindsym $s3+8 move container to workspace number 8
 bindsym $s3+9 move container to workspace number 9
 bindsym $s3+0 move container to workspace number 10
 bindsym $s3+f $popup frame ; mode "frame"
-bindsym $s3+h move left
-bindsym $s3+j move down
-bindsym $s3+k move up
-bindsym $s3+l move right
+bindsym $s3+h exec $i3c cast-buffer-left
+bindsym $s3+j exec $i3c cast-buffer-down
+bindsym $s3+k exec $i3c cast-buffer-up
+bindsym $s3+l exec $i3c cast-buffer-right
 bindsym $s3+p exec $i3c prev-workspace
 bindsym $s3+n exec $i3c next-workspace
 bindsym $s3+comma exec $i3c swap-workspace-left
@@ -224,6 +247,10 @@ bindsym $s4+n exec org-clip --dmenu
 bindsym $s4+t scratchpad show
 bindsym $s4+r move scratchpad
 bindsym $s4+a [class="Emacs"] scratchpad show
+bindsym $s4+h move left
+bindsym $s4+j move down
+bindsym $s4+k move up
+bindsym $s4+l move right
 
 # Rules
 for_window [class="Wfica_Seamless"] floating enable
@@ -232,9 +259,6 @@ for_window [class="Toplevel"] floating enable
 
 mouse_warping none
 
-# Start each workspace with an empty container
-exec $i3c init-populate-with-empty-containers
-
 exec_always --no-startup-id ~/.config/i3status/run_dzen2_bar
 
 exec --no-startup-id keynav
@@ -242,3 +266,6 @@ exec --no-startup-id keynav
 exec --no-startup-id ~/.config/i3/i3_startup
 
 exec --no-startup-id dunst &
+
+# Start each workspace with an empty container
+exec $i3c init-populate-with-empty-containers

@@ -22,7 +22,7 @@ X=$(${i3c} dzen2-bar-x ${ACTIVE_DISPLAY})
 WIDTH=$(${i3c} dzen2-bar-width ${ACTIVE_DISPLAY})
 FONT_WIDTH=$(( ${WIDTH} / $(dzen2-textwidth ${FONT} ".") - 1 ))
 
-if [ -z ${1} ]; then
+if [ -z "${1}" ]; then
     echo "default" | dzen2 -p 1\
                            -e 'onstart=uncollapse' \
                            -w ${WIDTH} \
