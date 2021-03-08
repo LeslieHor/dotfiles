@@ -963,6 +963,34 @@ class I3C:
         else:
             print 'NO MARKS'
 
+    def minimise_window(self):
+        self.minimise_window_horizontal()
+        self.minimise_window_vertical()
+
+    def minimise_window_horizontal(self):
+        tree = self.get_workspace_tree()
+        ws_width = tree['rect']['width']
+        ws_height = tree['rect']['height']
+
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+
+        self.set_window_width(focused_window, 50)
+
+    def minimise_window_vertical(self):
+        tree = self.get_workspace_tree()
+        ws_width = tree['rect']['width']
+        ws_height = tree['rect']['height']
+
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+
+        self.set_window_height(focused_window, 50)
+
 if len(sys.argv) <= 0:
     exit(1)
 
@@ -1066,3 +1094,10 @@ elif command == 'maximise-window-vertical':
     i3c.maximise_window_vertical()
 elif command == 'get-marks':
     i3c.get_marks()
+elif command == 'minimise-window':
+    i3c.minimise_window()
+elif command == 'minimise-window-horizontal':
+    i3c.minimise_window_horizontal()
+elif command == 'minimise-window-vertical':
+    print "1"
+    i3c.minimise_window_vertical()

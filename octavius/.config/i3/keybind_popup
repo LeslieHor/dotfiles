@@ -44,18 +44,21 @@ p - type pass
 b - type user and pass
 U - copy user
 P - copy pass"
+
 elif [ "${1}" == "cast-buffer" ]; then
     TITLE="cast buffer"
     TEXT="h - cast buffer left
 j - cast buffer down
 k - cast buffer up
 l - cast buffer right"
+
 elif [ "${1}" == "transpose-buffer" ]; then
     TITLE="transpose buffer"
     TEXT="h - transpose buffer left
 j - transpose buffer down
 k - transpose buffer up
 l - transpose buffer right"
+
 elif [ "${1}" == "utils" ]; then
     TITLE="utils"
     TEXT="d - disable i3 bindings
@@ -63,6 +66,18 @@ r - restart i3
 q - force kill window
 c - force create empty container
 l - logout"
+
+elif [ "${1}" == "maximise-window" ]; then
+    TITLE="maximise window"
+    TEXT="z - maximise window
+h - maximise window horizontal
+v - maximise window vertical"
+
+elif [ "${1}" == "minimise-window" ]; then
+    TITLE="minimise window"
+    TEXT="c - minimise window
+h - minimise window horizontal
+v - minimise window vertical"
 
 fi
 

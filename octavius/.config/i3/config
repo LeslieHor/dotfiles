@@ -140,6 +140,21 @@ mode "disabled" {
     bindsym $s1+F11 exec echo "" > ~/.config/i3/i3_keys_disabled_status ; $exit
 }
 
+mode "maximise-window" {
+    bindsym z exec $i3c maximise-window ; $exit
+    bindsym h exec $i3c maximise-window-horizontal ; $exit
+    bindsym v exec $i3c maximise-window-vertical ; $exit
+
+    bindsym Escape $exit
+}
+
+mode "minimise-window" {
+    bindsym c exec $i3c minimise-window ; $exit
+    bindsym h exec $i3c minimise-window-horizontal ; $exit
+    bindsym v exec $i3c minimise-window-vertical ; $exit
+
+    bindsym Escape $exit
+}
 
 # Mouse bindings
 
@@ -199,9 +214,8 @@ bindsym $s2+l resize grow width 2 px or 2 ppt
 bindsym $s2+y exec $i3c buffer-yank ; $message "Buffer yanked"
 bindsym $s2+p exec $i3c buffer-paste ; $message "Buffer pasted"
 bindsym $s2+e exec $i3c balance-windows
-bindsym $s2+z exec $i3c maximise-window
-bindsym $s2+t exec $i3c maximise-window-horizontal
-bindsym $s2+v exec $i3c maximise-window-vertical
+bindsym $s2+z exec $popup maximise-window ; mode "maximise-window"
+bindsym $s2+c exec $popup minimise-window ; mode "minimise-window"
 bindsym $s2+m exec banish-mouse
 
 ## SYS-3
@@ -245,12 +259,9 @@ for_window [class="Toplevel"] floating enable
 
 mouse_warping none
 
-# Start each workspace with an empty container
-exec $i3c init-populate-with-empty-containers
-
-exec --no-startup-id xrandr --output DVI-D-1 --auto --right-of DP-1-1
-exec --no-startup-id sleep 1
 exec --no-startup-id xrandr --output DP-1-1 --auto --right-of DVI-I-1
+exec --no-startup-id sleep 1
+exec --no-startup-id xrandr --output DVI-D-1 --auto --right-of DP-1-1
 exec_always --no-startup-id ~/.config/i3status/run_dzen2_bar
 
 exec --no-startup-id keynav
@@ -259,3 +270,6 @@ exec --no-startup-id xbindkeys
 exec --no-startup-id ~/.config/i3/i3_startup
 
 exec --no-startup-id dunst &
+
+# Start each workspace with an empty container
+exec $i3c init-populate-with-empty-containers
