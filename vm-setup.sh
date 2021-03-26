@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# sudo apt install -y git
+# mkdir -p ~/projects
+# cd ~/projects
+# git clone https://github.com/LeslieHor/dotfiles.git
+# cd dotfiles
+# ./vm-setup.sh
+
+
 # To cache sudo password
 sudo echo
 
@@ -21,7 +29,7 @@ ln -s ~/projects/emacs.d/configuration.org ~/.emacs.d/
 ln -s ~/projects/emacs.d/settings.org ~/.emacs.d/
 ln -s ~/projects/emacs.d/init.el ~/.emacs.d/
 ln -s ~/projects/emacs.d/packages/ ~/.emacs.d/
-printf "#+TITLE: Personal Settings\n\n#+BEGIN_SRC emacs-lisp\n#+END_SRC" ~/.emacs.d/personalsettings.org
+printf '#+TITLE: Personal Settings\n\n#+BEGIN_SRC emacs-lisp\n#+END_SRC' > ~/.emacs.d/personalsettings.org
 
 # Set pims files to enable emacs org-modeto load up
 mkdir -p ~/pims
