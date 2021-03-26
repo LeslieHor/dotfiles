@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-# cd ~/Downloads
-# scp -r leslie@octavius:~/projects/dotfiles ./
-# cd dotfiles
-# ./vm-setup.sh
-
 # To cache sudo password
 sudo echo
 
@@ -21,12 +16,18 @@ sudo apt install -y i3 dzen2 python dunst xterm emacs dunst xfonts-terminus xkbs
 sudo apt upgrade -y
 
 # Get emacs configuration
-git clone https://github.com/LeslieHor/emacs.d.git ~/projects/
+git clone https://github.com/LeslieHor/emacs.d.git ~/projects/emacs.d
 ln -s ~/projects/emacs.d/configuration.org ~/.emacs.d/
 ln -s ~/projects/emacs.d/settings.org ~/.emacs.d/
 ln -s ~/projects/emacs.d/init.el ~/.emacs.d/
 ln -s ~/projects/emacs.d/packages/ ~/.emacs.d/
-touch ~/projects/.emacs.d/personalsettings.org
+printf "#+TITLE: Personal Settings\n\n#+BEGIN_SRC emacs-lisp\n#+END_SRC" ~/.emacs.d/personalsettings.org
+
+# Set pims files to enable emacs org-modeto load up
+mkdir -p ~/pims
+touch ~/pims/inbox.org
+touch ~/pims/todo.org
+touch ~/pims/calendar.org
 
 # Install dotfiles
 mv ~/.bashrc ~/.bashrc.default
