@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+
+MINI_POPUP=~/.config/i3/mini_popup
+
+if [ "${1}" == "window" ]; then
+    TITLE="window"
+    TEXT="h - split right
+v - split vertical
+e - balance windows
+u - focus parent
+d - focus child
+m - toggle fullscreen
+f - toggle floating
+z - maximise window
+H - maximise window horizontal
+V - maximise window vertical"
+
+elif [ "${1}" == "buffer" ]; then
+    TITLE="buffer"
+    TEXT="j - jump to window
+b - bring window
+c - cast buffer
+t - transpose buffer
+n - buffer name"
+
+elif [ "${1}" == "frame" ]; then
+    TITLE="frame"
+    TEXT="r - rename workspace
+c - create new workspace"
+
+elif [ "${1}" == "applications" ]; then
+    TITLE="applications"
+    TEXT="o - open application
+f - firefox
+e - emacs
+t - thunderbird
+m - music
+n - netflix"
+
+elif [ "${1}" == "pass" ]; then
+    TITLE="pass"
+    TEXT="u - type user
+p - type pass
+b - type user and pass
+U - copy user
+P - copy pass"
+
+elif [ "${1}" == "cast-buffer" ]; then
+    TITLE="cast buffer"
+    TEXT="h - cast buffer left
+j - cast buffer down
+k - cast buffer up
+l - cast buffer right"
+
+elif [ "${1}" == "transpose-buffer" ]; then
+    TITLE="transpose buffer"
+    TEXT="h - transpose buffer left
+j - transpose buffer down
+k - transpose buffer up
+l - transpose buffer right"
+
+elif [ "${1}" == "utils" ]; then
+    TITLE="utils"
+    TEXT="d - disable i3 bindings
+r - restart i3
+q - force kill window
+c - force create empty container
+l - logout"
+
+elif [ "${1}" == "maximise-window" ]; then
+    TITLE="maximise window"
+    TEXT="z - maximise window
+h - maximise window horizontal
+v - maximise window vertical"
+
+elif [ "${1}" == "minimise-window" ]; then
+    TITLE="minimise window"
+    TEXT="c - minimise window
+h - minimise window horizontal
+v - minimise window vertical"
+
+fi
+
+${MINI_POPUP} "${TITLE}" "${TEXT}"

@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+i3c="${HOME}/.config/i3/i3c"
+
+PID_FILE="${HOME}/.config/i3/mini_popup.pid"
+
+if [ -f ${PID_FILE} ]; then
+    PARENT_PID=$(cat ${PID_FILE}) || true
+    CHILD_PID=$(pgrep -P ${PARENT_PID}) || true
+    kill ${PARENT_PID} || true
+    kill ${CHILD_PID} || true
+    rm ${PID_FILE}
+fi
+
+FONT="$(xrdb-query 'Leslie.bar.font')"
+FG='#FFFFFF'
+BG='#222222'
+DELAY=0.5
+
+ACTIVE_DISPLAY=$(${i3c} active-display)
+X=$(${i3c} dzen2-bar-x ${ACTIVE_DISPLAY})
+WIDTH=$(${i3c} dzen2-bar-width ${ACTIVE_DISPLAY})
+FONT_WIDTH=$(( ${WIDTH} / $(dzen2-textwidth ${FONT} ".") - 1 ))
+
+if [ -z "${1}" ]; then
+    echo "default" | dzen2 -p 1\
+                           -e 'onstart=uncollapse' \
+                           -w ${WIDTH} \
+                           -x ${X} \
+                           -fn ${FONT} \
+                           -fg ${FG} \
+                           -bg ${BG}
+    exit 0
+fi
+
+echo $$ > ${PID_FILE}
+
+sleep ${DELAY}
+
+TITLE="${1}"
+TEXT=$(echo "${2}" | column -c ${FONT_WIDTH} -x | expand | sed 's/^/ /')
+
+INPUT="${TITLE}\n${TEXT}\n"
+
+LINES=$(( $(printf "${INPUT}" | wc -l) - 1 ))
+
+printf "${INPUT}" | dzen2 -p \
+                          -e 'onstart=uncollapse' \
+                          -l ${LINES} \
+                          -w ${WIDTH} \
+                          -x ${X} \
+                          -fn ${FONT} \
+                          -fg ${FG} \
+                          -bg ${BG}

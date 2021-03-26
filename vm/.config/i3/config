@@ -1,0 +1,275 @@
+# i3 Config File
+# Created: 2020-01-21
+# As much as possible, make it act like emacs manual tiling
+
+# Settings
+
+# Font
+#font pango:Liberation Mono 7
+font pango:Liberation Mono 0
+
+## All workspaces start in tabbed layout
+workspace_layout tabbed
+
+## Modifier for floating window manipulation
+floating_modifier Mod4
+
+## Colours
+
+# class                 border  bground text    indicator child_border
+# client.focused          #006600 #004400 #FFFFFF #004400   #006600
+# client.focused_inactive #333333 #222222 #FFFFFF #FF0000   #333333
+# client.unfocused        #333333 #555555 #FFFFFF #FF0000   #333333
+
+# Trying out a hidden tab bar
+# Focus colour = cyan to make it way more obvious
+client.focused          #555555 #555555 #555555 #555555   #00FFFF
+client.focused_inactive #555555 #555555 #555555 #555555   #555555
+client.unfocused        #555555 #555555 #555555 #555555   #555555
+
+client.urgent           #FF0000 #FF0000 #FFFFFF #FF0000   #FF0000
+client.placeholder      #FF0000 #222222 #222222 #FF0000   #FF0000
+
+client.background       #FFFFFF
+
+default_border pixel 4
+default_floating_border pixel 4
+
+## Keybind shortcuts
+
+set $i3c ~/.config/i3/i3c
+set $popup exec ~/.config/i3/keybind_popup
+set $message exec ~/.config/i3/message
+set $exit exec ~/.config/i3/keybind_popup ; mode "default"
+
+### Key aliases
+#### default
+set $mod Mod4
+
+#### S Keys
+set $s1 Mod4
+set $s2 Mod1+Mod4
+set $s3 Shift+Mod4
+set $s4 Control+Mod4
+
+# Key tables
+
+mode "window" {
+    bindsym h exec $i3c split-right ; $exit
+    bindsym v exec $i3c split-down ; $exit
+    bindsym e exec $i3c balance-windows ; $exit
+    bindsym u focus parent ; $exit
+    bindsym d focus child ; $exit
+    bindsym m fullscreen toggle ; $exit
+    bindsym f floating toggle ; $exit
+    bindsym z exec $i3c maximise-window ; $exit
+    bindsym shift+h exec $i3c maximise-window-horizontal ; $exit
+    bindsym shift+v exec $i3c maximise-window-vertical ; $exit
+
+    bindsym Escape $exit
+}
+
+mode "frame" {
+    bindsym r exec $i3c rename-workspace "$(echo -n | dmenu -fn 'terminus-8' -p 'Rename workspace:')" ; $exit
+    bindsym c exec $i3c create-new-workspace ; $exit
+
+    bindsym Escape $exit
+}
+
+mode "buffer" {
+    bindsym j exec $i3c jump-to-window ; $exit
+    bindsym b exec $i3c bring-window ; $exit
+    bindsym c $popup cast-buffer ; mode "cast-buffer"
+    bindsym t $popup transpose-buffer ; mode "transpose-buffer"
+    bindsym n $message "$(xdotool getactivewindow getwindowname)" ; mode "default"
+    bindsym m $message "$($i3c get-marks)" ; mode "default"
+
+    bindsym Escape $exit
+}
+
+mode "cast-buffer" {
+    bindsym h exec $i3c cast-buffer-left ; $exit
+    bindsym j exec $i3c cast-buffer-down ; $exit
+    bindsym k exec $i3c cast-buffer-up ; $exit
+    bindsym l exec $i3c cast-buffer-right ; $exit
+
+    bindsym Escape $exit
+}
+
+mode "transpose-buffer" {
+    bindsym h exec $i3c transpose-buffer-left ; $exit
+    bindsym j exec $i3c transpose-buffer-down ; $exit
+    bindsym k exec $i3c transpose-buffer-up ; $exit
+    bindsym l exec $i3c transpose-buffer-right ; $exit
+
+    bindsym Escape $exit
+}
+
+mode "applications" {
+    bindsym o exec dmenu_run -fn "terminus-8" ; $exit
+    bindsym f exec firefox ; $exit
+    bindsym e exec e --hacky-exec-fix ; $exit
+    bindsym t exec $i3c find-or-open "Mail.Thunderbird" "Mozilla Thunderbird" "thunderbird" ; $exit
+    bindsym m exec music ; $exit
+    bindsym n exec $i3c find-or-open "netflix.com.Google-chrome" "Netflix" "netflix" ; $exit
+
+    bindsym Escape $exit
+}
+
+mode "pass" {
+    bindsym u exec passmenu type user ; $exit
+    bindsym p exec passmenu type pass ; $exit
+    bindsym b exec passmenu type both ; $exit
+    bindsym Shift+u exec passmenu copy user ; $exit
+    bindsym Shift+p exec passmenu copy pass ; $exit
+
+    bindsym Escape $exit
+}
+
+mode "utils" {
+    bindsym d exec echo " DISABLED (S1-F11 to return)" > ~/.config/i3/i3_keys_disabled_status ; exec ~/.config/i3/keybind_popup ; mode "disabled"
+    bindsym r exec ~/.config/i3/keybind_popup ; mode "default" ; restart
+    bindsym l exit
+    bindsym q kill ; $exit
+    bindsym c exec $i3c create-empty-container ; $exit
+
+    bindsym Escape $exit
+}
+
+mode "disabled" {
+    bindsym $s1+F11 exec echo "" > ~/.config/i3/i3_keys_disabled_status ; $exit
+}
+
+mode "maximise-window" {
+    bindsym z exec $i3c maximise-window ; $exit
+    bindsym h exec $i3c maximise-window-horizontal ; $exit
+    bindsym v exec $i3c maximise-window-vertical ; $exit
+
+    bindsym Escape $exit
+}
+
+mode "minimise-window" {
+    bindsym c exec $i3c minimise-window ; $exit
+    bindsym h exec $i3c minimise-window-horizontal ; $exit
+    bindsym v exec $i3c minimise-window-vertical ; $exit
+
+    bindsym Escape $exit
+}
+
+# Mouse bindings
+
+## The middle button over a titlebar kills the window
+bindsym --release button2 kill
+
+# Keybindings
+
+bindsym Mod4+BackSpace exec i3lock -fc 222222
+bindsym Mod4+space exec xterm
+
+bindsym XF86MonBrightnessUp exec brightness-up
+bindsym XF86MonBrightnessDown exec brightness-down
+bindsym XF86AudioRaiseVolume exec amixer -q set Master 2dB+
+bindsym XF86AudioLowerVolume exec amixer -q set Master 2dB-
+bindsym XF86AudioMute exec toggle-mute
+bindsym XF86AudioPlay exec mpc toggle
+bindsym XF86AudioNext exec mpc next
+bindsym XF86AudioPrev exec mpc prev
+
+## SYS-1
+
+bindsym $s1+1 exec $i3c focus-workspace 1
+bindsym $s1+2 exec $i3c focus-workspace 2
+bindsym $s1+3 exec $i3c focus-workspace 3
+bindsym $s1+4 exec $i3c focus-workspace 4
+bindsym $s1+5 exec $i3c focus-workspace 5
+bindsym $s1+6 exec $i3c focus-workspace 6
+bindsym $s1+7 exec $i3c focus-workspace 7
+bindsym $s1+8 exec $i3c focus-workspace 8
+bindsym $s1+9 exec $i3c focus-workspace 9
+bindsym $s1+0 exec $i3c focus-workspace 10
+bindsym $s1+h exec $i3c focus-left
+bindsym $s1+j exec $i3c focus-down
+bindsym $s1+k exec $i3c focus-up
+bindsym $s1+l exec $i3c focus-right
+bindsym $s1+m exec bring-mouse
+
+bindsym $s1+q exec $i3c kill
+bindsym $s1+c exec $i3c collapse-group
+#bindsym $s1+c move container to workspace hidden
+bindsym $s1+b $popup buffer ; mode "buffer"
+bindsym $s1+o $popup applications ; mode "applications"
+bindsym $s1+w $popup window ; mode "window"
+bindsym $s1+comma exec $i3c prev-tab
+bindsym $s1+period exec $i3c next-tab
+bindsym $s1+F11 $popup utils ; mode "utils"
+
+bindsym $s1+s exec toggle-sticky-keys
+
+## SYS-2
+
+bindsym $s2+h resize shrink width 2 px or 2 ppt
+bindsym $s2+j resize grow height 2 px or 2 ppt
+bindsym $s2+k resize shrink height 2 px or 2 ppt
+bindsym $s2+l resize grow width 2 px or 2 ppt
+bindsym $s2+y exec $i3c buffer-yank ; $message "Buffer yanked"
+bindsym $s2+p exec $i3c buffer-paste ; $message "Buffer pasted"
+bindsym $s2+e exec $i3c balance-windows
+bindsym $s2+z exec $popup maximise-window ; mode "maximise-window"
+bindsym $s2+c exec $popup minimise-window ; mode "minimise-window"
+bindsym $s2+m exec banish-mouse
+
+## SYS-3
+
+bindsym $s3+1 move container to workspace number 1
+bindsym $s3+2 move container to workspace number 2
+bindsym $s3+3 move container to workspace number 3
+bindsym $s3+4 move container to workspace number 4
+bindsym $s3+5 move container to workspace number 5
+bindsym $s3+6 move container to workspace number 6
+bindsym $s3+7 move container to workspace number 7
+bindsym $s3+8 move container to workspace number 8
+bindsym $s3+9 move container to workspace number 9
+bindsym $s3+0 move container to workspace number 10
+bindsym $s3+f $popup frame ; mode "frame"
+bindsym $s3+h exec $i3c cast-buffer-left
+bindsym $s3+j exec $i3c cast-buffer-down
+bindsym $s3+k exec $i3c cast-buffer-up
+bindsym $s3+l exec $i3c cast-buffer-right
+bindsym $s3+p exec $i3c prev-workspace
+bindsym $s3+n exec $i3c next-workspace
+bindsym $s3+comma exec $i3c swap-workspace-left
+bindsym $s3+period exec $i3c swap-workspace-right
+
+## SYS-4
+
+bindsym $s4+p $popup pass ; mode "pass"
+bindsym $s4+n exec org-clip --dmenu
+bindsym $s4+t scratchpad show
+bindsym $s4+r move scratchpad
+bindsym $s4+a [class="Emacs"] scratchpad show
+bindsym $s4+h move left
+bindsym $s4+j move down
+bindsym $s4+k move up
+bindsym $s4+l move right
+
+# Rules
+for_window [class="Wfica_Seamless"] floating enable
+# For scid dialog windows
+for_window [class="Toplevel"] floating enable
+
+mouse_warping none
+
+exec --no-startup-id xrandr --output DP-1-1 --auto --right-of DVI-I-1
+exec --no-startup-id sleep 1
+exec --no-startup-id xrandr --output DVI-D-1 --auto --right-of DP-1-1
+exec_always --no-startup-id ~/.config/i3status/run_dzen2_bar
+
+exec --no-startup-id keynav
+exec --no-startup-id xbindkeys
+
+exec --no-startup-id ~/.config/i3/i3_startup
+
+exec --no-startup-id dunst &
+
+# Start each workspace with an empty container
+exec $i3c init-populate-with-empty-containers

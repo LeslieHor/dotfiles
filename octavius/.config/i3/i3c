@@ -670,6 +670,8 @@ class I3C:
             selector_str = '[con_id=' + str(empty_container_id) + ']'
             i3(selector_str, 'kill')
 
+        self.simplify_tree()
+
     def cast_buffer(self, direction):
         self.buffer_yank('cast-buffer')
 
@@ -804,7 +806,6 @@ class I3C:
                 continue
 
             count = len(self.get_verticals(node))
-            print("VC2: %s" % count)
             height = desired_height * count
 
             self.set_window_height(node, height)
@@ -860,8 +861,10 @@ class I3C:
         num = tree.get('num', 0)
         layout = tree.get('layout')
         name = tree.get('name')
+        t_id = tree.get('id')
+        marks = tree.get('marks')
         isc = self.is_container_id_in_tree(tree, container_id)
-        print("%s%s: - %s - %s" % ("  " * level, isc, layout, name))
+        print("%s%s: - %s - %s - %s" % ("|   " * level, t_id, layout, name, marks))
 
         for node in tree['nodes']:
             self._print_tree(node, level + 1, container_id)
@@ -991,6 +994,104 @@ class I3C:
 
         self.set_window_height(focused_window, 50)
 
+    def simplify_tree(self, workspace_num=None):
+        """Simplify tree. If any connecting node only has one child, the node does not
+need to exist. Tree pollution is a side effect of the custom split process
+incorporated in this program."""
+        print("Simplifying tree")
+
+        tree = self.get_workspace_tree(workspace_num)
+
+        # Regular `_simplify_tree' function does not work when operating on the
+        # root of a workspace. Must skip the first root node before calling the
+        # simplification function.
+        tree = self._get_workspace_subtree(tree)
+        if not tree:
+            return
+
+        starting_id = tree['id']
+        starting_tree = tree['nodes'][0]
+
+        # Use a counter in case it gets stuck in an infinite loop. Due to a
+        # hardcoded limit, only a limited number of links can be simplified.
+        counter = 0
+        while counter < 10 and self._simplify_tree(starting_id, starting_tree):
+            counter += 1
+            print("Simplifying sub tree: %s" % (counter))
+
+            # Refresh tree data
+            self.get_tree(True)
+            self.get_workspaces(True)
+
+            tree = self.get_workspace_tree(workspace_num)
+            tree = self._get_workspace_subtree(tree)
+            if not tree:
+                return
+            starting_id = tree['id']
+            starting_tree = tree['nodes'][0]
+
+
+        self.get_tree(True)
+        self.get_workspaces(True)
+        tree = self.get_workspace_tree(workspace_num)
+
+        parent_id = tree['id']
+        tree = self._get_workspace_subtree(tree)
+        if not tree:
+            return
+        self._simplify_tree(parent_id, tree, True)
+
+    def _get_workspace_subtree(self, tree):
+        if len(tree['nodes']) != 1:
+            return False
+        tree = tree['nodes'][0]
+        if len(tree['nodes']) != 1:
+            return False
+        return tree
+
+    def _simplify_tree(self, parent_id, tree, is_workspace_root=False):
+        """Algorithm to simplify tree by removing connecting nodes with only one
+child."""
+        print("Simplifying id: %s" % (tree['id']))
+
+        if 'nodes' not in tree:
+            print("Node has no children")
+            return False
+
+        if tree['nodes'] == []:
+            print("Node has no children in node list")
+            return False
+
+        if len(tree['nodes']) == 1:
+            print("Node has a single child. Simplifying tree.")
+
+            parent_str = '[con_id=' + str(parent_id) + ']'
+            i3(parent_str, 'mark --add parent')
+
+            child_id = tree['nodes'][0]['id']
+            child_str = '[con_id=' + str(child_id) + ']'
+            i3(child_str, 'mark --add child')
+
+            # Moving directly to workspace roots does not work. The container
+            # must be moved to a different workspace first.
+            if is_workspace_root:
+                i3('[con_mark="' + 'child' + '"]', 'move', 'container', 'to', 'workspace', 'temp')
+            i3('[con_mark="' + 'child' + '"]', 'move', 'container', 'to', 'mark', 'parent')
+            i3('unmark parent')
+            i3('unmark child')
+
+            return True
+
+        if not is_workspace_root:
+            print("Recursively simplifying children trees")
+            for node in tree['nodes']:
+                if self._simplify_tree(tree['id'], node):
+                    print("Subtree was simplified")
+                    return True
+
+        print("Tree required no simplifying")
+        return False
+
 if len(sys.argv) <= 0:
     exit(1)
 
@@ -1099,5 +1200,6 @@ elif command == 'minimise-window':
 elif command == 'minimise-window-horizontal':
     i3c.minimise_window_horizontal()
 elif command == 'minimise-window-vertical':
-    print "1"
     i3c.minimise_window_vertical()
+elif command == 'simplify-tree':
+    i3c.simplify_tree()

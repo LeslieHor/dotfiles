@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# An emacs wrapper script
+#
+# e [-c | --create-frame] [FILE]
+#
+# Examples
+# $ e
+# Opens emacs. If emacs is already open, opens a new emacsclient frame
+#
+# $ e FILE
+# Opens FILE in the last used emacs frame
+#
+# $ e -c FILE
+# Opens FILE in a new emacs frame
+#
+# $ echo "Hello, world!" | e
+# Creates a temporary file containing the piped in data, and opens the
+# temporary file in emacs
+
+while [ ${#} -gt 0 ]; do
+    key=${1}
+    case ${key} in
+        -c|--create-frame)
+            CREATE_FRAME=" -c "
+            shift
+            ;;
+        --hacky-exec-fix)
+            HACKY_EXEC_FIX=true
+            shift
+            ;;
+        *)
+            FILE=${1}
+            shift
+            ;;
+    esac
+done
+
+if [ ! -t 0 ] && [ -z "${HACKY_EXEC_FIX}" ]; then
+    TEMPFILE=$(tempfile)
+    cat - > ${TEMPFILE}
+    FILE=${TEMPFILE}
+fi
+
+if [ -z "${FILE}" ]; then
+    emacsclient -c --no-wait -a 'false' || emacs
+else
+    emacsclient ${CREATE_FRAME} -a 'false' --no-wait ${FILE} || emacs ${FILE}
+fi
+

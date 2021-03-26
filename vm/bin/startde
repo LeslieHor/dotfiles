@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+if [ -z "${DISPLAY}" ] && [ "${XDG_VTNR}" -eq 1 ]; then
+    echo '
+===================================
+  ___       _              _
+ / _ \  ___| |_ __ ___   _(_)_   _ ___
+| | | |/ __| __/ _` \ \ / / | | | / __|
+| |_| | (__| || (_| |\ V /| | |_| \__ \
+ \___/ \___|\__\__,_| \_/ |_|\__,_|___/
+
+==================================='
+    echo
+    echo "TTY Detected. Asking to start DE."
+    echo "Will load DE in 5 seconds by default."
+    echo
+    echo "1. i3 (default)"
+    echo "2. ubuntu"
+    echo "3. kde"
+    echo "4. gnome"
+    echo "5. work"
+    echo "n. cancel"
+    echo
+    read -n 1 -t 5 -p "Select a DE:? " input
+    echo
+    case ${input} in
+        1)
+            exec startx ~/.xinitrc i3;;
+        2)
+            exec startx ~/.xinitrc ubuntu;;
+        3)
+            exec startx ~/.xinitrc kde;;
+        4)
+            exec startx ~/.xinitrc gnome;;
+        5)
+            exec startx ~/.xinitrc work;;
+        n)
+            echo "DE start up cancelled"
+            exit;;
+        *)
+            exec startx ~/.xinitrc i3;;
+    esac
+fi

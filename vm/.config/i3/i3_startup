@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# For computer specific commands
+
+mpd
+feh --bg-fill ~/wallpapers/triple/grand_canyon/{0,1,2}.jpg
+xset s off ; xset -dpms ; xset s noblank

@@ -1,0 +1,1205 @@
+#!/usr/bin/env python
+
+import json
+import subprocess
+import sys
+import time
+
+EMPTY_CONTAINER_PATH = '~/.config/i3/empty-container.json'
+
+def i3(*args):
+    new_list = []
+    for item in args:
+        if isinstance(item, str):
+            new_item = "'%s'" % (item)
+        elif isinstance(item, int):
+            new_item = "'%s'" % (str(item))
+        elif isinstance(item, float):
+            new_item = "'%s'" % (str(item))
+        elif isinstance(item, unicode):
+            new_item = "'%s'" % (str(item))
+        else:
+            raise Exception('Invalid type when attempting to join and sanitize')
+        new_list.append(new_item)
+    command = 'i3-msg %s' % (' '.join(new_list))
+
+    proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            shell=True)
+    result, _err = proc.communicate()
+    return result
+
+def call(command, stdin=None):
+    """Call into the system and run Command (string)"""
+    cmd = join_and_sanitize(command)
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            stdin=subprocess.PIPE, shell=True)
+    result, _err = proc.communicate(input=stdin)
+    return result
+
+def join_and_sanitize(list_):
+    """Join a list of items into a single string"""
+    if isinstance(list_, str):
+        return list_
+
+    new_list = []
+    for item in list_:
+        if isinstance(item, str):
+            new_list.append(item)
+        elif isinstance(item, int):
+            new_list.append(str(item))
+        elif isinstance(item, float):
+            new_list.append(str(item))
+        elif isinstance(item, unicode):
+            new_list.append(str(item))
+        else:
+            raise Exception('Invalid type when attempting to join and sanitize')
+
+    return ' '.join(new_list)
+
+class I3C:
+    def __init__(self):
+        self.tree = {}
+        self.workspaces = {}
+        self.outputs = {}
+        self.displays = []
+
+    def get_tree(self, force=False):
+        if self.tree == {} or force:
+            self.tree = json.loads(i3('-t', 'get_tree'))
+        return self.tree
+
+    def get_workspaces(self, force=False):
+        if self.workspaces == {} or force:
+            self.workspaces = json.loads(i3('-t', 'get_workspaces'))
+        return self.workspaces
+
+    def get_outputs(self, force=False):
+        if self.outputs == {} or force:
+            self.outputs = json.loads(i3('-t', 'get_outputs'))
+        return self.outputs
+
+    def get_displays(self, force=False):
+        if self.displays == [] or force:
+            displays = filter(lambda d: d['active'], self.get_outputs())
+            displays = sorted(displays, key=lambda d: d['rect']['x'])
+            displays = [d['name'] for d in displays]
+            self.displays = displays
+        return self.displays
+
+    def get_focused_workspace(self):
+        focused_workspace = filter(lambda w: w['focused'], self.get_workspaces())[0]
+        return focused_workspace
+
+    def get_visible_workspaces(self):
+        return filter(lambda w: w['visible'], self.get_workspaces())
+
+    def get_windows_with_parent_data(self):
+        data = self._get_windows_with_parent_data(self.get_tree(),
+                                                  self._get_parent_data(self.get_tree()))
+        return data
+
+    def _get_windows_with_parent_data(self, tree, parent_data):
+        if tree['window']:
+            data = {}
+            data['parent'] = parent_data
+            data['window'] = tree
+            return [data]
+
+        d = []
+        for node in tree['nodes']:
+            data = self._get_windows_with_parent_data(node, self._get_parent_data(tree))
+            d += data
+
+        for node in tree['floating_nodes']:
+            data = self._get_windows_with_parent_data(node, self._get_parent_data(tree))
+            d += data
+
+        return d
+
+    def _get_parent_data(self, node):
+        data = {}
+        data['layout'] = node['layout']
+        data['focus'] = node['focus']
+        data['nodes'] = node['nodes']
+        return data
+
+    def get_all_leafs(self):
+        data = self._get_all_leafs(self.get_tree()),
+        return data[0] # TODO : Why do i need this?
+
+    def _get_all_leafs(self, tree):
+        if len(tree['nodes']) <= 0:
+            return [tree]
+
+        d = []
+        for node in tree['nodes']:
+            data = self._get_all_leafs(node)
+            d += data
+        return d
+
+    def create_empty_window(self):
+        r = json.loads(i3('open'))
+        return r[0]['id']
+
+    def get_new_empty_container(self):
+        leafs = filter(lambda w: 'marks' in w, self.get_all_leafs())
+        empty_container = filter(lambda w: 'new_empty_container' in w['marks'],
+                                 leafs)[0]
+        return empty_container
+
+    def sleep_focus(self, num):
+        # Sleep due to race condition with i3 changing focus after the second move
+        time.sleep(0.1)
+        i3('workspace', 'number', num)
+
+    def create_empty_container(self):
+        i3('append_layout', EMPTY_CONTAINER_PATH)
+        self.get_tree(True)
+        empty_container = self.get_new_empty_container()
+        empty_container_id = empty_container['id']
+        empty_container_str = '[con_id=' + str(empty_container_id) + ']'
+        i3(empty_container_str, 'focus')
+        i3(empty_container_str, 'unmark', 'new_empty_container')
+        timestamp = time.time(),
+        i3(empty_container_str, 'mark --add empty_container_%s' % (timestamp))
+        return empty_container
+
+    def swap_workspace(self, direction):
+        "Swap workspaces"
+        visible_workspaces = self.get_visible_workspaces()
+
+        focused_workspace = self.get_focused_workspace()
+        focused_display = focused_workspace['output']
+        focused_workspace_num = focused_workspace['num']
+
+        i = self.get_displays().index(focused_display)
+        if direction == 'left':
+            i = (i - 1) % len(self.get_displays())
+        else:
+            i = (i + 1) % len(self.get_displays())
+
+        target_display = self.get_displays()[i]
+        target_workspace = filter(lambda o: o['output'] == target_display,
+                                  visible_workspaces)[0]
+        target_workspace_num = target_workspace['num']
+
+        i3('move', 'workspace', 'to', 'output', target_display)
+        i3('workspace', 'number', target_workspace_num)
+        i3('move', 'workspace', 'to', 'output', focused_display)
+        self.sleep_focus(target_workspace_num)
+
+    def focus_workspace(self, num):
+        "Focus on a workspace. If it is not visible, bring it to the current display"
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+        # If there is only one window on the desktop, and it is an empty
+        # container, kill it.
+        if self.number_of_windows_on_current_desktop() <= 1 and \
+           self.is_empty_container(focused_window):
+            empty_container_id = focused_window['id']
+            selector_str = '[con_id=' + str(empty_container_id) + ']'
+            i3(selector_str, 'kill')
+
+        focused_workspace = self.get_focused_workspace()
+        focused_display = focused_workspace['output']
+
+        target_workspace = filter(lambda w: w['num'] == num, self.get_workspaces())
+        i3('workspace', 'number', num)
+        if target_workspace == []:
+            # Workspace didn't exist, new one will be created, so no need to swap
+            # New workspaces need an empty container
+            self.create_empty_container()
+            return
+        target_workspace = target_workspace[0]
+
+        if not target_workspace['visible']:
+            i3('move', 'workspace', 'to', 'output', focused_display)
+            self.sleep_focus(num)
+
+    def next_workspace(self, flag='next'):
+        """
+        Focus on the next non-visible workspace"
+        """
+        non_visible_workspaces = filter(lambda w: not w['visible'],
+                                        self.get_workspaces())
+
+        if non_visible_workspaces == []:
+            return
+
+        focused_workspace = self.get_focused_workspace()
+        focused_num = focused_workspace['num']
+
+        non_visible_workspaces_nums = [w['num'] for w in non_visible_workspaces]
+        non_visible_workspaces_nums = sorted(non_visible_workspaces_nums)
+
+
+        if flag == 'next':
+            fallback = non_visible_workspaces_nums[0]
+            rest = filter(lambda n: n > focused_num,
+                          non_visible_workspaces_nums)
+        else:
+            fallback = non_visible_workspaces_nums[-1]
+            rest = filter(lambda n: n < focused_num,
+                          non_visible_workspaces_nums)
+            rest.reverse()
+
+        if len(rest) > 0:
+            self.focus_workspace(rest[0])
+        else:
+            self.focus_workspace(fallback)
+
+    def maybe_focus_parent(self):
+        """
+        When focusing to a different output, in which the focus will be on a
+        tabbed group, i3 has a bug in which is selects the left / right most
+        window.
+
+        To fix this, we need the old tree data. Find the newly focused window
+        and find the old state of its parent. If the parent is a tabbed
+        container, then reselect the window that was active in that container
+        before the focus changed.
+        """
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)
+        if len(focused_node) <= 0:
+            return
+        focused_node = focused_node[0]
+
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+        if focused_parent['layout'] == 'tabbed':
+            i3('focus', 'parent')
+
+    def maybe_focus_last_tab(self):
+        self.get_tree()
+        old_parent_window_data = self.get_windows_with_parent_data()
+
+        self.get_tree(True)
+
+        new_parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], new_parent_window_data)
+        if len(focused_node) <= 0:
+            return
+        focused_node = focused_node[0]
+
+        focused_node_id = focused_node['window']['id']
+
+        old_node = filter(lambda w: w['window']['id'] == focused_node_id, old_parent_window_data)[0]
+        old_parent = old_node['parent']
+
+        if old_parent['layout'] == 'tabbed':
+            last_tab = old_parent['focus'][0]
+            selector_str = '[con_id=' + str(last_tab) + ']'
+            i3(selector_str, 'focus')
+
+    def focus_left(self):
+        self.maybe_focus_parent()
+        i3('focus', 'left')
+        i3('focus', 'child')
+        # This is a fail-safe if i3 fails to focus in a particilar direction
+        # i3 always reports a success, even if focus change fails
+        self.maybe_focus_last_tab()
+
+    def focus_down(self):
+        self.maybe_focus_parent()
+        i3('focus', 'down')
+        i3('focus', 'child')
+        self.maybe_focus_last_tab()
+
+    def focus_up(self):
+        self.maybe_focus_parent()
+        i3('focus', 'up')
+        i3('focus', 'child')
+        self.maybe_focus_last_tab()
+
+    def focus_right(self):
+        self.maybe_focus_parent()
+        i3('focus', 'right')
+        i3('focus', 'child')
+        self.maybe_focus_last_tab()
+
+    def next_tab(self):
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+        if focused_parent['layout'] != 'tabbed':
+            return
+
+        child_ids = [w['id'] for w in focused_parent['nodes']]
+        active_id = focused_window['id']
+        active_index = child_ids.index(active_id)
+        next_index = active_index + 1
+        if next_index > (len(child_ids) - 1):
+            next_index = 0
+        next_tab = child_ids[next_index]
+        selector_str = '[con_id=' + str(next_tab) + ']'
+        i3(selector_str, 'focus')
+
+    def prev_tab(self):
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+        if focused_parent['layout'] != 'tabbed':
+            return
+
+        child_ids = [w['id'] for w in focused_parent['nodes']]
+        active_id = focused_window['id']
+        active_index = child_ids.index(active_id)
+        prev_index = active_index - 1
+        prev_tab = child_ids[prev_index]
+        selector_str = '[con_id=' + str(prev_tab) + ']'
+        i3(selector_str, 'focus')
+
+    def split(self, direction):
+        if direction == 'right':
+            self._split('horizontal', 'vertical')
+        elif direction == 'down':
+            self._split('vertical', 'horizontal')
+
+    def _split(self, direction, other_direction):
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_window = focused_node['window']
+        focused_window_id = focused_window['id']
+
+        focused_workspace = self.get_focused_workspace()
+        focused_num = focused_workspace['num']
+
+        i3('focus', 'parent')
+        i3('split', direction)
+        empty_window_id = self.create_empty_window()
+        self.get_tree(True)
+
+        # Create an empty container in a temporary workspace
+        i3('workspace temp')
+        empty_container = self.create_empty_container()
+        empty_container_id = empty_container['id']
+        i3('workspace number', focused_num)
+
+        focused_window_str = '[con_id=' + str(focused_window_id) + ']'
+        empty_window_str = '[con_id=' + str(empty_window_id) + ']'
+        empty_container_str = '[con_id=' + str(empty_container_id) + ']'
+
+        # Move the empty container to the newlu splitted window
+        i3(empty_window_str, 'focus')
+        i3(empty_container_str, 'move', 'container', 'to', 'workspace', 'current')
+        i3(empty_container_str, 'mark --add new_container_target')
+
+        # Remove the empty window, as we have the empty container to reserve its spot
+        i3(empty_window_str, 'kill')
+        i3(empty_container_str, 'focus')
+
+        # Make the new node with the empty container tabbed.
+        self.get_tree(True)
+        new_parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'],
+                              new_parent_window_data)[0]
+        if focused_node['parent']['layout'] != "tabbed":
+            i3('split', other_direction)
+            i3('layout', 'tabbed')
+
+        # Bring the window to the new splitted area.
+        if not self.is_empty_container(focused_window):
+            i3(focused_window_str, 'move', 'container', 'to', 'mark', 'new_container_target')
+            i3(focused_window_str, 'focus')
+        i3('unmark new_container_target')
+
+    def buffer_yank(self, mark='window-buffer'):
+        i3('mark --add %s' % (mark))
+
+    def buffer_paste(self, mark='window-buffer'):
+        i3('mark --add paste-target')
+        i3('[con_mark="' + mark + '"]', 'move', 'container', 'to', 'mark', 'paste-target')
+        i3('[con_mark="' + mark + '"]', 'focus')
+        i3('unmark', 'paste-target')
+        i3('unmark', mark)
+
+    def transpose_buffer_left(self):
+        self.transpose_buffer('left')
+    def transpose_buffer_down(self):
+        self.transpose_buffer('down')
+    def transpose_buffer_up(self):
+        self.transpose_buffer('up')
+    def transpose_buffer_right(self):
+        self.transpose_buffer('right')
+
+    def transpose_buffer(self, direction):
+        i3('mark --add transpose_a')
+
+        if direction == 'left':
+            self.focus_left()
+        elif direction == 'down':
+            self.focus_down()
+        elif direction == 'up':
+            self.focus_up()
+        elif direction == 'right':
+            self.focus_right()
+
+        i3('mark --add transpose_b')
+
+        if direction == 'left':
+            self.focus_right()
+        elif direction == 'down':
+            self.focus_up()
+        elif direction == 'up':
+            self.focus_down()
+        elif direction == 'right':
+            self.focus_left()
+
+        i3('[con_mark="' + 'transpose_a' + '"]', 'move', 'container', 'to', 'mark', 'transpose_b')
+        i3('mark --add transpose_c')
+        i3('[con_mark="' + 'transpose_b' + '"]', 'move', 'container', 'to', 'mark', 'transpose_c')
+        i3('[con_mark="' + 'transpose_b' + '"]', 'focus')
+        i3('[con_mark="' + 'transpose_a' + '"]', 'focus')
+        i3('unmark' 'transpose_a')
+        i3('unmark' 'transpose_b')
+        i3('unmark' 'transpose_c')
+
+    def get_output_nums(self):
+        outputs = self.get_outputs()
+        outputs = filter(lambda o: o['active'], outputs)
+        outputs = [str(x) for x in range(len(outputs))]
+        print ' '.join(outputs)
+
+    def dzen2_bar_x(self, i):
+        outputs = self.get_outputs()
+        outputs = filter(lambda o: o['active'], outputs)
+        outputs = sorted(outputs, key=lambda d: d['rect']['x'])
+        output = outputs[i]
+        print(output['rect']['x'])
+
+    def dzen2_bar_width(self, i):
+        outputs = self.get_outputs()
+        outputs = filter(lambda o: o['active'], outputs)
+        outputs = sorted(outputs, key=lambda o: o['rect']['x'])
+        output = outputs[i]
+        print(output['rect']['width'])
+
+    def bar_workspaces(self, i):
+        outputs = self.get_outputs()
+        outputs = filter(lambda o: o['active'], outputs)
+        outputs = sorted(outputs, key=lambda d: d['rect']['x'])
+        output = outputs[i]
+        current_workspace = output['current_workspace']
+
+        workspaces = self.get_workspaces()
+        workspaces = filter(lambda w: w['num'] > 0, workspaces)
+        workspaces = sorted(workspaces, key=lambda w: w['num'])
+
+        ws_strings = []
+        for ws in workspaces:
+            ws_string = ''
+
+            ws_name = '%s' % ws['name']
+            if ws['name'] == current_workspace:
+                ws_string += 'A%s' % ws_name
+            elif ws['visible']:
+                ws_string += 'V%s' % ws_name
+            else:
+                ws_string += 'H%s' % ws_name
+
+            ws_strings.append(ws_string)
+
+        ws_string = '\t'.join(ws_strings)
+        print(ws_string)
+
+    def active_display(self):
+        workspace = filter(lambda w: w['focused'], self.get_workspaces())[0]
+        active_display = workspace['output']
+        displays = self.get_displays()
+        print(displays.index(active_display))
+
+    def get_workspace_nums(self):
+        workspace_nums = [str(ws['num']) for ws in self.get_workspaces()]
+        print(' '.join(workspace_nums))
+
+    def init_populate_with_empty_containers(self):
+        active_workspace = filter(lambda w: w['focused'], self.get_workspaces())[0]
+        workspace_nums = [str(ws['num']) for ws in self.get_workspaces()]
+        for num in workspace_nums:
+            i3('workspace', 'number', num)
+            self.create_empty_container()
+        i3('workspace', 'number', active_workspace['num'])
+
+    def rename_workspace(self, name=''):
+        workspace = filter(lambda w: w['focused'], self.get_workspaces())[0]
+        workspace_num = workspace['num']
+
+        index_in_name = name.split(': ')[0]
+        try:
+            index_in_name = int(index_in_name)
+            name = name.split(': ')[1]
+        except:
+            index_in_name = -1
+
+        just_a_number = False
+        try:
+            new_index = int(name)
+            just_a_number = True
+        except:
+            just_a_number = False
+
+        if name == '':
+            new_name = '"%s"' % (workspace_num)
+        elif just_a_number:
+            new_name = '"%s"' % (new_index)
+        elif 0 < index_in_name:
+            new_name = '"%s: %s"' % (index_in_name, name)
+        else:
+            new_name = '"%s: %s"' % (workspace_num, name)
+        # Extra single-quotes needed for i3 to understand
+        i3('rename', 'workspace', 'to', new_name)
+
+    def create_new_workspace(self):
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+        # If there is only one window on the desktop, and it is an empty
+        # container, kill it.
+        if self.number_of_windows_on_current_desktop() <= 1 and \
+           self.is_empty_container(focused_window):
+            empty_container_id = focused_window['id']
+            selector_str = '[con_id=' + str(empty_container_id) + ']'
+            i3(selector_str, 'kill')
+
+        workspace_nums = [w['num'] for w in self.get_workspaces()]
+        workspace_nums = filter(lambda n: n > 0, workspace_nums)
+        workspace_nums = sorted(workspace_nums)
+
+        for i in range(1, len(workspace_nums) + 1):
+            if i in workspace_nums:
+                continue
+            i3('workspace', 'number', i)
+            # New workspaces need an empty container
+            self.create_empty_container()
+            return
+        i3('workspace', 'number', len(workspace_nums) + 1)
+        # New workspaces need an empty container
+        self.create_empty_container()
+
+    def prompt_for_window(self, prompt):
+        window_ids = call(['wmctrl -l']).rstrip()
+        window_ids = window_ids.split('\n')
+        window_ids = [ w.split(' ') for w in window_ids ]
+        window_ids = [ w[0] for w in window_ids ]
+
+        windows = []
+        for w_id in window_ids:
+            w_class = call(['xprop -id', w_id, 'WM_CLASS']).rstrip()
+            w_class = w_class.split(' = ')
+            if len(w_class) <= 1:
+                # Window has no class. Invalid window
+                continue
+            w_class = w_class[1]
+            w_class = w_class.split(', ')[1][1:-1]
+
+            w_name = call(['xprop -id', w_id, 'WM_NAME']).rstrip().split(' = ')[1][1:-1]
+
+            w_user_time = call(['xprop -id', w_id, '_NET_WM_USER_TIME']).rstrip()
+            w_user_time = w_user_time.split(' = ')
+            if len(w_user_time) <= 1:
+                w_user_time = 0
+            else:
+                w_user_time = int(w_user_time[1])
+
+            windows.append({'id' : w_id,
+                            'name': w_name,
+                            'user_time' : w_user_time,
+                            'class': w_class})
+
+        windows = sorted(windows, key=lambda w: w['user_time'], reverse=True)
+        window_list_string = ''
+        for w in windows:
+            window_list_string += '{:s} : {:20s}    {:s}\n'.format(w['id'], w['class'], w['name'])
+        print window_list_string
+
+        user_input = call(['dmenu -i -fn "terminus-8" -l 10 -p "%s"' % prompt], window_list_string)
+        user_input = user_input.split(' : ')[0]
+        return user_input
+
+    def jump_to_window(self):
+        window_id = self.prompt_for_window("Jump")
+        window_id_str = "[id=%s]" % window_id
+        i3(window_id_str, 'focus')
+
+    def bring_window(self, window_id=None):
+        if not window_id:
+            window_id = self.prompt_for_window("Bring")
+        window_str = '[id=' + str(window_id) + ']'
+        i3('mark --add target')
+        i3(window_str, 'move', 'container' 'to', 'mark', 'target')
+        i3('unmark target')
+        i3(window_str, 'focus')
+
+    def number_of_windows_on_current_desktop(self):
+        current_desktop_number = call(['xdotool get_desktop']).rstrip()
+        workspace_windows = call(['wmctrl -l | ',
+                                  'awk \'$2 == "%s" {print "t"}\''  % (current_desktop_number)]).rstrip().split('\n')
+        return len(workspace_windows)
+
+    def collapse_group(self):
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        children = focused_parent['nodes']
+
+        for child in children:
+            child_id = child['id']
+            selector_str = '[con_id=' + str(child_id) + ']'
+
+            if self.is_empty_container(child):
+                # Don't delete the empty container yet.
+                # Hide all the other windows first.
+                empty_container = child
+            else:
+                i3(selector_str, 'move', 'to', 'workspace', 'hidden')
+
+        # If the empty container is the only window left on the workspace, remove it
+        # otherwise, keep it to maintain the workspace layout
+        #
+        # If there are more windows than just the one empty container, it is
+        # safe to kill the container, because the collapse group is intended to
+        # remove a tile
+        if 1 < self.number_of_windows_on_current_desktop():
+            empty_container_id = empty_container['id']
+            selector_str = '[con_id=' + str(empty_container_id) + ']'
+            i3(selector_str, 'kill')
+
+        self.simplify_tree()
+
+    def cast_buffer(self, direction):
+        self.buffer_yank('cast-buffer')
+
+        if direction == 'left':
+            self.focus_left()
+        elif direction == 'down':
+            self.focus_down()
+        elif direction == 'up':
+            self.focus_up()
+        elif direction == 'right':
+            self.focus_right()
+
+        self.buffer_paste('cast-buffer')
+
+    def find_or_open(self, w_class, w_title, launch_cmd):
+        window_list = call(['wmctrl -lx |',
+                            'awk \'{printf $1"\t"$3"\t"; for (i=5;i<=NF;i++) printf $i" "; print ""}\'']).rstrip()
+        window_list = window_list.split('\n')
+        window_list = [w.split('\t') for w in window_list]
+        match = filter(lambda w: w[1] == w_class and w_title in w[2],
+                       window_list)
+        if match:
+            match = match[0]
+            window_id = match[0]
+            self.bring_window(window_id)
+        else:
+            call(launch_cmd)
+
+    def kill(self):
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+        if self.is_empty_container(focused_window):
+            # Can't kill empty windows, just collapse them to kill them.
+            return
+        else:
+            i3('kill')
+
+    def is_empty_container(self, window):
+        marks = []
+        if 'marks' in window:
+            marks = window['marks']
+        else:
+            return False
+
+        for mark in marks:
+            if "empty_container" in mark:
+                return True
+        return False
+
+    def balance_windows(self):
+        tree = self.get_workspace_tree()
+        self.balance_windows_horizontal(tree, tree['rect']['width'])
+        self.balance_windows_vertical(tree, tree['rect']['height'])
+
+    def set_window_width(self, window, width):
+        window_id = window['id']
+        selector_str = '[con_id=' + str(window_id) + ']'
+        i3(selector_str, 'resize', 'set', 'width', width, 'px')
+
+    def set_window_height(self, window, height):
+        window_id = window['id']
+        selector_str = '[con_id=' + str(window_id) + ']'
+        i3(selector_str, 'resize', 'set', 'height', height, 'px')
+
+    def is_container_id_in_tree(self, tree, container_id):
+        if tree['id'] == container_id:
+            return True
+        elif len(tree['nodes']) == 0:
+            return False
+
+        for node in tree['nodes']:
+            if self.is_container_id_in_tree(node, container_id):
+                return True
+        return False
+
+    def balance_windows_horizontal(self, tree, container_width):
+        # If the container is tabbed or split vertically, no need to count any
+        # children that are horizontally split
+        # If it is split vertically, then the container must be recursivly balanced.
+        if tree['layout'] == 'tabbed':
+            return
+        elif tree['layout'] == 'splitv':
+            for node in tree['nodes']:
+                self.balance_windows_horizontal(node, container_width)
+            return
+
+        horizontals = self.get_horizontals(tree)
+        horizontal_count = len(horizontals)
+        desired_width = container_width / horizontal_count
+
+        # For each child, if the child is a tabbed or vertical split container,
+        # it logically only counts as a single horizontal window, so set the
+        # size directly and recursively resize its children.
+        #
+        # Otherwise, count how many horizontal children the child has, and use
+        # that to calculate the total size of the parent, then recursivly resize
+        # children.
+        for node in tree['nodes']:
+            if tree['layout'] == 'tabbed':
+                self.set_window_width(node, desired_width)
+                continue
+            elif tree['layout'] == 'splitv' and 1 < len(tree['nodes']):
+                self.set_window_width(node, desired_width)
+                continue
+
+            count = len(self.get_horizontals(node))
+            width = desired_width * count
+
+            self.set_window_width(node, width)
+            self.balance_windows_horizontal(node, width)
+
+    def balance_windows_vertical(self, tree, container_height):
+        if tree['layout'] == 'tabbed':
+            return
+        elif tree['layout'] == 'splith':
+            for node in tree['nodes']:
+                self.balance_windows_vertical(node, container_height)
+            return
+
+        verticals = self.get_verticals(tree)
+        vertical_count = len(verticals)
+        desired_height = container_height / vertical_count
+
+        for node in tree['nodes']:
+            if tree['layout'] == 'tabbed':
+                self.set_window_height(node, desired_height)
+                continue
+            elif tree['layout'] == 'splith' and 1 < len(tree['nodes']):
+                self.set_window_height(node, desired_height)
+                continue
+
+            count = len(self.get_verticals(node))
+            height = desired_height * count
+
+            self.set_window_height(node, height)
+            self.balance_windows_vertical(node, height)
+
+    def get_horizontals(self, tree):
+        if tree['layout'] == 'tabbed':
+            return [tree]
+        elif tree['layout'] == 'splitv' and 1 < len(tree['nodes']):
+            return [tree]
+        total = []
+        for node in tree['nodes']:
+            total += (self.get_horizontals(node))
+        return total
+
+    def get_verticals(self, tree):
+        if tree['layout'] == 'tabbed':
+            return [tree]
+        elif tree['layout'] == 'splith' and 1 < len(tree['nodes']):
+            return [tree]
+        total = []
+        for node in tree['nodes']:
+            total += (self.get_verticals(node))
+        return total
+
+    def get_workspace_tree(self, workspace_num=None):
+        if not workspace_num:
+            focused_workspace = self.get_focused_workspace()
+            workspace_num = focused_workspace['num']
+        else:
+            workspace_num = int(workspace_num)
+
+        tree = self.get_tree()
+        tree = tree['nodes']
+        tree2 = []
+        for t in tree:
+            tree2 += t['nodes']
+        tree = tree2
+
+        tree2 = []
+        for t in tree:
+            tree2 += t['nodes']
+        tree = tree2
+        tree = filter(lambda t: t.get('num') == workspace_num, tree)[0]
+
+        return tree
+
+    def print_workspace_tree(self, workspace_num=None):
+        tree = self.get_workspace_tree(workspace_num)
+        self._print_tree(tree)
+
+    def _print_tree(self, tree, level=0, container_id=None):
+        num = tree.get('num', 0)
+        layout = tree.get('layout')
+        name = tree.get('name')
+        t_id = tree.get('id')
+        marks = tree.get('marks')
+        isc = self.is_container_id_in_tree(tree, container_id)
+        print("%s%s: - %s - %s - %s" % ("|   " * level, t_id, layout, name, marks))
+
+        for node in tree['nodes']:
+            self._print_tree(node, level + 1, container_id)
+
+    def maximise_window(self):
+        tree = self.get_workspace_tree()
+        ws_width = tree['rect']['width']
+        ws_height = tree['rect']['height']
+
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+        focused_window_id = focused_window['id']
+
+        self.maximise_windows_horizontal(tree, ws_width, focused_window_id)
+        self.maximise_windows_vertical(tree, ws_height, focused_window_id)
+
+    def maximise_window_horizontal(self):
+        tree = self.get_workspace_tree()
+        ws_width = tree['rect']['width']
+        ws_height = tree['rect']['height']
+
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+        focused_window_id = focused_window['id']
+
+        self.maximise_windows_horizontal(tree, ws_width, focused_window_id)
+
+    def maximise_window_vertical(self):
+        tree = self.get_workspace_tree()
+        ws_width = tree['rect']['width']
+        ws_height = tree['rect']['height']
+
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+        focused_window_id = focused_window['id']
+
+        self.maximise_windows_vertical(tree, ws_height, focused_window_id)
+
+    def maximise_windows_horizontal(self, tree, container_width, target_id):
+        if not self.is_container_id_in_tree(tree, target_id):
+            return
+        elif tree['layout'] == 'tabbed':
+            return
+        elif tree['layout'] == 'splitv':
+            for node in tree['nodes']:
+                self.maximise_windows_horizontal(node, container_width, target_id)
+            return
+
+        desired_width = int(container_width * 0.97)
+        other_window_width = container_width - desired_width
+
+        if len(tree['nodes']) == 1:
+            desired_width = container_width
+
+        for node in tree['nodes']:
+            if self.is_container_id_in_tree(node, target_id):
+                self.set_window_width(node, desired_width)
+                self.maximise_windows_horizontal(node, desired_width, target_id)
+            else:
+                self.set_window_width(node, other_window_width)
+
+    def maximise_windows_vertical(self, tree, container_height, target_id):
+        if not self.is_container_id_in_tree(tree, target_id):
+            return
+        elif tree['layout'] == 'tabbed':
+            return
+        elif tree['layout'] == 'splith':
+            for node in tree['nodes']:
+                self.maximise_windows_vertical(node, container_height, target_id)
+            return
+
+        desired_height = int(container_height * 0.95)
+        other_window_height = container_height - desired_height
+
+        if len(tree['nodes']) == 1:
+            desired_height = container_height
+
+        for node in tree['nodes']:
+            if self.is_container_id_in_tree(node, target_id):
+                self.set_window_height(node, desired_height)
+                self.maximise_windows_vertical(node, desired_height, target_id)
+            else:
+                self.set_window_height(node, other_window_height)
+
+    def get_marks(self):
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+
+        if 'marks' in focused_window:
+            print ', '.join(focused_window['marks'])
+        else:
+            print 'NO MARKS'
+
+    def minimise_window(self):
+        self.minimise_window_horizontal()
+        self.minimise_window_vertical()
+
+    def minimise_window_horizontal(self):
+        tree = self.get_workspace_tree()
+        ws_width = tree['rect']['width']
+        ws_height = tree['rect']['height']
+
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+
+        self.set_window_width(focused_window, 50)
+
+    def minimise_window_vertical(self):
+        tree = self.get_workspace_tree()
+        ws_width = tree['rect']['width']
+        ws_height = tree['rect']['height']
+
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+
+        self.set_window_height(focused_window, 50)
+
+    def simplify_tree(self, workspace_num=None):
+        """Simplify tree. If any connecting node only has one child, the node does not
+need to exist. Tree pollution is a side effect of the custom split process
+incorporated in this program."""
+        print("Simplifying tree")
+
+        tree = self.get_workspace_tree(workspace_num)
+
+        # Regular `_simplify_tree' function does not work when operating on the
+        # root of a workspace. Must skip the first root node before calling the
+        # simplification function.
+        tree = self._get_workspace_subtree(tree)
+        if not tree:
+            return
+
+        starting_id = tree['id']
+        starting_tree = tree['nodes'][0]
+
+        # Use a counter in case it gets stuck in an infinite loop. Due to a
+        # hardcoded limit, only a limited number of links can be simplified.
+        counter = 0
+        while counter < 10 and self._simplify_tree(starting_id, starting_tree):
+            counter += 1
+            print("Simplifying sub tree: %s" % (counter))
+
+            # Refresh tree data
+            self.get_tree(True)
+            self.get_workspaces(True)
+
+            tree = self.get_workspace_tree(workspace_num)
+            tree = self._get_workspace_subtree(tree)
+            if not tree:
+                return
+            starting_id = tree['id']
+            starting_tree = tree['nodes'][0]
+
+
+        self.get_tree(True)
+        self.get_workspaces(True)
+        tree = self.get_workspace_tree(workspace_num)
+
+        parent_id = tree['id']
+        tree = self._get_workspace_subtree(tree)
+        if not tree:
+            return
+        self._simplify_tree(parent_id, tree, True)
+
+    def _get_workspace_subtree(self, tree):
+        if len(tree['nodes']) != 1:
+            return False
+        tree = tree['nodes'][0]
+        if len(tree['nodes']) != 1:
+            return False
+        return tree
+
+    def _simplify_tree(self, parent_id, tree, is_workspace_root=False):
+        """Algorithm to simplify tree by removing connecting nodes with only one
+child."""
+        print("Simplifying id: %s" % (tree['id']))
+
+        if 'nodes' not in tree:
+            print("Node has no children")
+            return False
+
+        if tree['nodes'] == []:
+            print("Node has no children in node list")
+            return False
+
+        if len(tree['nodes']) == 1:
+            print("Node has a single child. Simplifying tree.")
+
+            parent_str = '[con_id=' + str(parent_id) + ']'
+            i3(parent_str, 'mark --add parent')
+
+            child_id = tree['nodes'][0]['id']
+            child_str = '[con_id=' + str(child_id) + ']'
+            i3(child_str, 'mark --add child')
+
+            # Moving directly to workspace roots does not work. The container
+            # must be moved to a different workspace first.
+            if is_workspace_root:
+                i3('[con_mark="' + 'child' + '"]', 'move', 'container', 'to', 'workspace', 'temp')
+            i3('[con_mark="' + 'child' + '"]', 'move', 'container', 'to', 'mark', 'parent')
+            i3('unmark parent')
+            i3('unmark child')
+
+            return True
+
+        if not is_workspace_root:
+            print("Recursively simplifying children trees")
+            for node in tree['nodes']:
+                if self._simplify_tree(tree['id'], node):
+                    print("Subtree was simplified")
+                    return True
+
+        print("Tree required no simplifying")
+        return False
+
+if len(sys.argv) <= 0:
+    exit(1)
+
+i3c = I3C()
+command = sys.argv[1]
+
+if command == 'swap-workspace-left':
+    i3c.swap_workspace('left')
+elif command == 'swap-workspace-right':
+    i3c.swap_workspace('right')
+elif command == 'focus-workspace':
+    i3c.focus_workspace(int(sys.argv[2]))
+elif command == 'next-workspace':
+    i3c.next_workspace('next')
+elif command == 'prev-workspace':
+    i3c.next_workspace('prev')
+elif command == 'focus-left':
+    i3c.focus_left()
+elif command == 'focus-down':
+    i3c.focus_down()
+elif command == 'focus-up':
+    i3c.focus_up()
+elif command == 'focus-right':
+    i3c.focus_right()
+elif command == 'next-tab':
+    i3c.next_tab()
+elif command == 'prev-tab':
+    i3c.prev_tab()
+elif command == 'split-right':
+    i3c.split('right')
+elif command == 'split-down':
+    i3c.split('down')
+elif command == 'buffer-yank':
+    i3c.buffer_yank()
+elif command == 'buffer-paste':
+    i3c.buffer_paste()
+elif command == 'rename-workspace':
+    if 2 < len(sys.argv):
+        i3c.rename_workspace(sys.argv[2])
+    else:
+        i3c.rename_workspace()
+elif command == 'create-new-workspace':
+    i3c.create_new_workspace()
+elif command == 'jump-to-window':
+    i3c.jump_to_window()
+elif command == 'bring-window':
+    i3c.bring_window()
+elif command == 'collapse-group':
+    i3c.collapse_group()
+elif command == 'cast-buffer-left':
+    i3c.cast_buffer('left')
+elif command == 'cast-buffer-down':
+    i3c.cast_buffer('down')
+elif command == 'cast-buffer-up':
+    i3c.cast_buffer('up')
+elif command == 'cast-buffer-right':
+    i3c.cast_buffer('right')
+elif command == 'find-or-open':
+    w_class = sys.argv[2]
+    w_title = sys.argv[3]
+    launch_cmd = sys.argv[4]
+    i3c.find_or_open(w_class, w_title, launch_cmd)
+elif command == 'get-output-nums':
+    i3c.get_output_nums()
+elif command == 'dzen2-bar-x':
+    i3c.dzen2_bar_x(int(sys.argv[2]))
+elif command == 'dzen2-bar-width':
+    i3c.dzen2_bar_width(int(sys.argv[2]))
+elif command == 'bar-workspaces':
+    i3c.bar_workspaces(int(sys.argv[2]))
+elif command == 'active-display':
+    i3c.active_display()
+elif command == 'get-workspace-nums':
+    i3c.get_workspace_nums()
+elif command == 'init-populate-with-empty-containers':
+    i3c.init_populate_with_empty_containers()
+elif command == 'kill':
+    i3c.kill()
+elif command == 'create-empty-container':
+    i3c.create_empty_container()
+elif command == 'transpose-buffer-left':
+    i3c.transpose_buffer_left()
+elif command == 'transpose-buffer-down':
+    i3c.transpose_buffer_down()
+elif command == 'transpose-buffer-up':
+    i3c.transpose_buffer_up()
+elif command == 'transpose-buffer-right':
+    i3c.transpose_buffer_right()
+elif command == 'balance-windows':
+    i3c.balance_windows()
+elif command == 'print-workspace-tree':
+    if 2 < len(sys.argv):
+        i3c.print_workspace_tree(sys.argv[2])
+    else:
+        i3c.print_workspace_tree()
+elif command == 'maximise-window':
+    i3c.maximise_window()
+elif command == 'maximise-window-horizontal':
+    i3c.maximise_window_horizontal()
+elif command == 'maximise-window-vertical':
+    i3c.maximise_window_vertical()
+elif command == 'get-marks':
+    i3c.get_marks()
+elif command == 'minimise-window':
+    i3c.minimise_window()
+elif command == 'minimise-window-horizontal':
+    i3c.minimise_window_horizontal()
+elif command == 'minimise-window-vertical':
+    i3c.minimise_window_vertical()
+elif command == 'simplify-tree':
+    i3c.simplify_tree()
