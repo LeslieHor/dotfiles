@@ -28,3 +28,7 @@ install: install-$(HOSTNAME)-preview
 		else\
 			echo -e "\nCancelling"; \
 		fi
+
+ensure-directories:
+	mkdir -p ~/.ssh
+	mkdir -p ~/.config

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+exit 0
+pidof emacs > /dev/null || exit 0
+
+emacsclient --eval '(circ/get-modified-channels-string)' | sed 's/^"\(.*\)"$/\1/'

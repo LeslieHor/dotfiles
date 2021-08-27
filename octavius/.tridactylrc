@@ -62,7 +62,7 @@ command archive composite js "'" + window.location.href + "' '" + btoa(window.do
 command mpv composite get_current_url | exclaim_quiet mpv
 
 " Open in reader
-command read js window.location.href = "http://lucy:7799/read/" + btoa(window.location.href)
+command read js window.location.href = "http://reader01:8701/read/" + btoa(window.location.href)
 
 " ------------------------------------------------------------------------------
 " Misc settings

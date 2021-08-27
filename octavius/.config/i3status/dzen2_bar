@@ -244,6 +244,24 @@ music() {
     echo "${FG_HEADER}MUS:${FG_END} [${play_status}] ${track_pos} - ${track_progress} - ${current_song}"
 }
 
+email_count() {
+    count=$( (mu find "flag:unread AND NOT flag:trashed AND NOT maildir:/gmail/[Gmail]/Spam" | wc -l) || echo "0" )
+    if [ 0 -lt "${count}" ]; then
+        echo "${FG_HEADER}EML:${FG_END} ${FG_ACTIVE}${count}${FG_END}"
+    else
+        echo "${FG_HEADER}EML:${FG_END} ${FG_INACTIVE}${count}${FG_END}"
+    fi
+}
+
+irc_display() {
+    display=$(erc-modified-channels)
+    if [ "${display}" == "" ]; then
+        echo "${FG_HEADER}IRC${FG_END}"
+    else
+        echo "${FG_HEADER}IRC:${FG_END} ${FG_ACTIVE}${display}${FG_END}"
+    fi
+}
+
 while sleep 1; do
     # Evaluate variables
     if [ $(( ${SECONDS} % 1 )) == 0 ] || [ ${SECONDS} -lt 3 ]; then
@@ -253,6 +271,8 @@ while sleep 1; do
         keyboard_indicators=$(keyboard_indicators)
         date=$(date '+%Y-%m-%d %H:%M:%S')
         music="$(music)"
+        email_count=$(email_count)
+        irc_display=$(irc_display)
     fi
 
     if [ $(( ${SECONDS} % 5 )) == 0 ] || [ ${SECONDS} -lt 3 ]; then
@@ -268,6 +288,7 @@ while sleep 1; do
     if [ $(( ${SECONDS} % 600 )) == 0 ] || [ ${SECONDS} -lt 3 ]; then
         diskusage_f=$(diskusage / 'F/')
         diskusage_s=$(diskusage /mnt/slave/ 'S/')
+        diskusage_m=$(diskusage /mnt/md0/ 'M/')
     fi
 
     # Left block
@@ -293,6 +314,8 @@ while sleep 1; do
     right=""
     case "${DISPLAY_NUM}" in
         0)
+            right="${right}${SEP}${irc_display}"
+            right="${right}${SEP}${email_count}"
             right="${right}${SEP}${music}"
             ;;
         2)
@@ -300,6 +323,7 @@ while sleep 1; do
             right="${right}${SEP}${cpu_temps}"
             right="${right}${SEP}${diskusage_f}"
             right="${right}${SEP}${diskusage_s}"
+            right="${right}${SEP}${diskusage_m}"
             right="${right}${SEP}${ram}"
             right="${right}${SEP}${sticky_keys}"
             right="${right}${SEP}${keyboard_indicators}"

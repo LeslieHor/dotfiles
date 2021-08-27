@@ -1092,6 +1092,89 @@ child."""
         print("Tree required no simplifying")
         return False
 
+    def switch_to_workspace(self):
+        outputs = self.get_outputs()
+        outputs = filter(lambda o: o['active'], outputs)
+        outputs = sorted(outputs, key=lambda d: d['rect']['x'])
+
+        workspaces = self.get_workspaces()
+        workspaces = filter(lambda w: w['num'] > 0, workspaces)
+        workspaces = sorted(workspaces, key=lambda w: w['num'])
+
+        ws_strings = []
+        for ws in workspaces:
+            if ws['name'] == str(ws['num']):
+                name = "%s:" % ws['name']
+            else:
+                name = ws['name']
+
+            if ws['visible']:
+                visible = "Visible"
+            else:
+                visible = "Not Visible"
+
+            if ws['focused']:
+                current = "Current"
+            else:
+                current = ""
+
+            if ws['visible']:
+                o = filter(lambda op: op['name'] == ws['output'], outputs)[0]
+                display_num = outputs.index(o)
+
+                if display_num == 0:
+                    display = "Left"
+                elif display_num == 1:
+                    display = "Middle"
+                elif display_num == 2:
+                    display = "Right"
+
+            else:
+                display = ""
+
+            ws_string = '%-20s %-10s %-15s %-10s' % (name, display, visible, current)
+
+            ws_strings.append(ws_string)
+
+        ws_string = '\n'.join(ws_strings)
+        prompt = "Workspace: "
+        user_input = call(['dmenu -i -fn "terminus-8" -l 10 -p "%s" | grep -oP \'^[0-9]*\'' % prompt], ws_string).rstrip()
+        print user_input
+
+        self.focus_workspace(int(user_input))
+
+    def resize_horizontal(self):
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+
+        tree = self.get_workspace_tree()
+        screen_width = tree['rect']['width']
+
+        user_input = call(['dmenu -i -fn "terminus-8" -l 10 -p "Resize Horizontal: "']).rstrip()
+
+        desired_width = (int(user_input) / 100.0) * screen_width
+        print desired_width
+
+        print self.set_window_width(focused_window, int(desired_width))
+
+    def resize_vertical(self):
+        parent_window_data = self.get_windows_with_parent_data()
+        focused_node = filter(lambda w: w['window']['focused'], parent_window_data)[0]
+        focused_parent = focused_node['parent']
+        focused_window = focused_node['window']
+
+        tree = self.get_workspace_tree()
+        screen_height = tree['rect']['height']
+
+        user_input = call(['dmenu -i -fn "terminus-8" -l 10 -p "Resize Vertical: "']).rstrip()
+
+        desired_height = (int(user_input) / 100.0) * screen_height
+
+        self.set_window_height(focused_window, int(desired_height))
+
+
 if len(sys.argv) <= 0:
     exit(1)
 
@@ -1203,3 +1286,9 @@ elif command == 'minimise-window-vertical':
     i3c.minimise_window_vertical()
 elif command == 'simplify-tree':
     i3c.simplify_tree()
+elif command == 'switch-to-workspace':
+    i3c.switch_to_workspace()
+elif command == 'resize-horizontal':
+    i3c.resize_horizontal()
+elif command == 'resize-vertical':
+    i3c.resize_vertical()

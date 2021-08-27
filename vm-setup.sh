@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
 
-# sudo apt install -y git
-# mkdir -p ~/projects
-# cd ~/projects
-# git clone https://github.com/LeslieHor/dotfiles.git
-# cd dotfiles
-# ./vm-setup.sh
-
-
 # To cache sudo password
 sudo echo
 
@@ -20,8 +12,14 @@ mkdir -p \
 
 # Install programs
 sudo apt update
-sudo apt install -y i3 dzen2 python dunst xterm emacs dunst xfonts-terminus xkbset git stow vim lm-sensors
+sudo apt install -y git i3 dzen2 python dunst xterm emacs dunst xfonts-terminus xkbset git stow vim lm-sensors
 sudo apt upgrade -y
+
+# Get dotfiles
+git clone https://github.com/LeslieHor/dotfiles.git ~/projects/dotfiles
+cd ~/projects/dotfiles
+mv ~/.bashrc ~/.bashrc.backup
+stow -Sv vm -t ~
 
 # Get emacs configuration
 git clone https://github.com/LeslieHor/emacs.d.git ~/projects/emacs.d
@@ -36,10 +34,6 @@ mkdir -p ~/pims
 touch ~/pims/inbox.org
 touch ~/pims/todo.org
 touch ~/pims/calendar.org
-
-# Install dotfiles
-mv ~/.bashrc ~/.bashrc.default
-stow -Sv vm -t ~
 
 # Disable Gnome Display manager
 sudo systemctl disable gdm

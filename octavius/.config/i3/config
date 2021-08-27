@@ -72,6 +72,7 @@ mode "window" {
 mode "frame" {
     bindsym r exec $i3c rename-workspace "$(echo -n | dmenu -fn 'terminus-8' -p 'Rename workspace:')" ; $exit
     bindsym c exec $i3c create-new-workspace ; $exit
+    bindsym j exec $i3c switch-to-workspace ; $exit
 
     bindsym Escape $exit
 }
@@ -119,9 +120,11 @@ mode "applications" {
 mode "pass" {
     bindsym u exec passmenu type user ; $exit
     bindsym p exec passmenu type pass ; $exit
+    bindsym o exec passmenu type otp ; $exit
     bindsym b exec passmenu type both ; $exit
     bindsym Shift+u exec passmenu copy user ; $exit
     bindsym Shift+p exec passmenu copy pass ; $exit
+    bindsym Shift+O exec passmenu copy otp ; $exit
 
     bindsym Escape $exit
 }
@@ -144,6 +147,8 @@ mode "maximise-window" {
     bindsym z exec $i3c maximise-window ; $exit
     bindsym h exec $i3c maximise-window-horizontal ; $exit
     bindsym v exec $i3c maximise-window-vertical ; $exit
+    bindsym Shift+h exec $i3c resize-horizontal ; $exit
+    bindsym Shift+v exec $i3c resize-vertical ; $exit
 
     bindsym Escape $exit
 }
@@ -152,6 +157,8 @@ mode "minimise-window" {
     bindsym c exec $i3c minimise-window ; $exit
     bindsym h exec $i3c minimise-window-horizontal ; $exit
     bindsym v exec $i3c minimise-window-vertical ; $exit
+    bindsym Shift+h exec $i3c resize-horizontal ; $exit
+    bindsym Shift+v exec $i3c resize-vertical ; $exit
 
     bindsym Escape $exit
 }
@@ -191,6 +198,7 @@ bindsym $s1+h exec $i3c focus-left
 bindsym $s1+j exec $i3c focus-down
 bindsym $s1+k exec $i3c focus-up
 bindsym $s1+l exec $i3c focus-right
+bindsym $s1+Right exec $i3c focus-right
 bindsym $s1+m exec bring-mouse
 
 bindsym $s1+q exec $i3c kill
@@ -207,10 +215,11 @@ bindsym $s1+s exec toggle-sticky-keys
 
 ## SYS-2
 
-bindsym $s2+h resize shrink width 2 px or 2 ppt
-bindsym $s2+j resize grow height 2 px or 2 ppt
-bindsym $s2+k resize shrink height 2 px or 2 ppt
-bindsym $s2+l resize grow width 2 px or 2 ppt
+bindsym $s2+h resize shrink width 5 px or 5 ppt
+bindsym $s2+j resize grow height 5 px or 5 ppt
+bindsym $s2+k resize shrink height 5 px or 5 ppt
+bindsym $s2+l resize grow width 5 px or 5 ppt
+bindsym $s2+Right resize grow width 5 px or 5 ppt
 bindsym $s2+y exec $i3c buffer-yank ; $message "Buffer yanked"
 bindsym $s2+p exec $i3c buffer-paste ; $message "Buffer pasted"
 bindsym $s2+e exec $i3c balance-windows
@@ -235,6 +244,7 @@ bindsym $s3+h exec $i3c cast-buffer-left
 bindsym $s3+j exec $i3c cast-buffer-down
 bindsym $s3+k exec $i3c cast-buffer-up
 bindsym $s3+l exec $i3c cast-buffer-right
+bindsym $s3+Right exec $i3c cast-buffer-right
 bindsym $s3+p exec $i3c prev-workspace
 bindsym $s3+n exec $i3c next-workspace
 bindsym $s3+comma exec $i3c swap-workspace-left
@@ -251,6 +261,7 @@ bindsym $s4+h move left
 bindsym $s4+j move down
 bindsym $s4+k move up
 bindsym $s4+l move right
+bindsym $s4+Right move right
 
 # Rules
 for_window [class="Wfica_Seamless"] floating enable
@@ -259,9 +270,9 @@ for_window [class="Toplevel"] floating enable
 
 mouse_warping none
 
-exec --no-startup-id xrandr --output DP-1-1 --auto --right-of DVI-I-1
-exec --no-startup-id sleep 1
-exec --no-startup-id xrandr --output DVI-D-1 --auto --right-of DP-1-1
+exec --no-startup-id xrandr --output DVI-I-1 --pos 0x0
+exec --no-startup-id xrandr --output DP-1-1 --pos 1920x0
+exec --no-startup-id xrandr --output DVI-D-1 --pos 3840x0
 exec_always --no-startup-id ~/.config/i3status/run_dzen2_bar
 
 exec --no-startup-id keynav

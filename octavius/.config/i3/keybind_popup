@@ -26,7 +26,8 @@ n - buffer name"
 elif [ "${1}" == "frame" ]; then
     TITLE="frame"
     TEXT="r - rename workspace
-c - create new workspace"
+c - create new workspace
+j - jump to workspace"
 
 elif [ "${1}" == "applications" ]; then
     TITLE="applications"
@@ -41,9 +42,11 @@ elif [ "${1}" == "pass" ]; then
     TITLE="pass"
     TEXT="u - type user
 p - type pass
+o - type otp
 b - type user and pass
 U - copy user
-P - copy pass"
+P - copy pass
+O - copy otp"
 
 elif [ "${1}" == "cast-buffer" ]; then
     TITLE="cast buffer"
@@ -71,13 +74,17 @@ elif [ "${1}" == "maximise-window" ]; then
     TITLE="maximise window"
     TEXT="z - maximise window
 h - maximise window horizontal
-v - maximise window vertical"
+v - maximise window vertical
+H - resize horizontal
+V - resize window"
 
 elif [ "${1}" == "minimise-window" ]; then
     TITLE="minimise window"
     TEXT="c - minimise window
 h - minimise window horizontal
-v - minimise window vertical"
+v - minimise window vertical
+H - resize horizontal
+V - resize window"
 
 fi
 

@@ -6,6 +6,8 @@ xsetroot -solid '#222222' &
 # Here i3 is kept as default
 session=${1:-i3}
 
+# Note: desktop files located in /usr/share/xsessions/
+
 case $session in
     i3|i3wm)
         exec i3;;

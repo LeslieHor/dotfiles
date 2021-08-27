@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Map wacom tablet to screens
+
+OUTPUT=$(xrandr --query | \
+               grep ' connected' | \
+               sed 's/primary// ; s/ (.*//' | \
+               awk '{print $3" "$1}' | \
+               sort | \
+               awk '{print $2}' | \
+               sed "${1}q;d")
+
+echo "Mapping Wacom Tablet to ${OUTPUT}"
+xsetwacom --set 'Wacom Intuos PT S Pen stylus' MapToOutput "${OUTPUT}"
+xsetwacom --set 'Wacom Intuos PT S Pen eraser' MapToOutput "${OUTPUT}"

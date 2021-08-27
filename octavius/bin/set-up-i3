@@ -19,9 +19,7 @@ echo "Setting audio in to ${INPUT_DEVICE}"
 switch-audio-device output ${OUTPUT_DEVICE}
 switch-audio-device input ${INPUT_DEVICE}
 
-emacs &
-
-sleep 3
+sleep 1
 
 i3-msg workspace 3
 ~/.config/i3/i3c swap-workspace-right
