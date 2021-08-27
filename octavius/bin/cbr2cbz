@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+FILE="${1}"
+DIR=$(mktemp -d)
+NEW_FILE=$(sed 's/\.cbr$/.cbz/' <<< "${FILE}")
+
+echo ${DIR}
+echo ${FILE}
+echo ${NEW_FILE}
+
+unar "${FILE}" -o "${DIR}"
+zip -r "${NEW_FILE}" "${DIR}"
+rm -r "${DIR}"
+
+echo "Conversion done."
