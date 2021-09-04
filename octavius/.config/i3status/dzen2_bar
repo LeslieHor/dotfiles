@@ -201,7 +201,8 @@ workspaces() {
 active_display() {
     active_display=$(${i3c} active-display)
     if [ ${active_display} == ${1} ]; then
-        echo "ACTIVE"
+        xdotool getwindowfocus getwindowname
+        # echo "ACTIVE"
     fi
 }
 
@@ -245,7 +246,7 @@ music() {
 }
 
 email_count() {
-    count=$( (mu find "flag:unread AND NOT flag:trashed AND NOT maildir:/gmail/[Gmail]/Spam" | wc -l) || echo "0" )
+    count=$( (mu find "flag:unread AND NOT flag:trashed AND NOT maildir:/gmail/[Gmail]/Spam" 2> /dev/null | wc -l) || echo "0" )
     if [ 0 -lt "${count}" ]; then
         echo "${FG_HEADER}EML:${FG_END} ${FG_ACTIVE}${count}${FG_END}"
     else
