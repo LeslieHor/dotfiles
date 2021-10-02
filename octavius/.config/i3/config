@@ -73,6 +73,8 @@ mode "frame" {
     bindsym r exec $i3c rename-workspace "$(echo -n | dmenu -fn 'terminus-8' -p 'Rename workspace:')" ; $exit
     bindsym c exec $i3c create-new-workspace ; $exit
     bindsym j exec $i3c switch-to-workspace ; $exit
+    bindsym f exec $i3c set-workspace-floating ; $exit
+    bindsym t exec $i3c set-workspace-tiling ; $exit
 
     bindsym Escape $exit
 }

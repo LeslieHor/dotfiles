@@ -27,7 +27,9 @@ elif [ "${1}" == "frame" ]; then
     TITLE="frame"
     TEXT="r - rename workspace
 c - create new workspace
-j - jump to workspace"
+j - jump to workspace
+f - set workspace to floating
+t - set workspace to tiling"
 
 elif [ "${1}" == "applications" ]; then
     TITLE="applications"

@@ -1174,6 +1174,34 @@ child."""
 
         self.set_window_height(focused_window, int(desired_height))
 
+    def get_workspace_windows(self):
+        "Not including the empty containers"
+        focused_workspace = self.get_focused_workspace()
+        focused_workspace_num = focused_workspace['num']
+        workspace_tree = self.get_workspace_tree(focused_workspace_num)
+        windows = self._get_windows_with_parent_data(workspace_tree,
+                                                     self._get_parent_data(workspace_tree))
+        windows = [ w['window'] for w in windows ]
+        return filter(lambda w: not self.is_empty_container(w), windows)
+
+    def set_workspace_floating(self):
+        windows = self.get_workspace_windows()
+        windows = filter(lambda w: w['floating'] != 'user_on', windows)
+
+        for w in windows:
+            win_id = w['id']
+            match_str = '[con_id=' + str(win_id) + ']'
+            i3(match_str, 'floating toggle')
+
+    def set_workspace_tiling(self):
+        windows = self.get_workspace_windows()
+        windows = filter(lambda w: w['floating'] == 'user_on', windows)
+
+        for w in windows:
+            win_id = w['id']
+            match_str = '[con_id=' + str(win_id) + ']'
+            i3(match_str, 'floating toggle')
+
 
 if len(sys.argv) <= 0:
     exit(1)
@@ -1292,3 +1320,7 @@ elif command == 'resize-horizontal':
     i3c.resize_horizontal()
 elif command == 'resize-vertical':
     i3c.resize_vertical()
+elif command == 'set-workspace-floating':
+    i3c.set_workspace_floating()
+elif command == 'set-workspace-tiling':
+    i3c.set_workspace_tiling()
